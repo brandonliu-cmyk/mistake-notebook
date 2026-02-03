@@ -1,0 +1,2148 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>错题本 - Sigma Education</title>
+    <style>
+        :root {
+            --primary-color: #1890ff;
+            --sidebar-bg: #4a3aff;
+            --bg-color: #f0f2f5;
+            --text-color: #333;
+            --text-secondary: #666;
+            --border-color: #d9d9d9;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* 主内容区 */
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* 顶部导航 */
+        .header {
+            background: #fff;
+            padding: 0 20px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .logo {
+            position: absolute;
+            top: 15px;
+            left: 20px;
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 100;
+            transition: all 0.3s ease;
+        }
+
+        .logo:hover {
+            transform: translateY(-2px);
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-orange {
+            background: #ff7a45;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-orange:hover {
+            background: #ff6b36;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(255, 122, 69, 0.3);
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background: #40a9ff;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(24, 144, 255, 0.3);
+        }
+
+        /* 主体内容布局 */
+        .body-content {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* 左侧知识点树 */
+        .knowledge-tree {
+            width: 300px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: absolute;
+            left: 20px;
+            top: 120px;
+            bottom: 20px;
+            height: calc(100vh - 140px);
+        }
+
+        /* 知识点树头部 */
+        .tree-header {
+            padding: 10px;
+            border-bottom: 1px solid var(--border-color);
+            background: #fafafa;
+        }
+
+        .tree-filters {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .tree-filter {
+            flex: 1;
+            padding: 6px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        /* 知识点树标题 */
+        .tree-title {
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--text-color);
+            margin-bottom: 15px;
+            padding: 10px 15px;
+            background: var(--primary-color);
+            color: white;
+        }
+
+        /* 知识点树内容 */
+        .tree-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0 15px 15px 15px;
+        }
+
+        /* 知识点树节点 */
+        .tree-node {
+            margin-bottom: 5px;
+        }
+
+        .tree-node-content {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 0;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .tree-node-content:hover {
+            color: var(--primary-color);
+        }
+
+        .tree-node-content input[type="checkbox"] {
+            margin: 0;
+        }
+
+        .tree-node-children {
+            margin-left: 20px;
+            margin-top: 5px;
+        }
+
+        /* 展开/折叠图标 */
+        .tree-toggle {
+            width: 16px;
+            text-align: center;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        /* 右侧内容区域 */
+        .content-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            padding-bottom: 100px;
+            background: linear-gradient(135deg, #f0f2f5 0%, #e6e8eb 100%);
+            position: absolute;
+            left: 340px;
+            top: 120px;
+            right: 20px;
+            bottom: 20px;
+            height: calc(100vh - 140px);
+        }
+
+        /* 页面标题 */
+        .page-title {
+            font-size: 28px;
+            font-weight: bold;
+            color: var(--text-color);
+            margin-bottom: 25px;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+
+        /* 错题本内容 */
+        .mistake-notebook {
+            background: white;
+            border-radius: 8px;
+            padding: 25px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+        }
+
+        .mistake-notebook:hover {
+            box-shadow: 0 6px 24px rgba(0,0,0,0.12);
+        }
+
+        .notebook-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .notebook-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: var(--text-color);
+        }
+
+        .notebook-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            background: #e6e6e6;
+            border-color: #d9d9d9;
+            transform: translateY(-1px);
+        }
+
+        /* 错题列表 */
+        .mistake-list {
+            margin-top: 25px;
+        }
+
+        .mistake-item {
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            background: #fafafa;
+            transition: all 0.3s ease;
+        }
+
+        .mistake-item:hover {
+            background: #f0f8ff;
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(24, 144, 255, 0.1);
+        }
+
+        .mistake-subject {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--primary-color);
+        }
+
+        .btn-small {
+            padding: 6px 14px;
+            font-size: 13px;
+            border-radius: 4px;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s ease;
+        }
+
+        .btn-small:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+
+        .btn-view-small {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-view-small:hover {
+            background: #40a9ff;
+        }
+
+        .btn-delete-small {
+            background: #ff4d4f;
+            color: white;
+        }
+
+        .btn-delete-small:hover {
+            background: #ff7875;
+        }
+
+        /* 底部固定操作栏 */
+        .bottom-action-bar {
+            position: fixed;
+            bottom: 0;
+            left: 340px;
+            right: 20px;
+            background: white;
+            border-top: 2px solid #e8e8e8;
+            padding: 15px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 -2px 8px rgba(0,0,0,0.08);
+            z-index: 100;
+        }
+
+        .selection-info {
+            font-size: 15px;
+            color: var(--text-color);
+        }
+
+        .selection-count {
+            font-weight: bold;
+            color: var(--primary-color);
+            font-size: 18px;
+            margin: 0 5px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-action {
+            padding: 10px 24px;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .btn-action:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .btn-assign-homework {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-assign-homework:hover {
+            background: #40a9ff;
+        }
+
+        /* 开关样式 */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 22px;
+            margin-right: 10px;
+        }
+
+        .switch input { opacity: 0; width: 0; height: 0; }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 2px;
+            bottom: 2px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--primary-color);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(22px);
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .content-area {
+                padding: 15px;
+            }
+            
+            .filter-section {
+                padding: 15px;
+            }
+            
+            .filter-section > div {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .mistake-item > div:first-child {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .mistake-item > div:first-child > div:last-child {
+                margin-top: 20px;
+                text-align: left;
+            }
+            
+            .notebook-header > div {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 15px;
+            }
+        }
+
+        /* 加载动画 */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .mistake-item {
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        .mistake-item:nth-child(1) {
+            animation-delay: 0.1s;
+        }
+
+        .mistake-item:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .mistake-item:nth-child(3) {
+            animation-delay: 0.3s;
+        }
+
+        .mistake-item:nth-child(4) {
+            animation-delay: 0.4s;
+        }
+    </style>
+</head>
+<body>
+    <!-- 主内容区 -->
+    <div class="main-content">
+        <!-- 顶部导航 -->
+        <div class="header">
+            <div class="logo">
+                <svg width="24" height="24" viewBox="0 0 100 100" fill="#1890ff">
+                    <circle cx="50" cy="50" r="45" stroke="#1890ff" stroke-width="5" fill="none"/>
+                    <path d="M30 50 L50 70 L80 30" stroke="#1890ff" stroke-width="8" fill="none"/>
+                </svg>
+                兆涵科技 <span style="font-size: 14px; font-weight: normal; color: #666; margin-left: 5px;">Sigma Education</span>
+            </div>
+            <div class="header-actions">
+                <button class="btn-orange">测试</button>
+                <button class="btn-primary">新手教程</button>
+                <div style="width: 40px; height: 40px; border-radius: 50%; background: #e6f7ff; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+                    👤
+                </div>
+            </div>
+        </div>
+
+        <!-- 返回按钮和筛选下拉框 -->
+        <div style="position: absolute; top: 70px; left: 20px; right: 20px; z-index: 100; display: flex; align-items: center; justify-content: space-between;">
+            <button onclick="window.location.href='index.html'" style="background: none; border: none; font-size: 16px; cursor: pointer; color: var(--text-color); display: flex; align-items: center; gap: 5px;">
+                ← 返回
+            </button>
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <select id="dateRangeFilter" style="padding: 6px 12px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 13px;">
+                    <option value="all">全部数据</option>
+                    <option value="week">近一周数据</option>
+                    <option value="month">近一月数据</option>
+                    <option value="sixMonths">近六个月数据</option>
+                    <option value="year">近一年数据</option>
+                    <option value="custom">自定义</option>
+                </select>
+                <select id="classFilter" style="padding: 6px 12px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 13px; min-width: 120px;">
+                    <option value="all">全部班级</option>
+                    <option value="class1">四年级1班</option>
+                    <option value="class2">四年级2班</option>
+                    <option value="class3">四年级3班</option>
+                    <option value="class4">四年级4班</option>
+                    <option value="class5">四年级5班</option>
+                </select>
+                <select id="subjectTreeFilter" class="tree-filter" style="padding: 6px 12px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 13px;">
+                    <option value="math">数学</option>
+                    <option value="chinese">语文</option>
+                    <option value="english">英语</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- 主体内容 -->
+        <div class="body-content">
+            <!-- 左侧知识点树 -->
+            <div class="knowledge-tree">
+                <!-- 知识点树头部 -->
+                <div class="tree-header">
+                </div>
+                
+                <!-- 知识点树标题 -->
+                <div class="tree-title">知识点</div>
+                
+                <!-- 知识点树内容 -->
+                <div class="tree-content">
+                    <!-- 数与代数 -->
+                    <div class="tree-node">
+                        <div class="tree-node-content">
+                            <span class="tree-toggle" onclick="toggleTreeNode(this)">▼</span>
+                            <input type="checkbox" onchange="toggleNodeCheck(this)">
+                            <span>数与代数</span>
+                        </div>
+                        <div class="tree-node-children">
+                            <div class="tree-node">
+                                <div class="tree-node-content">
+                                    <span class="tree-toggle" onclick="toggleTreeNode(this)">▶</span>
+                                    <input type="checkbox" onchange="toggleNodeCheck(this)">
+                                    <span>数的认识</span>
+                                </div>
+                                <div class="tree-node-children" style="display: none;">
+                                    <div class="tree-node">
+                                        <div class="tree-node-content">
+                                            <span class="tree-toggle">　</span>
+                                            <input type="checkbox">
+                                            <span>整数</span>
+                                        </div>
+                                    </div>
+                                    <div class="tree-node">
+                                        <div class="tree-node-content">
+                                            <span class="tree-toggle">　</span>
+                                            <input type="checkbox">
+                                            <span>小数</span>
+                                        </div>
+                                    </div>
+                                    <div class="tree-node">
+                                        <div class="tree-node-content">
+                                            <span class="tree-toggle">　</span>
+                                            <input type="checkbox">
+                                            <span>分数</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tree-node">
+                                <div class="tree-node-content">
+                                    <span class="tree-toggle" onclick="toggleTreeNode(this)">▶</span>
+                                    <input type="checkbox" onchange="toggleNodeCheck(this)">
+                                    <span>数的运算</span>
+                                </div>
+                                <div class="tree-node-children" style="display: none;">
+                                    <div class="tree-node">
+                                        <div class="tree-node-content">
+                                            <span class="tree-toggle">　</span>
+                                            <input type="checkbox">
+                                            <span>加法</span>
+                                        </div>
+                                    </div>
+                                    <div class="tree-node">
+                                        <div class="tree-node-content">
+                                            <span class="tree-toggle">　</span>
+                                            <input type="checkbox">
+                                            <span>减法</span>
+                                        </div>
+                                    </div>
+                                    <div class="tree-node">
+                                        <div class="tree-node-content">
+                                            <span class="tree-toggle">　</span>
+                                            <input type="checkbox">
+                                            <span>乘法</span>
+                                        </div>
+                                    </div>
+                                    <div class="tree-node">
+                                        <div class="tree-node-content">
+                                            <span class="tree-toggle">　</span>
+                                            <input type="checkbox">
+                                            <span>除法</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tree-node">
+                                <div class="tree-node-content">
+                                    <span class="tree-toggle" onclick="toggleTreeNode(this)">▶</span>
+                                    <input type="checkbox" onchange="toggleNodeCheck(this)">
+                                    <span>式与方程</span>
+                                </div>
+                                <div class="tree-node-children" style="display: none;">
+                                    <div class="tree-node">
+                                        <div class="tree-node-content">
+                                            <span class="tree-toggle">　</span>
+                                            <input type="checkbox">
+                                            <span>代数式</span>
+                                        </div>
+                                    </div>
+                                    <div class="tree-node">
+                                        <div class="tree-node-content">
+                                            <span class="tree-toggle">　</span>
+                                            <input type="checkbox">
+                                            <span>方程</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tree-node">
+                                <div class="tree-node-content">
+                                    <span class="tree-toggle" onclick="toggleTreeNode(this)">▶</span>
+                                    <input type="checkbox" onchange="toggleNodeCheck(this)">
+                                    <span>比和比例</span>
+                                </div>
+                                <div class="tree-node-children" style="display: none;">
+                                    <div class="tree-node">
+                                        <div class="tree-node-content">
+                                            <span class="tree-toggle">　</span>
+                                            <input type="checkbox">
+                                            <span>比</span>
+                                        </div>
+                                    </div>
+                                    <div class="tree-node">
+                                        <div class="tree-node-content">
+                                            <span class="tree-toggle">　</span>
+                                            <input type="checkbox">
+                                            <span>比例</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tree-node">
+                                <div class="tree-node-content">
+                                    <span class="tree-toggle">　</span>
+                                    <input type="checkbox">
+                                    <span>常见的量</span>
+                                </div>
+                            </div>
+                            <div class="tree-node">
+                                <div class="tree-node-content">
+                                    <span class="tree-toggle">　</span>
+                                    <input type="checkbox">
+                                    <span>应用题</span>
+                                </div>
+                            </div>
+                            <div class="tree-node">
+                                <div class="tree-node-content">
+                                    <span class="tree-toggle">　</span>
+                                    <input type="checkbox">
+                                    <span>探索规律</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 图形与几何 -->
+                    <div class="tree-node">
+                        <div class="tree-node-content">
+                            <span class="tree-toggle" onclick="toggleTreeNode(this)">▶</span>
+                            <input type="checkbox" onchange="toggleNodeCheck(this)">
+                            <span>图形与几何</span>
+                        </div>
+                        <div class="tree-node-children" style="display: none;">
+                            <div class="tree-node">
+                                <div class="tree-node-content">
+                                    <span class="tree-toggle">　</span>
+                                    <input type="checkbox">
+                                    <span>平面图形</span>
+                                </div>
+                            </div>
+                            <div class="tree-node">
+                                <div class="tree-node-content">
+                                    <span class="tree-toggle">　</span>
+                                    <input type="checkbox">
+                                    <span>立体图形</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 统计与概率 -->
+                    <div class="tree-node">
+                        <div class="tree-node-content">
+                            <span class="tree-toggle" onclick="toggleTreeNode(this)">▶</span>
+                            <input type="checkbox" onchange="toggleNodeCheck(this)">
+                            <span>统计与概率</span>
+                        </div>
+                        <div class="tree-node-children" style="display: none;">
+                            <div class="tree-node">
+                                <div class="tree-node-content">
+                                    <span class="tree-toggle">　</span>
+                                    <input type="checkbox">
+                                    <span>统计</span>
+                                </div>
+                            </div>
+                            <div class="tree-node">
+                                <div class="tree-node-content">
+                                    <span class="tree-toggle">　</span>
+                                    <input type="checkbox">
+                                    <span>概率</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 数学竞赛 -->
+                    <div class="tree-node">
+                        <div class="tree-node-content">
+                            <span class="tree-toggle">　</span>
+                            <input type="checkbox">
+                            <span>数学竞赛</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 右侧内容区域 -->
+            <div class="content-area">
+                
+                <!-- 整合的统计与搜索区域 -->
+                <div style="background: white; border-radius: 8px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                    <!-- 统计数据与分布分析 - 紧凑单行 -->
+                    <div style="display: flex; align-items: center; justify-content: space-between; padding: 8px 0;">
+                        <!-- 左侧组：统计数据 -->
+                <div style="display: flex; align-items: center; gap: 30px;">
+                    <!-- 统计概览 -->
+                    <div style="display: flex; align-items: center; gap: 30px;">
+                                <div style="display: flex; flex-direction: column; align-items: center; gap: 2px;">
+                                    <div style="display: flex; align-items: center; gap: 6px;">
+                                        <span style="font-size: 18px;">📊</span>
+                                        <span style="font-size: 20px; font-weight: bold; color: var(--primary-color);">42</span>
+                                        <span style="font-size: 13px; color: var(--text-secondary);">题</span>
+                                    </div>
+                                    <span style="font-size: 11px; color: var(--text-secondary);">错题总数</span>
+                                </div>
+                                <div style="display: flex; flex-direction: column; align-items: center; gap: 2px;">
+                                    <div style="display: flex; align-items: center; gap: 6px;">
+                                        <span style="font-size: 18px;">👥</span>
+                                        <span style="font-size: 20px; font-weight: bold; color: #ff4d4f;">70</span>
+                                        <span style="font-size: 13px; color: var(--text-secondary);">人</span>
+                                    </div>
+                                    <span style="font-size: 11px; color: var(--text-secondary);">总错题人数</span>
+                                </div>
+                                <div style="display: flex; flex-direction: column; align-items: center; gap: 2px;">
+                                    <div style="display: flex; align-items: center; gap: 6px;">
+                                        <span style="font-size: 18px;">📈</span>
+                                        <span style="font-size: 20px; font-weight: bold; color: #faad14;">47.5%</span>
+                                    </div>
+                                    <span style="font-size: 11px; color: var(--text-secondary);">平均错误率</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 中间分隔线 -->
+                        <div style="width: 2px; height: 30px; background: linear-gradient(to bottom, transparent, #d9d9d9, transparent); margin: 0 30px;"></div>
+                        
+                        <!-- 右侧：错误最多的知识点 -->
+                        <div style="flex: 1; display: flex; align-items: center; gap: 15px; font-size: 12px;">
+                            <span style="color: var(--text-secondary); font-weight: 500; white-space: nowrap;">错误最多的知识点:</span>
+                            <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                                <span style="display: flex; align-items: center; gap: 4px;">
+                                    <span style="width: 8px; height: 8px; border-radius: 50%; background: #ff4d4f;"></span>
+                                    <span>加法运算(25人)</span>
+                                </span>
+                                <span style="display: flex; align-items: center; gap: 4px;">
+                                    <span style="width: 8px; height: 8px; border-radius: 50%; background: #ff7a45;"></span>
+                                    <span>分数加法(20人)</span>
+                                </span>
+                                <span style="display: flex; align-items: center; gap: 4px;">
+                                    <span style="width: 8px; height: 8px; border-radius: 50%; background: #ffa940;"></span>
+                                    <span>偶数(18人)</span>
+                                </span>
+                                <span style="display: flex; align-items: center; gap: 4px;">
+                                    <span style="width: 8px; height: 8px; border-radius: 50%; background: #ffc53d;"></span>
+                                    <span>be动词(16人)</span>
+                                </span>
+                                <span style="display: flex; align-items: center; gap: 4px;">
+                                    <span style="width: 8px; height: 8px; border-radius: 50%; background: #fadb14;"></span>
+                                    <span>成语运用(15人)</span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            
+            <div class="mistake-notebook">
+                <div class="notebook-header">
+                    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                        <div style="display: flex; align-items: center; gap: 15px;">
+                            <div class="notebook-title">错题集</div>
+                            <!-- 排序选项 -->
+                            <div style="display: flex; align-items: center; gap: 10px; padding-left: 15px; border-left: 1px solid #e8e8e8;">
+                                <span style="font-size: 14px; color: var(--text-secondary);">排序：</span>
+                                <select id="sortOption" onchange="sortMistakes()" style="padding: 6px 12px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 13px;">
+                                    <option value="comprehensiveDesc">综合排序（从高到低）</option>
+                                    <option value="comprehensiveAsc">综合排序（从低到高）</option>
+                                    <option value="dateDesc">时间（从新到旧）</option>
+                                    <option value="dateAsc">时间（从旧到新）</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <!-- 搜索框 -->
+                            <div style="position: relative; width: 250px;">
+                                <input type="text" id="searchInput" placeholder="输入错题关键词" style="width: 100%; padding: 6px 12px 6px 35px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 13px;">
+                                <span style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #999; font-size: 13px;">🔍</span>
+                            </div>
+                            <button onclick="applyFilters()" style="padding: 6px 16px; background: var(--primary-color); color: white; border: none; border-radius: 4px; font-size: 13px; cursor: pointer; white-space: nowrap;">筛选</button>
+                            <button onclick="resetFilters()" style="padding: 6px 16px; background: #f0f0f0; color: var(--text-color); border: 1px solid var(--border-color); border-radius: 4px; font-size: 13px; cursor: pointer; white-space: nowrap;">重置</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mistake-list">
+                    <!-- 错题列表项 -->
+                    <div class="mistake-item" data-subject="math" data-grade="grade3" data-knowledge="addition" data-error-count="25" data-date="2026-01-27">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
+                            <div>
+                                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                                    <span class="mistake-subject" style="padding: 2px 8px; background: #e6f7ff; border-radius: 4px;">数学</span>
+                                    <span style="font-size: 14px; color: var(--text-secondary);">三年级</span>
+                                    <span style="font-size: 14px; color: var(--text-secondary);">2026-01-27</span>
+                                </div>
+                                <h3 style="font-size: 16px; font-weight: 500; color: var(--text-color); margin-bottom: 10px;">计算：28+35的结果是？</h3>
+                                <div style="font-size: 14px; color: var(--text-secondary); margin-bottom: 10px; line-height: 1.5;">
+                                    <p>知识点：加法运算、进位加法</p>
+                                    <p>错误类型：计算错误、进位错误</p>
+                                </div>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="font-size: 24px; font-weight: bold; color: #ff4d4f; margin-bottom: 5px;">25/40</div>
+                                <div style="font-size: 14px; color: var(--text-secondary);">错题人数/答题人数</div>
+                                <div style="font-size: 14px; color: var(--text-secondary); margin-top: 5px;">错误率：62.5%</div>
+                            </div>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 10px; border-top: 1px solid #f0f0f0;">
+                            <div style="display: flex; gap: 10px;">
+                                <span style="padding: 2px 8px; background: #f6ffed; color: #52c41a; border-radius: 4px; font-size: 12px;">高频错题</span>
+                                <span style="padding: 2px 8px; background: #fff7e6; color: #faad14; border-radius: 4px; font-size: 12px;">基础题</span>
+                            </div>
+                            <div class="mistake-actions">
+                                <button class="btn-small btn-view-small">查看详情</button>
+                                <button class="btn-small" style="background: #1890ff; color: white; margin-left: 10px;">查看学生</button>
+                                <button class="btn-small btn-delete-small" style="margin-left: 10px;">删除</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mistake-item" data-subject="math" data-grade="grade4" data-knowledge="multiplication" data-error-count="18" data-date="2026-01-26">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
+                            <div>
+                                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                                    <span class="mistake-subject" style="padding: 2px 8px; background: #e6f7ff; border-radius: 4px;">数学</span>
+                                    <span style="font-size: 14px; color: var(--text-secondary);">四年级</span>
+                                    <span style="font-size: 14px; color: var(--text-secondary);">2026-01-26</span>
+                                </div>
+                                <h3 style="font-size: 16px; font-weight: 500; color: var(--text-color); margin-bottom: 10px;">判断：所有偶数都是合数（）</h3>
+                                <div style="font-size: 14px; color: var(--text-secondary); margin-bottom: 10px; line-height: 1.5;">
+                                    <p>知识点：偶数、合数、质数</p>
+                                    <p>错误类型：概念混淆</p>
+                                </div>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="font-size: 24px; font-weight: bold; color: #ff4d4f; margin-bottom: 5px;">18/40</div>
+                                <div style="font-size: 14px; color: var(--text-secondary);">错题人数/答题人数</div>
+                                <div style="font-size: 14px; color: var(--text-secondary); margin-top: 5px;">错误率：45.0%</div>
+                            </div>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 10px; border-top: 1px solid #f0f0f0;">
+                            <div style="display: flex; gap: 10px;">
+                                <span style="padding: 2px 8px; background: #f6ffed; color: #52c41a; border-radius: 4px; font-size: 12px;">中频错题</span>
+                                <span style="padding: 2px 8px; background: #fff7e6; color: #faad14; border-radius: 4px; font-size: 12px;">概念题</span>
+                            </div>
+                            <div class="mistake-actions">
+                                <button class="btn-small btn-view-small">查看详情</button>
+                                <button class="btn-small" style="background: #1890ff; color: white; margin-left: 10px;">查看学生</button>
+                                <button class="btn-small btn-delete-small" style="margin-left: 10px;">删除</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mistake-item" data-subject="chinese" data-grade="grade5" data-knowledge="idiom" data-error-count="15" data-date="2026-01-25">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
+                            <div>
+                                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                                    <span class="mistake-subject" style="padding: 2px 8px; background: #fff0f6; border-radius: 4px; color: #ff4d4f;">语文</span>
+                                    <span style="font-size: 14px; color: var(--text-secondary);">五年级</span>
+                                    <span style="font-size: 14px; color: var(--text-secondary);">2026-01-25</span>
+                                </div>
+                                <h3 style="font-size: 16px; font-weight: 500; color: var(--text-color); margin-bottom: 10px;">下列成语使用正确的是（）</h3>
+                                <div style="font-size: 14px; color: var(--text-secondary); margin-bottom: 10px; line-height: 1.5;">
+                                    <p>知识点：成语运用、语境理解</p>
+                                    <p>错误类型：语境误用</p>
+                                </div>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="font-size: 24px; font-weight: bold; color: #ff4d4f; margin-bottom: 5px;">15/40</div>
+                                <div style="font-size: 14px; color: var(--text-secondary);">错题人数/答题人数</div>
+                                <div style="font-size: 14px; color: var(--text-secondary); margin-top: 5px;">错误率：37.5%</div>
+                            </div>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 10px; border-top: 1px solid #f0f0f0;">
+                            <div style="display: flex; gap: 10px;">
+                                <span style="padding: 2px 8px; background: #f6ffed; color: #52c41a; border-radius: 4px; font-size: 12px;">中频错题</span>
+                                <span style="padding: 2px 8px; background: #fff7e6; color: #faad14; border-radius: 4px; font-size: 12px;">选择题</span>
+                            </div>
+                            <div class="mistake-actions">
+                                <button class="btn-small btn-view-small">查看详情</button>
+                                <button class="btn-small" style="background: #1890ff; color: white; margin-left: 10px;">查看学生</button>
+                                <button class="btn-small btn-delete-small" style="margin-left: 10px;">删除</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mistake-item" data-subject="english" data-grade="grade4" data-knowledge="vocabulary" data-error-count="12" data-date="2026-01-24">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
+                            <div>
+                                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                                    <span class="mistake-subject" style="padding: 2px 8px; background: #f6ffed; border-radius: 4px; color: #52c41a;">英语</span>
+                                    <span style="font-size: 14px; color: var(--text-secondary);">四年级</span>
+                                    <span style="font-size: 14px; color: var(--text-secondary);">2026-01-24</span>
+                                </div>
+                                <h3 style="font-size: 16px; font-weight: 500; color: var(--text-color); margin-bottom: 10px;">Choose the correct answer: I ___ a student.</h3>
+                                <div style="font-size: 14px; color: var(--text-secondary); margin-bottom: 10px; line-height: 1.5;">
+                                    <p>知识点：be动词、一般现在时</p>
+                                    <p>错误类型：语法错误、主谓一致</p>
+                                </div>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="font-size: 24px; font-weight: bold; color: #ff4d4f; margin-bottom: 5px;">12/40</div>
+                                <div style="font-size: 14px; color: var(--text-secondary);">错题人数/答题人数</div>
+                                <div style="font-size: 14px; color: var(--text-secondary); margin-top: 5px;">错误率：30.0%</div>
+                            </div>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 10px; border-top: 1px solid #f0f0f0;">
+                            <div style="display: flex; gap: 10px;">
+                                <span style="padding: 2px 8px; background: #fff7e6; color: #faad14; border-radius: 4px; font-size: 12px;">低频错题</span>
+                                <span style="padding: 2px 8px; background: #fff7e6; color: #faad14; border-radius: 4px; font-size: 12px;">选择题</span>
+                            </div>
+                            <div class="mistake-actions">
+                                <button class="btn-small btn-view-small">查看详情</button>
+                                <button class="btn-small" style="background: #1890ff; color: white; margin-left: 10px;">查看学生</button>
+                                <button class="btn-small btn-delete-small" style="margin-left: 10px;">删除</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 分页功能 -->
+                <div style="display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 30px; padding-top: 20px; border-top: 1px solid var(--border-color);">
+                    <button onclick="changePage(-1)" style="padding: 8px 12px; border: 1px solid var(--border-color); background: white; border-radius: 4px; cursor: pointer; font-size: 14px;">‹ 上一页</button>
+                    
+                    <button onclick="goToPage(1)" class="page-btn active" style="padding: 8px 12px; border: 1px solid var(--border-color); background: var(--primary-color); color: white; border-radius: 4px; cursor: pointer; font-size: 14px;">1</button>
+                    <button onclick="goToPage(2)" class="page-btn" style="padding: 8px 12px; border: 1px solid var(--border-color); background: white; border-radius: 4px; cursor: pointer; font-size: 14px;">2</button>
+                    <button onclick="goToPage(3)" class="page-btn" style="padding: 8px 12px; border: 1px solid var(--border-color); background: white; border-radius: 4px; cursor: pointer; font-size: 14px;">3</button>
+                    <button onclick="goToPage(4)" class="page-btn" style="padding: 8px 12px; border: 1px solid var(--border-color); background: white; border-radius: 4px; cursor: pointer; font-size: 14px;">4</button>
+                    <button onclick="goToPage(5)" class="page-btn" style="padding: 8px 12px; border: 1px solid var(--border-color); background: white; border-radius: 4px; cursor: pointer; font-size: 14px;">5</button>
+                    
+                    <button onclick="changePage(1)" style="padding: 8px 12px; border: 1px solid var(--border-color); background: white; border-radius: 4px; cursor: pointer; font-size: 14px;">下一页 ›</button>
+                    
+                    <div style="font-size: 14px; color: var(--text-secondary); margin-left: 20px;">
+                        共 <span style="font-weight: 500; color: var(--text-color);">12</span> 条记录
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 底部固定操作栏 -->
+    <div class="bottom-action-bar">
+        <div class="selection-info">
+            已选择：<span class="selection-count" id="selectionCount">0</span>题
+            <div style="margin-top: 8px; display: flex; align-items: center; gap: 10px;">
+                <button onclick="selectTopQuestions(10)" style="padding: 4px 12px; background: #1890ff; border: 1px solid #1890ff; color: white; border-radius: 4px; font-size: 12px; cursor: pointer;">快速选中前10题</button>
+                <div style="display: flex; align-items: center; gap: 5px;">
+                    <span style="font-size: 12px; color: var(--text-secondary);">快速选中前</span>
+                    <input type="number" id="selectCountInput" min="1" max="50" value="5" style="width: 50px; padding: 4px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 12px;">
+                    <span style="font-size: 12px; color: var(--text-secondary);">题</span>
+                    <button onclick="selectTopQuestionsByInput()" style="padding: 4px 12px; background: #1890ff; border: 1px solid #1890ff; color: white; border-radius: 4px; font-size: 12px; cursor: pointer;">确定</button>
+                </div>
+                <button id="cancelSelectionBtn" onclick="cancelSelection()" style="padding: 4px 12px; background: #ff4d4f; border: 1px solid #ff4d4f; color: white; border-radius: 4px; font-size: 12px; cursor: pointer; display: none;">取消选中</button>
+            </div>
+        </div>
+        <div class="action-buttons" style="display: flex; align-items: center; gap: 20px;">
+            <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 5px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 14px; color: var(--text-secondary);">智能分层作业</span>
+                    <label class="switch" style="margin-right: 5px;">
+                        <input type="checkbox" id="layeredHomeworkToggle" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <span style="font-size: 12px; color: #999; margin-right: 2px;">开启后可根据学生掌握程度分层布置不同难度的题目</span>
+            </div>
+            <button class="btn-action btn-assign-homework" onclick="assignHomework()">布置错题巩固作业</button>
+        </div>
+    </div>
+
+    <script>
+        // 当前页码
+        let currentPage = 1;
+        
+        // 模拟完整的错题数据
+        const allMistakes = [
+            {
+                subject: 'math',
+                subjectName: '数学',
+                grade: 'grade3',
+                gradeName: '三年级',
+                classId: 'class1',
+                errorCount: 25,
+                totalCount: 40,
+                errorRate: 62.5,
+                date: '2026-01-27',
+                questionType: '单项选择题',
+                difficulty: '中等',
+                knowledgePoints: '加法运算、进位加法',
+                question: '计算：28 + 35 = ?',
+                options: ['A. 53', 'B. 63', 'C. 73', 'D. 83'],
+                answer: 'B'
+            },
+            {
+                subject: 'math',
+                subjectName: '数学',
+                grade: 'grade4',
+                gradeName: '四年级',
+                errorCount: 18,
+                totalCount: 40,
+                errorRate: 45.0,
+                date: '2026-01-26',
+                questionType: '判断题',
+                difficulty: '困难',
+                knowledgePoints: '偶数、合数、质数',
+                question: '所有偶数都是合数。',
+                options: ['A. 正确', 'B. 错误'],
+                answer: 'B'
+            },
+            {
+                subject: 'chinese',
+                subjectName: '语文',
+                grade: 'grade5',
+                gradeName: '五年级',
+                errorCount: 15,
+                totalCount: 40,
+                errorRate: 37.5,
+                date: '2026-01-25',
+                questionType: '单项选择题',
+                difficulty: '中等',
+                knowledgePoints: '成语运用、语境理解',
+                question: '下列词语中，哪一组词语搭配最合适？',
+                options: ['A. 富富的楼房', 'B. 美丽的下雨', 'C. 快乐地跑步', 'D. 红色的唱歌'],
+                answer: 'C'
+            },
+            {
+                subject: 'english',
+                subjectName: '英语',
+                grade: 'grade4',
+                gradeName: '四年级',
+                errorCount: 12,
+                totalCount: 40,
+                errorRate: 30.0,
+                date: '2026-01-24',
+                questionType: '单项选择题',
+                difficulty: '简单',
+                knowledgePoints: 'be动词、一般现在时',
+                question: 'I ___ a student.',
+                options: ['A. am', 'B. is', 'C. are', 'D. be'],
+                answer: 'A'
+            },
+            {
+                subject: 'math',
+                subjectName: '数学',
+                grade: 'grade5',
+                gradeName: '五年级',
+                errorCount: 20,
+                totalCount: 40,
+                errorRate: 50.0,
+                date: '2026-01-23',
+                questionType: '计算题',
+                difficulty: '中等',
+                knowledgePoints: '分数加法、通分',
+                question: '计算：3/4 + 1/2 = ?',
+                options: ['A. 4/6', 'B. 5/4', 'C. 5/6', 'D. 1'],
+                answer: 'B'
+            },
+            {
+                subject: 'chinese',
+                subjectName: '语文',
+                grade: 'grade3',
+                gradeName: '三年级',
+                errorCount: 10,
+                totalCount: 40,
+                errorRate: 25.0,
+                date: '2026-01-22',
+                questionType: '单项选择题',
+                difficulty: '简单',
+                knowledgePoints: '字形辨析',
+                question: '下列词语中没有错别字的一项是：',
+                options: ['A. 辩论', 'B. 辨论', 'C. 辩伦', 'D. 辨伦'],
+                answer: 'A'
+            },
+            {
+                subject: 'english',
+                subjectName: '英语',
+                grade: 'grade6',
+                gradeName: '六年级',
+                errorCount: 16,
+                totalCount: 40,
+                errorRate: 40.0,
+                date: '2026-01-21',
+                questionType: '填空题',
+                difficulty: '中等',
+                knowledgePoints: '一般现在时、第三人称单数',
+                question: 'She ___ to school every day.',
+                options: ['答案：goes'],
+                answer: 'goes'
+            },
+            {
+                subject: 'math',
+                subjectName: '数学',
+                grade: 'grade6',
+                gradeName: '六年级',
+                errorCount: 14,
+                totalCount: 40,
+                errorRate: 35.0,
+                date: '2026-01-20',
+                questionType: '填空题',
+                difficulty: '简单',
+                knowledgePoints: '圆的面积、公式应用',
+                question: '圆的面积公式是：S = ___',
+                options: ['答案：πr²'],
+                answer: 'πr²'
+            },
+            {
+                subject: 'math',
+                subjectName: '数学',
+                grade: 'grade3',
+                gradeName: '三年级',
+                errorCount: 22,
+                totalCount: 40,
+                errorRate: 55.0,
+                date: '2026-01-19',
+                questionType: '单项选择题',
+                difficulty: '中等',
+                knowledgePoints: '乘法口诀、乘法运算',
+                question: '7 × 8 = ?',
+                options: ['A. 54', 'B. 56', 'C. 58', 'D. 64'],
+                answer: 'B'
+            },
+            {
+                subject: 'chinese',
+                subjectName: '语文',
+                grade: 'grade4',
+                gradeName: '四年级',
+                errorCount: 13,
+                totalCount: 40,
+                errorRate: 32.5,
+                date: '2026-01-18',
+                questionType: '单项选择题',
+                difficulty: '中等',
+                knowledgePoints: '标点符号、句子理解',
+                question: '下列句子标点符号使用正确的是：',
+                options: ['A. 今天天气真好啊。', 'B. 今天天气真好啊！', 'C. 今天天气真好啊，', 'D. 今天天气真好啊？'],
+                answer: 'B'
+            },
+            {
+                subject: 'english',
+                subjectName: '英语',
+                grade: 'grade5',
+                gradeName: '五年级',
+                errorCount: 17,
+                totalCount: 40,
+                errorRate: 42.5,
+                date: '2026-01-17',
+                questionType: '单项选择题',
+                difficulty: '中等',
+                knowledgePoints: '现在进行时、动词形式',
+                question: 'Look! The children ___ in the playground.',
+                options: ['A. play', 'B. plays', 'C. playing', 'D. are playing'],
+                answer: 'D'
+            },
+            {
+                subject: 'math',
+                subjectName: '数学',
+                grade: 'grade4',
+                gradeName: '四年级',
+                errorCount: 19,
+                totalCount: 40,
+                errorRate: 47.5,
+                date: '2026-01-16',
+                questionType: '应用题',
+                difficulty: '困难',
+                knowledgePoints: '除法应用、平均分配',
+                question: '小明有48个苹果，要平均分给6个小朋友，每个小朋友能分到几个苹果？',
+                options: ['A. 6个', 'B. 7个', 'C. 8个', 'D. 9个'],
+                answer: 'C'
+            },
+            {
+                subject: 'chinese',
+                subjectName: '语文',
+                grade: 'grade6',
+                gradeName: '六年级',
+                errorCount: 11,
+                totalCount: 40,
+                errorRate: 27.5,
+                date: '2026-01-15',
+                questionType: '单项选择题',
+                difficulty: '困难',
+                knowledgePoints: '修辞手法、比喻句',
+                question: '下列句子中使用了比喻修辞手法的是：',
+                options: ['A. 天空很蓝。', 'B. 天空像一块蓝色的宝石。', 'C. 天空真美啊！', 'D. 天空中飘着白云。'],
+                answer: 'B'
+            },
+            {
+                subject: 'english',
+                subjectName: '英语',
+                grade: 'grade3',
+                gradeName: '三年级',
+                errorCount: 9,
+                totalCount: 40,
+                errorRate: 22.5,
+                date: '2026-01-14',
+                questionType: '单项选择题',
+                difficulty: '简单',
+                knowledgePoints: '名词单复数、可数名词',
+                question: 'I have two ___.',
+                options: ['A. book', 'B. books', 'C. a book', 'D. the book'],
+                answer: 'B'
+            },
+            {
+                subject: 'math',
+                subjectName: '数学',
+                grade: 'grade5',
+                gradeName: '五年级',
+                errorCount: 21,
+                totalCount: 40,
+                errorRate: 52.5,
+                date: '2026-01-13',
+                questionType: '判断题',
+                difficulty: '中等',
+                knowledgePoints: '小数比较、小数大小',
+                question: '0.5 > 0.50',
+                options: ['A. 正确', 'B. 错误'],
+                answer: 'B'
+            },
+            {
+                subject: 'chinese',
+                subjectName: '语文',
+                grade: 'grade3',
+                gradeName: '三年级',
+                errorCount: 8,
+                totalCount: 40,
+                errorRate: 20.0,
+                date: '2026-01-12',
+                questionType: '填空题',
+                difficulty: '简单',
+                knowledgePoints: '反义词、词语积累',
+                question: '"高"的反义词是___。',
+                options: ['答案：低'],
+                answer: '低'
+            },
+            {
+                subject: 'math',
+                subjectName: '数学',
+                grade: 'grade6',
+                gradeName: '六年级',
+                errorCount: 23,
+                totalCount: 40,
+                errorRate: 57.5,
+                date: '2026-01-11',
+                questionType: '单项选择题',
+                difficulty: '困难',
+                knowledgePoints: '百分数应用、折扣计算',
+                question: '一件衣服原价200元，打8折后的价格是多少元？',
+                options: ['A. 120元', 'B. 140元', 'C. 160元', 'D. 180元'],
+                answer: 'C'
+            },
+            {
+                subject: 'english',
+                subjectName: '英语',
+                grade: 'grade4',
+                gradeName: '四年级',
+                errorCount: 14,
+                totalCount: 40,
+                errorRate: 35.0,
+                date: '2026-01-10',
+                questionType: '单项选择题',
+                difficulty: '中等',
+                knowledgePoints: '介词、时间表达',
+                question: 'We have lunch ___ 12 o\'clock.',
+                options: ['A. in', 'B. on', 'C. at', 'D. for'],
+                answer: 'C'
+            },
+            {
+                subject: 'chinese',
+                subjectName: '语文',
+                grade: 'grade5',
+                gradeName: '五年级',
+                errorCount: 16,
+                totalCount: 40,
+                errorRate: 40.0,
+                date: '2026-01-09',
+                questionType: '单项选择题',
+                difficulty: '中等',
+                knowledgePoints: '关联词、句子连接',
+                question: '___天气很冷，___我们还是坚持锻炼。',
+                options: ['A. 因为...所以...', 'B. 虽然...但是...', 'C. 不但...而且...', 'D. 如果...就...'],
+                answer: 'B'
+            },
+            {
+                subject: 'math',
+                subjectName: '数学',
+                grade: 'grade4',
+                gradeName: '四年级',
+                errorCount: 15,
+                totalCount: 40,
+                errorRate: 37.5,
+                date: '2026-01-08',
+                questionType: '单项选择题',
+                difficulty: '简单',
+                knowledgePoints: '角的认识、角的分类',
+                question: '直角是多少度？',
+                options: ['A. 45度', 'B. 60度', 'C. 90度', 'D. 180度'],
+                answer: 'C'
+            }
+        ];
+        
+        // 为每个题目随机分配班级（模拟数据）
+        allMistakes.forEach((mistake, index) => {
+            const classes = ['class1', 'class2', 'class3', 'class4', 'class5'];
+            mistake.classId = classes[index % classes.length];
+        });
+        
+        let currentFilters = {subject: 'math', dateRange: 'all', searchTerm: '', classId: 'all'};
+        
+        function filterMistakes() {
+            return allMistakes.filter(m => {
+                if (currentFilters.subject && m.subject !== currentFilters.subject) return false;
+                if (currentFilters.classId && currentFilters.classId !== 'all' && m.classId !== currentFilters.classId) return false;
+                if (currentFilters.searchTerm && !m.question.toLowerCase().includes(currentFilters.searchTerm.toLowerCase())) return false;
+                if (currentFilters.dateRange && currentFilters.dateRange !== 'all') {
+                    const questionDate = new Date(m.date);
+                    const today = new Date();
+                    let startDate;
+                    
+                    switch(currentFilters.dateRange) {
+                        case 'week':
+                            startDate = new Date(today.setDate(today.getDate() - 7));
+                            break;
+                        case 'month':
+                            startDate = new Date(today.setMonth(today.getMonth() - 1));
+                            break;
+                        case 'sixMonths':
+                            startDate = new Date(today.setMonth(today.getMonth() - 6));
+                            break;
+                        case 'year':
+                            startDate = new Date(today.setFullYear(today.getFullYear() - 1));
+                            break;
+                        default:
+                            return true;
+                    }
+                    
+                    return questionDate >= startDate;
+                }
+                return true;
+            });
+        }
+        
+        function calculateStats(mistakes) {
+            const totalMistakes = mistakes.length;
+            const totalErrorCount = mistakes.reduce((sum, m) => sum + m.errorCount, 0);
+            const avgErrorRate = mistakes.length > 0 ? (mistakes.reduce((sum, m) => sum + m.errorRate, 0) / mistakes.length).toFixed(1) : 0;
+            
+            // 统计知识点错误数
+            const knowledgeDist = {};
+            mistakes.forEach(m => {
+                const points = m.knowledgePoints.split('、');
+                points.forEach(point => {
+                    if (!knowledgeDist[point]) {
+                        knowledgeDist[point] = { count: 0, errorCount: 0 };
+                    }
+                    knowledgeDist[point].count += 1;
+                    knowledgeDist[point].errorCount += m.errorCount;
+                });
+            });
+            
+            // 按错误人数排序，取前5个
+            const topKnowledge = Object.entries(knowledgeDist)
+                .sort((a, b) => b[1].errorCount - a[1].errorCount)
+                .slice(0, 5)
+                .map(([name, data]) => ({ name, errorCount: data.errorCount, count: data.count }));
+            
+            return {totalMistakes, totalErrorCount, avgErrorRate, topKnowledge};
+        }
+        
+        function updateStats(stats) {
+            const statsHTML = `
+                <div style="display: flex; align-items: center; gap: 15px; padding: 8px 0;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 2px;">
+                            <div style="display: flex; align-items: center; gap: 6px;">
+                                <span style="font-size: 18px;">📊</span>
+                                <span style="font-size: 20px; font-weight: bold; color: var(--primary-color);">${stats.totalMistakes}</span>
+                                <span style="font-size: 13px; color: var(--text-secondary);">题</span>
+                            </div>
+                            <span style="font-size: 11px; color: var(--text-secondary);">错题总数</span>
+                        </div>
+                        <div style="width: 1px; height: 35px; background: #e8e8e8;"></div>
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 2px;">
+                            <div style="display: flex; align-items: center; gap: 6px;">
+                                <span style="font-size: 18px;">👥</span>
+                                <span style="font-size: 20px; font-weight: bold; color: #ff4d4f;">${stats.totalErrorCount}</span>
+                                <span style="font-size: 13px; color: var(--text-secondary);">人</span>
+                            </div>
+                            <span style="font-size: 11px; color: var(--text-secondary);">总错题人数</span>
+                        </div>
+                        <div style="width: 1px; height: 35px; background: #e8e8e8;"></div>
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 2px;">
+                            <div style="display: flex; align-items: center; gap: 6px;">
+                                <span style="font-size: 18px;">📈</span>
+                                <span style="font-size: 20px; font-weight: bold; color: #faad14;">${stats.avgErrorRate}%</span>
+                            </div>
+                            <span style="font-size: 11px; color: var(--text-secondary);">平均错误率</span>
+                        </div>
+                    </div>
+                    <div style="width: 2px; height: 30px; background: linear-gradient(to bottom, transparent, #d9d9d9, transparent);"></div>
+                    <div style="flex: 1; display: flex; align-items: center; gap: 15px; font-size: 12px;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span style="color: var(--text-secondary); font-weight: 500;">错误最多的知识点:</span>
+                            <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                                ${stats.topKnowledge.map((item, index) => {
+                                    const colors = ['#ff4d4f', '#ff7a45', '#ffa940', '#ffc53d', '#fadb14'];
+                                    return `<span style="display: flex; align-items: center; gap: 4px;">
+                                        <span style="width: 8px; height: 8px; border-radius: 50%; background: ${colors[index]};"></span>
+                                        <span>${item.name}(${item.errorCount}人)</span>
+                                    </span>`;
+                                }).join('')}
+                                ${stats.topKnowledge.length === 0 ? '<span style="color: var(--text-secondary);">暂无数据</span>' : ''}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            const statsContainer = document.querySelector('.content-area > div:nth-child(2) > div:nth-child(2)');
+            if (statsContainer) statsContainer.innerHTML = statsHTML;
+        }
+        
+        function updateMistakeList(mistakes) {
+            const mistakeListContainer = document.querySelector('.mistake-list');
+            if (!mistakeListContainer) return;
+            
+            if (mistakes.length === 0) {
+                mistakeListContainer.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--text-secondary);">暂无符合条件的错题</div>';
+                return;
+            }
+            
+            const subjectColors = {
+                'math': {bg: '#e6f7ff', color: '#1890ff'},
+                'chinese': {bg: '#fff0f6', color: '#ff4d4f'},
+                'english': {bg: '#f6ffed', color: '#52c41a'}
+            };
+            
+            const difficultyColors = {
+                '简单': {bg: '#f6ffed', color: '#52c41a'},
+                '中等': {bg: '#fff7e6', color: '#faad14'},
+                '困难': {bg: '#fff1f0', color: '#ff4d4f'}
+            };
+            
+            mistakeListContainer.innerHTML = mistakes.map(m => {
+                const style = subjectColors[m.subject];
+                const diffStyle = difficultyColors[m.difficulty];
+                return `
+                    <div class="mistake-item" style="position: relative; padding: 15px;">
+                        <!-- 右上角区域：统计信息 + 选择框 -->
+                        <div style="position: absolute; top: 15px; right: 15px; display: flex; align-items: center; gap: 12px;">
+                                <div style="font-size: 12px; color: var(--text-secondary); padding: 3px 8px; background: #fff1f0; border-radius: 4px;">
+                                    错误率：${m.errorRate}%
+                                </div>
+                                <span style="font-size: 12px; color: var(--text-secondary);">错题人数/答题人数</span>
+                                <span onclick="showStudentList('${m.question}', ${m.errorCount})" style="font-size: 20px; font-weight: bold; color: #ff4d4f; text-decoration: underline; cursor: pointer;">${m.errorCount}/${m.totalCount || 40}</span>
+                                <input type="checkbox" class="question-checkbox" onchange="updateSelectionCount()" style="width: 18px; height: 18px; cursor: pointer; margin-left: 8px;">
+                            </div>
+                        
+                        <div style="padding-right: 280px;">
+                            <!-- 题型+难度+知识点 -->
+                            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                                <span style="padding: 3px 10px; background: ${style.bg}; border-radius: 4px; color: ${style.color}; font-size: 13px; font-weight: 500;">${m.questionType}</span>
+                                <span style="padding: 3px 10px; background: ${diffStyle.bg}; border-radius: 4px; color: ${diffStyle.color}; font-size: 13px;">${m.difficulty}</span>
+                                <span style="font-size: 13px; color: var(--text-secondary);">知识点：${m.knowledgePoints}</span>
+                            </div>
+                            
+                            <!-- 题干 -->
+                            <div style="font-size: 15px; font-weight: 500; color: var(--text-color); margin-bottom: 8px; line-height: 1.5;">
+                                ${m.question}
+                            </div>
+                            
+                            <!-- 选项 -->
+                            <div style="font-size: 14px; color: var(--text-color); margin-bottom: 6px; line-height: 1.6;">
+                                ${m.options.map(opt => `<div>${opt}</div>`).join('')}
+                            </div>
+                            
+                            <!-- 参考答案 -->
+                            <div style="font-size: 14px; color: #52c41a; font-weight: 500;">
+                                参考答案：${m.answer}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function applyFiltersAndUpdate() {
+            const filteredMistakes = filterMistakes();
+            const stats = calculateStats(filteredMistakes);
+            updateStats(stats);
+            updateMistakeList(filteredMistakes);
+        }
+        
+        // 更新班级选择器选项
+        function updateClassOptions() {
+            const classFilter = document.getElementById('classFilter');
+            if (!classFilter) return;
+            
+            // 清空并重新生成选项
+            classFilter.innerHTML = `
+                <option value="all">全部班级</option>
+                <option value="class1">四年级1班</option>
+                <option value="class2">四年级2班</option>
+                <option value="class3">四年级3班</option>
+                <option value="class4">四年级4班</option>
+                <option value="class5">四年级5班</option>
+            `;
+            
+            // 重置班级筛选为全部
+            currentFilters.classId = 'all';
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            const subjectFilter = document.getElementById('subjectTreeFilter');
+            const dateRangeFilter = document.getElementById('dateRangeFilter');
+            const classFilter = document.getElementById('classFilter');
+            
+            if (subjectFilter) {
+                subjectFilter.addEventListener('change', function() {
+                    currentFilters.subject = this.value;
+                    applyFiltersAndUpdate();
+                });
+            }
+            
+            if (dateRangeFilter) {
+                dateRangeFilter.addEventListener('change', function() {
+                    currentFilters.dateRange = this.value;
+                    if (this.value === 'custom') {
+                        // 这里可以添加自定义日期范围选择的逻辑
+                        alert('自定义日期范围功能待实现');
+                        // 重置为全部数据
+                        this.value = 'all';
+                        currentFilters.dateRange = 'all';
+                    }
+                    applyFiltersAndUpdate();
+                });
+            }
+            
+            if (classFilter) {
+                classFilter.addEventListener('change', function() {
+                    currentFilters.classId = this.value;
+                    applyFiltersAndUpdate();
+                });
+            }
+            
+            // 初始化班级选项
+            updateClassOptions();
+            applyFiltersAndUpdate();
+        });
+        
+        function toggleTreeNode(toggleElement) {
+            const nodeContent = toggleElement.parentElement;
+            const children = nodeContent.nextElementSibling;
+            
+            if (children && children.classList.contains('tree-node-children')) {
+                if (children.style.display === 'none') {
+                    children.style.display = 'block';
+                    toggleElement.textContent = '▼';
+                } else {
+                    children.style.display = 'none';
+                    toggleElement.textContent = '▶';
+                }
+            }
+        }
+        
+        function toggleNodeCheck(checkbox) {
+            const nodeContent = checkbox.parentElement;
+            const children = nodeContent.nextElementSibling;
+            
+            if (children && children.classList.contains('tree-node-children')) {
+                const childCheckboxes = children.querySelectorAll('input[type="checkbox"]');
+                childCheckboxes.forEach(childCheckbox => {
+                    childCheckbox.checked = checkbox.checked;
+                });
+            }
+        }
+        
+        function applyFilters() {
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+                currentFilters.searchTerm = searchInput.value;
+            }
+            applyFiltersAndUpdate();
+        }
+        
+        function resetFilters() {
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+                searchInput.value = '';
+            }
+            
+            document.querySelectorAll('.tree-content input[type="checkbox"]').forEach(checkbox => {
+                checkbox.checked = false;
+            });
+            
+            currentFilters.searchTerm = '';
+            applyFiltersAndUpdate();
+        }
+        
+        function sortMistakes() {
+            const sortOption = document.getElementById('sortOption').value;
+            console.log('排序方式:', sortOption);
+            
+            const filteredMistakes = filterMistakes();
+            let sortedMistakes = [...filteredMistakes];
+            
+            switch(sortOption) {
+                case 'comprehensiveDesc':
+                    // 综合排序（从高到低）：错误率和错题人数均高的排前面
+                    sortedMistakes.sort((a, b) => {
+                        const scoreA = a.errorRate * 0.6 + (a.errorCount / (a.totalCount || 40)) * 40 * 0.4;
+                        const scoreB = b.errorRate * 0.6 + (b.errorCount / (b.totalCount || 40)) * 40 * 0.4;
+                        return scoreB - scoreA;
+                    });
+                    break;
+                case 'comprehensiveAsc':
+                    // 综合排序（从低到高）：错误率和错题人数均低的排前面
+                    sortedMistakes.sort((a, b) => {
+                        const scoreA = a.errorRate * 0.6 + (a.errorCount / (a.totalCount || 40)) * 40 * 0.4;
+                        const scoreB = b.errorRate * 0.6 + (b.errorCount / (b.totalCount || 40)) * 40 * 0.4;
+                        return scoreA - scoreB;
+                    });
+                    break;
+                case 'dateDesc':
+                    // 时间（从新到旧）
+                    sortedMistakes.sort((a, b) => new Date(b.date) - new Date(a.date));
+                    break;
+                case 'dateAsc':
+                    // 时间（从旧到新）
+                    sortedMistakes.sort((a, b) => new Date(a.date) - new Date(b.date));
+                    break;
+            }
+            
+            updateMistakeList(sortedMistakes);
+        }
+        
+        function changePage(direction) {
+            const newPage = currentPage + direction;
+            if (newPage >= 1 && newPage <= 5) {
+                goToPage(newPage);
+            }
+        }
+        
+        function goToPage(page) {
+            currentPage = page;
+            document.querySelectorAll('.page-btn').forEach((btn, index) => {
+                if (parseInt(btn.textContent) === page) {
+                    btn.classList.add('active');
+                    btn.style.background = 'var(--primary-color)';
+                    btn.style.color = 'white';
+                } else {
+                    btn.classList.remove('active');
+                    btn.style.background = 'white';
+                    btn.style.color = 'var(--text-color)';
+                }
+            });
+        }
+        
+        // 更新选择计数
+        function updateSelectionCount() {
+            const checkboxes = document.querySelectorAll('.question-checkbox');
+            const checkedCount = Array.from(checkboxes).filter(cb => cb.checked).length;
+            const countElement = document.getElementById('selectionCount');
+            const cancelBtn = document.getElementById('cancelSelectionBtn');
+            if (countElement) {
+                countElement.textContent = checkedCount;
+            }
+            if (cancelBtn) {
+                cancelBtn.style.display = checkedCount > 0 ? 'inline-block' : 'none';
+            }
+        }
+        
+        // 快速选中前N题
+        function selectTopQuestions(count) {
+            const checkboxes = document.querySelectorAll('.question-checkbox');
+            checkboxes.forEach((checkbox, index) => {
+                checkbox.checked = index < count;
+            });
+            updateSelectionCount();
+        }
+        
+        // 根据输入框值快速选中前N题
+        function selectTopQuestionsByInput() {
+            const input = document.getElementById('selectCountInput');
+            const count = parseInt(input.value) || 5;
+            selectTopQuestions(count);
+        }
+        
+        // 取消全部选中
+        function cancelSelection() {
+            const checkboxes = document.querySelectorAll('.question-checkbox');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = false;
+            });
+            updateSelectionCount();
+        }
+        
+        // 加入错题组
+        function addToGroup() {
+            const checkboxes = document.querySelectorAll('.question-checkbox:checked');
+            if (checkboxes.length === 0) {
+                alert('请先选择要加入错题组的题目');
+                return;
+            }
+            alert(`已将 ${checkboxes.length} 道题目加入错题组`);
+            // 这里可以添加实际的加入错题组逻辑
+        }
+        
+        // 布置作业
+        function assignHomework() {
+            const checkboxes = document.querySelectorAll('.question-checkbox:checked');
+            if (checkboxes.length === 0) {
+                alert('请先勾选需要布置的错题！');
+                return;
+            }
+            
+            const isLayered = document.getElementById('layeredHomeworkToggle').checked;
+            if (isLayered) {
+                // 跳转到智能分层作业页面
+                window.location.href = 'fenceng-homework.html';
+            } else {
+                // 弹出布置错题巩固作业的弹窗
+                showAssignHomeworkModal();
+            }
+        }
+        
+        // 生成试卷
+        function generatePaper() {
+            const checkboxes = document.querySelectorAll('.question-checkbox:checked');
+            if (checkboxes.length === 0) {
+                alert('请先选择要生成试卷的题目');
+                return;
+            }
+            alert(`正在生成包含 ${checkboxes.length} 道题目的试卷...`);
+            // 这里可以添加实际的生成试卷逻辑
+        }
+        
+        // 一键推送试题
+        function pushQuestions() {
+            const checkboxes = document.querySelectorAll('.question-checkbox:checked');
+            if (checkboxes.length === 0) {
+                alert('请先选择要推送的题目');
+                return;
+            }
+            alert(`正在推送 ${checkboxes.length} 道题目给学生...`);
+            // 这里可以添加实际的推送逻辑
+        }
+    </script>
+    
+    <!-- 布置错题巩固作业弹窗 -->
+    <div id="assignHomeworkModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+        <div style="background: white; border-radius: 8px; width: 700px; height: 700px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.15);">
+            <!-- 弹窗头部 -->
+            <div style="padding: 20px 25px; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="margin: 0; font-size: 20px; color: var(--text-color); font-weight: 600;">布置错题巩固作业</h3>
+                <button onclick="closeAssignHomeworkModal()" style="background: none; border: none; font-size: 24px; color: #999; cursor: pointer; line-height: 1;">&times;</button>
+            </div>
+            
+            <!-- 弹窗内容 -->
+            <div style="padding: 20px; height: calc(100% - 130px); overflow: hidden;">
+                <!-- 原题重做选项 -->
+                <div style="margin-bottom: 15px;">
+                    <div style="margin-bottom: 8px;">
+                        <label style="display: flex; align-items: center; cursor: pointer; margin-bottom: 8px;">
+                            <input type="radio" name="questionMode" value="original" checked style="width: 16px; height: 16px; margin-right: 10px; cursor: pointer;">
+                            <span style="font-size: 14px; color: var(--text-color);">
+                                <strong>原题重做：</strong>直接布置选中的原题，适合强化纠错
+                            </span>
+                        </label>
+                    </div>
+                    <div style="margin-bottom: 8px;">
+                        <label style="display: flex; align-items: center; cursor: pointer; margin-bottom: 8px;">
+                            <input type="radio" name="questionMode" value="similar" style="width: 16px; height: 16px; margin-right: 10px; cursor: pointer;">
+                            <span style="font-size: 14px; color: var(--text-color);">
+                                <strong>举一反三：</strong>系统相似题推荐
+                            </span>
+                        </label>
+                    </div>
+                    <div style="margin-bottom: 8px;">
+                        <label style="display: flex; align-items: center; cursor: pointer;">
+                            <input type="radio" name="questionMode" value="ai" style="width: 16px; height: 16px; margin-right: 10px; cursor: pointer;">
+                            <span style="font-size: 14px; color: var(--text-color);">
+                                <strong>AI变题：</strong>AI根据当前考核内容生成内容相似的变题，考察学生掌握程度
+                            </span>
+                        </label>
+                    </div>
+                    <!-- AI变题类型选择 -->
+                    <div id="ai-variation-options" style="display: none; margin-top: 10px; padding-left: 26px;">
+                        <div style="display: flex; flex-wrap: wrap; gap: 15px;">
+                            <div style="display: flex; align-items: center; gap: 5px;">
+                                <input type="radio" name="ai-variation-type" class="radio" checked id="variation1">
+                                <label for="variation1" style="font-size: 12px;">题型转换</label>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 5px;">
+                                <input type="radio" name="ai-variation-type" class="radio" id="variation2">
+                                <label for="variation2" style="font-size: 12px;">情境重构</label>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 5px;">
+                                <input type="radio" name="ai-variation-type" class="radio" id="variation3">
+                                <label for="variation3" style="font-size: 12px;">数值 / 素材替换</label>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 5px;">
+                                <input type="radio" name="ai-variation-type" class="radio" id="variation4">
+                                <label for="variation4" style="font-size: 12px;">知识点融合</label>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 5px;">
+                                <input type="radio" name="ai-variation-type" class="radio" id="variation5">
+                                <label for="variation5" style="font-size: 12px;">条件变式</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 已选择题目信息 -->
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; font-size: 14px; color: var(--text-color); margin-bottom: 8px; font-weight: 500;">已选择题目信息</label>
+                    <div style="padding: 10px; border: 1px solid var(--border-color); border-radius: 4px; background: #f9f9f9;">
+                        <div style="margin-bottom: 6px;">
+                            <span style="font-size: 14px; color: var(--text-secondary);">总数：</span>
+                            <span id="selectedQuestionCount" style="font-size: 14px; color: var(--text-color); font-weight: 500;">0</span>
+                        </div>
+                        <div style="font-size: 14px; color: var(--text-secondary);">
+                            类型：<span id="selectedQuestionTypes" style="color: var(--text-color);">暂无选择</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 作业截止提交时间 -->
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; font-size: 14px; color: var(--text-color); margin-bottom: 8px; font-weight: 500;">作业截止提交时间</label>
+                    <input type="datetime-local" id="homeworkDeadline" value="2026-01-30T23:59" style="width: 100%; padding: 10px 12px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 14px; box-sizing: border-box;">
+                </div>
+                
+                <!-- 总分 -->
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; font-size: 14px; color: var(--text-color); margin-bottom: 8px; font-weight: 500;">总分</label>
+                    <input type="number" id="homeworkTotalScore" value="100" min="1" max="100" style="width: 100%; padding: 10px 12px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 14px; box-sizing: border-box;">
+                </div>
+                
+                <!-- 布置范围 -->
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; font-size: 14px; color: var(--text-color); margin-bottom: 8px; font-weight: 500;">布置范围</label>
+                    <div style="border: 1px solid var(--border-color); border-radius: 4px; overflow: hidden;">
+                        <!-- 班级Tab选择 -->
+                        <div style="display: flex; gap: 10px; padding: 8px 12px; background: #f5f5f5; border-bottom: 1px solid var(--border-color); overflow-x: auto;">
+                            <button style="padding: 4px 12px; border: 2px solid var(--primary-color); border-radius: 4px; background: var(--primary-color); color: white; font-size: 13px; cursor: pointer; font-weight: bold;">初一班</button>
+                            <button style="padding: 4px 12px; border: 2px solid var(--border-color); border-radius: 4px; background: white; color: var(--text-color); font-size: 13px; cursor: pointer; font-weight: bold;">五年级8班</button>
+                            <button style="padding: 4px 12px; border: 2px solid var(--border-color); border-radius: 4px; background: white; color: var(--text-color); font-size: 13px; cursor: pointer; font-weight: bold;">六年级一班</button>
+                            <button style="padding: 4px 12px; border: 2px solid var(--border-color); border-radius: 4px; background: white; color: var(--text-color); font-size: 13px; cursor: pointer; font-weight: bold;">同学号班</button>
+                            <button style="padding: 4px 12px; border: 2px solid var(--border-color); border-radius: 4px; background: white; color: var(--text-color); font-size: 13px; cursor: pointer; font-weight: bold;">测试班</button>
+                            <button style="padding: 4px 12px; border: 2px solid var(--border-color); border-radius: 4px; background: #e6f7ff; color: var(--primary-color); font-size: 13px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 5px;">
+                                <span>📋</span> 添加学生
+                            </button>
+                        </div>
+                        <!-- 已选中学生显示 -->
+                        <div style="padding: 12px; min-height: 60px; background: white;">
+                            <div style="font-size: 14px; color: var(--text-color);">李2、李3</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 弹窗底部 -->
+            <div style="padding: 15px 25px; border-top: 1px solid #f0f0f0; display: flex; justify-content: flex-end; gap: 12px;">
+                <button onclick="closeAssignHomeworkModal()" style="padding: 10px 24px; background: #f0f0f0; color: var(--text-color); border: 1px solid var(--border-color); border-radius: 4px; font-size: 14px; cursor: pointer;">取消</button>
+                <button onclick="confirmAssignHomework()" style="padding: 10px 24px; background: var(--primary-color); color: white; border: none; border-radius: 4px; font-size: 14px; cursor: pointer; font-weight: 500;">确认布置</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 学生名单弹窗 -->
+    <div id="studentModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+        <div style="background: white; border-radius: 8px; width: 600px; max-height: 80vh; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.15);">
+            <!-- 弹窗头部 -->
+            <div style="padding: 20px; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="margin: 0; font-size: 18px; color: var(--text-color);">错题学生名单</h3>
+                <button onclick="closeStudentModal()" style="background: none; border: none; font-size: 24px; color: #999; cursor: pointer; line-height: 1;">&times;</button>
+            </div>
+            
+            <!-- 题目信息 -->
+            <div id="modalQuestionInfo" style="padding: 15px 20px; background: #f9f9f9; border-bottom: 1px solid #f0f0f0;">
+                <div style="font-size: 14px; color: var(--text-secondary); margin-bottom: 5px;">题目：</div>
+                <div id="modalQuestion" style="font-size: 15px; color: var(--text-color); font-weight: 500;"></div>
+            </div>
+            
+            <!-- 学生列表 -->
+            <div style="padding: 20px; max-height: 400px; overflow-y: auto;">
+                <div style="margin-bottom: 10px; font-size: 14px; color: var(--text-secondary);">
+                    共 <span id="modalStudentCount" style="color: #ff4d4f; font-weight: bold;">0</span> 名学生答错此题
+                </div>
+                <div id="studentList" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
+                    <!-- 学生列表将动态生成 -->
+                </div>
+            </div>
+            
+            <!-- 弹窗底部 -->
+            <div style="padding: 15px 20px; border-top: 1px solid #f0f0f0; text-align: right;">
+                <button onclick="closeStudentModal()" style="padding: 8px 20px; background: var(--primary-color); color: white; border: none; border-radius: 4px; font-size: 14px; cursor: pointer;">关闭</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // 显示学生名单弹窗
+        function showStudentList(question, errorCount) {
+            const modal = document.getElementById('studentModal');
+            const modalQuestion = document.getElementById('modalQuestion');
+            const modalStudentCount = document.getElementById('modalStudentCount');
+            const studentList = document.getElementById('studentList');
+            
+            // 设置题目信息
+            modalQuestion.textContent = question;
+            modalStudentCount.textContent = errorCount;
+            
+            // 生成模拟学生数据
+            const students = [];
+            for (let i = 1; i <= errorCount; i++) {
+                students.push({
+                    name: `学生${i}`,
+                    studentId: `2024${String(i).padStart(4, '0')}`
+                });
+            }
+            
+            // 生成学生列表HTML
+            studentList.innerHTML = students.map(student => `
+                <div style="padding: 10px; background: #f9f9f9; border-radius: 4px; text-align: center;">
+                    <div style="font-size: 14px; font-weight: 500; color: var(--text-color); margin-bottom: 3px;">${student.name}</div>
+                    <div style="font-size: 12px; color: var(--text-secondary);">${student.studentId}</div>
+                </div>
+            `).join('');
+            
+            // 显示弹窗
+            modal.style.display = 'flex';
+        }
+        
+        // 关闭学生名单弹窗
+        function closeStudentModal() {
+            const modal = document.getElementById('studentModal');
+            modal.style.display = 'none';
+        }
+        
+        // 显示布置错题巩固作业弹窗
+        function showAssignHomeworkModal() {
+            // 获取已选择的题目数量
+            const selectedCount = document.getElementById('selectionCount').textContent;
+            
+            // 检查是否有选中的题目
+            if (parseInt(selectedCount) === 0) {
+                alert('请先勾选需要布置的错题！');
+                return;
+            }
+            
+            // 更新已选择题目信息
+            const selectedQuestionCount = document.getElementById('selectedQuestionCount');
+            const selectedQuestionTypes = document.getElementById('selectedQuestionTypes');
+            
+            if (selectedQuestionCount) {
+                selectedQuestionCount.textContent = selectedCount;
+            }
+            
+            if (selectedQuestionTypes) {
+                // 这里可以根据实际选中的题目类型进行统计
+                // 由于我们没有实际的题目类型数据，这里使用模拟数据
+                selectedQuestionTypes.textContent = '单项选择题 3 题，判断题 2 题';
+            }
+            
+            // 显示布置作业弹窗
+            const modal = document.getElementById('assignHomeworkModal');
+            modal.style.display = 'flex';
+        }
+        
+        // 关闭布置作业弹窗
+        function closeAssignHomeworkModal() {
+            const modal = document.getElementById('assignHomeworkModal');
+            modal.style.display = 'none';
+        }
+        
+        // 确认布置作业
+        function confirmAssignHomework() {
+            // 跳转到发布预览界面
+            window.location.href = 'preview.html';
+        }
+        
+        // 切换班级下拉框显示/隐藏
+        function toggleClassDropdown() {
+            const dropdown = document.getElementById('classDropdown');
+            dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+        }
+        
+        // 选择班级
+        function selectClass(className) {
+            const selectedClasses = document.getElementById('selectedClasses');
+            const classDropdown = document.getElementById('classDropdown');
+            
+            // 检查班级是否已选中
+            const existingTags = selectedClasses.querySelectorAll('span[data-class]');
+            let isSelected = false;
+            
+            existingTags.forEach(tag => {
+                if (tag.getAttribute('data-class') === className) {
+                    isSelected = true;
+                }
+            });
+            
+            // 如果未选中，则添加标签
+            if (!isSelected) {
+                const tag = document.createElement('span');
+                tag.setAttribute('data-class', className);
+                tag.style.display = 'inline-flex';
+                tag.style.alignItems = 'center';
+                tag.style.padding = '4px 10px';
+                tag.style.background = '#e6f7ff';
+                tag.style.color = 'var(--primary-color)';
+                tag.style.borderRadius = '4px';
+                tag.style.fontSize = '13px';
+                tag.style.marginRight = '8px';
+                tag.style.marginBottom = '8px';
+                
+                tag.innerHTML = `
+                    ${className}
+                    <span onclick="removeClassTag(this)" style="margin-left: 6px; cursor: pointer; font-weight: bold;">&times;</span>
+                `;
+                
+                // 在下拉箭头前插入标签
+                const arrowBtn = selectedClasses.querySelector('button');
+                selectedClasses.insertBefore(tag, arrowBtn);
+            }
+            
+            // 隐藏下拉框
+            classDropdown.style.display = 'none';
+        }
+        
+        // 移除班级标签
+        function removeClassTag(element) {
+            const tag = element.parentElement;
+            tag.remove();
+        }
+        
+        // 点击弹窗外部关闭
+        document.addEventListener('click', function(e) {
+            const modal = document.getElementById('studentModal');
+            if (e.target === modal) {
+                closeStudentModal();
+            }
+            
+            const assignModal = document.getElementById('assignHomeworkModal');
+            if (e.target === assignModal) {
+                closeAssignHomeworkModal();
+            }
+        });
+        
+        // AI变题类型选择功能
+        const questionModeRadios = document.querySelectorAll('input[name="questionMode"]');
+        const aiVariationOptions = document.getElementById('ai-variation-options');
+        
+        questionModeRadios.forEach(radio => {
+            radio.addEventListener('change', () => {
+                if (radio.value === 'ai') {
+                    // 选中AI变题时显示类型选择
+                    aiVariationOptions.style.display = 'block';
+                } else {
+                    // 未选中AI变题时隐藏类型选择
+                    aiVariationOptions.style.display = 'none';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

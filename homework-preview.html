@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>作业预览 - Sigma Education</title>
+    <style>
+        :root {
+            --primary-color: #1890ff;
+            --bg-color: #f0f2f5;
+            --text-color: #333;
+            --text-secondary: #666;
+            --border-color: #d9d9d9;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding-bottom: 80px;
+        }
+
+        /* 顶部导航 */
+        .header {
+            background: #fff;
+            padding: 0 20px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+
+        .logo {
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* 主容器 */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* 渐变头部 */
+        .preview-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 8px;
+            padding: 30px;
+            color: white;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .preview-header h1 {
+            font-size: 28px;
+            margin-bottom: 20px;
+        }
+
+        .header-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            font-size: 14px;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .info-label {
+            opacity: 0.9;
+        }
+
+        .info-value {
+            font-weight: 600;
+        }
+
+        /* 题目列表 */
+        .question-list {
+            background: white;
+            border-radius: 8px;
+            padding: 25px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .question-list-header {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .question-item {
+            padding: 20px;
+            margin-bottom: 15px;
+            background: #fafafa;
+            border-radius: 6px;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .question-number {
+            font-size: 16px;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .question-meta {
+            display: flex;
+            gap: 10px;
+            font-size: 13px;
+        }
+
+        .meta-tag {
+            padding: 3px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .tag-type {
+            background: #e6f7ff;
+            color: #1890ff;
+        }
+
+        .tag-difficulty {
+            background: #fff7e6;
+            color: #faad14;
+        }
+
+        .question-content {
+            font-size: 15px;
+            line-height: 1.6;
+            margin-bottom: 10px;
+            color: var(--text-color);
+        }
+
+        .question-options {
+            margin: 10px 0;
+            font-size: 14px;
+            line-height: 1.8;
+        }
+
+        .question-answer {
+            margin-top: 10px;
+            padding: 8px 12px;
+            background: #f6ffed;
+            border-left: 3px solid #52c41a;
+            color: #52c41a;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .question-knowledge {
+            margin-top: 8px;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        /* 底部操作栏 */
+        .footer-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: white;
+            box-shadow: 0 -2px 8px rgba(0,0,0,0.08);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            z-index: 100;
+        }
+
+        .btn {
+            padding: 10px 40px;
+            border: none;
+            border-radius: 4px;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .btn-cancel {
+            background: #f0f0f0;
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-cancel:hover {
+            background: #e6e6e6;
+        }
+
+        .btn-publish {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-publish:hover {
+            background: #40a9ff;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航 -->
+    <div class="header">
+        <div class="logo">
+            <svg width="24" height="24" viewBox="0 0 100 100" fill="#1890ff">
+                <circle cx="50" cy="50" r="45" stroke="#1890ff" stroke-width="5" fill="none"/>
+                <path d="M30 50 L50 70 L80 30" stroke="#1890ff" stroke-width="8" fill="none"/>
+            </svg>
+            兆涵科技 <span style="font-size: 14px; font-weight: normal; color: #666; margin-left: 5px;">Sigma Education</span>
+        </div>
+    </div>
+
+    <!-- 主容器 -->
+    <div class="container">
+        <!-- 渐变头部 -->
+        <div class="preview-header">
+            <h1 id="homeworkTitle">作业预览</h1>
+            <div class="header-info">
+                <div class="info-item">
+                    <span class="info-label">📝 作业模式：</span>
+                    <span class="info-value" id="homeworkMode">原题重做</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">👥 布置范围：</span>
+                    <span class="info-value" id="homeworkClasses">五年级1班</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">📊 题目数量：</span>
+                    <span class="info-value" id="questionCount">0</span>
+                    <span class="info-label">题</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">⏰ 截止时间：</span>
+                    <span class="info-value" id="homeworkDeadline">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">💯 总分：</span>
+                    <span class="info-value" id="totalScore">100</span>
+                    <span class="info-label">分</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 题目列表 -->
+        <div class="question-list">
+            <div class="question-list-header">
+                📋 题目详情
+            </div>
+            <div id="questionListContainer">
+                <!-- 题目将动态生成 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 底部操作栏 -->
+    <div class="footer-bar">
+        <button class="btn btn-cancel" onclick="goBack()">取消</button>
+        <button class="btn btn-publish" onclick="publishHomework()">发布</button>
+    </div>
+
+    <script>
+        // 从localStorage获取数据
+        const previewData = JSON.parse(localStorage.getItem('homeworkPreviewData') || '{}');
+
+        // 模式映射
+        const modeMap = {
+            'original': '原题重做',
+            'similar': '举一反三',
+            'ai': 'AI变题'
+        };
+
+        // 难度颜色映射
+        const difficultyColors = {
+            '简单': { bg: '#f6ffed', color: '#52c41a' },
+            '中等': { bg: '#fff7e6', color: '#faad14' },
+            '困难': { bg: '#fff1f0', color: '#ff4d4f' }
+        };
+
+        // 页面加载时渲染数据
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!previewData.title) {
+                alert('没有找到作业数据，请返回重新操作');
+                window.location.href = 'mistake-notebook.html';
+                return;
+            }
+
+            // 填充头部信息
+            document.getElementById('homeworkTitle').textContent = previewData.title || '作业预览';
+            document.getElementById('homeworkMode').textContent = modeMap[previewData.mode] || '原题重做';
+            document.getElementById('homeworkClasses').textContent = (previewData.classes || []).join('、') || '未选择班级';
+            document.getElementById('questionCount').textContent = previewData.questionCount || 0;
+            document.getElementById('homeworkDeadline').textContent = previewData.deadline || '-';
+            document.getElementById('totalScore').textContent = previewData.totalScore || 100;
+
+            // 渲染题目列表
+            renderQuestions(previewData.questions || []);
+        });
+
+        // 渲染题目列表
+        function renderQuestions(questions) {
+            const container = document.getElementById('questionListContainer');
+            
+            if (questions.length === 0) {
+                container.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--text-secondary);">暂无题目</div>';
+                return;
+            }
+
+            container.innerHTML = questions.map((q, index) => {
+                const diffStyle = difficultyColors[q.difficulty] || difficultyColors['中等'];
+                
+                return `
+                    <div class="question-item">
+                        <div class="question-header">
+                            <div class="question-number">第 ${index + 1} 题</div>
+                            <div class="question-meta">
+                                <span class="meta-tag tag-type">${q.questionType || '单项选择题'}</span>
+                                <span class="meta-tag tag-difficulty" style="background: ${diffStyle.bg}; color: ${diffStyle.color};">${q.difficulty || '中等'}</span>
+                            </div>
+                        </div>
+                        <div class="question-content">
+                            ${q.question || '题目内容'}
+                        </div>
+                        ${q.options && q.options.length > 0 ? `
+                            <div class="question-options">
+                                ${q.options.map(opt => `<div>${opt}</div>`).join('')}
+                            </div>
+                        ` : ''}
+                        <div class="question-answer">
+                            参考答案：${q.answer || '-'}
+                        </div>
+                        ${q.knowledgePoints ? `
+                            <div class="question-knowledge">
+                                📌 知识点：${q.knowledgePoints}
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // 返回
+        function goBack() {
+            if (confirm('确定要取消吗？未保存的数据将丢失。')) {
+                window.location.href = 'mistake-notebook.html';
+            }
+        }
+
+        // 发布作业
+        function publishHomework() {
+            // 这里可以添加发布作业的逻辑，比如发送到后端
+            alert('作业发布成功！');
+            
+            // 清除localStorage数据
+            localStorage.removeItem('homeworkPreviewData');
+            
+            // 跳转回作业管理页面
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>

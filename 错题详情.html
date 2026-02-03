@@ -1,0 +1,2898 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>作业详情 - 错题分析演示</title>
+    <style>
+        /* 全局样式，贴合原有页面风格 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft YaHei", "思源黑体", sans-serif;
+        }
+        body {
+            background-color: #f0f2f5;
+            color: #333;
+            font-size: 14px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* 顶部导航栏 */
+        .top-nav {
+            background-color: #fff;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .nav-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+        }
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .nav-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            background-color: #f0f0f0;
+            color: #666;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        .nav-btn.active {
+            background-color: #4285f4;
+            color: #fff;
+        }
+
+        /* 页面头部样式 */
+        .page-header {
+            background-color: #fff0f5; /* 粉红色背景 */
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+        .header-main {
+            flex: 1;
+            margin-right: 20px;
+        }
+        .header-title-section {
+            margin-bottom: 10px;
+        }
+        .header-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .subject-tag {
+            background-color: #fff;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: bold;
+            color: #333;
+        }
+        .subject-pinyin {
+            font-size: 14px;
+            color: #999;
+            font-family: Arial, sans-serif;
+        }
+        .date-tag {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+        }
+        .homework-type {
+            font-size: 14px;
+            color: #666;
+        }
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+        .btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .btn-blue {
+            background-color: #4285f4;
+            color: #fff;
+        }
+        .btn-gray {
+            background-color: #ccc;
+            color: #fff;
+        }
+        .btn-red {
+            background-color: #e63946;
+            color: #fff;
+        }
+        .header-info-section {
+            margin-bottom: 15px;
+        }
+        .header-info {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            font-size: 12px;
+            color: #666;
+        }
+        .info-left {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .info-item {
+            display: inline-block;
+        }
+        .header-stats-section {
+            display: flex;
+            align-items: flex-start;
+        }
+        .header-stats {
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+        }
+        .stat-item {
+            text-align: left;
+        }
+        .white-box {
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 10px 15px;
+            min-width: 140px;
+            width: 140px;
+        }
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 4px;
+        }
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .green-text {
+            color: #00cc00;
+            font-weight: bold;
+        }
+        .red-text {
+            color: #ff0000;
+            font-weight: bold;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 15px;
+            }
+            .header-main {
+                margin-right: 0;
+            }
+            .header-stats-section {
+                justify-content: flex-start;
+            }
+            .header-info {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            .info-left {
+                flex-direction: column;
+                gap: 5px;
+            }
+            .student-table-container {
+                overflow-x: auto;
+            }
+            .student-table {
+                font-size: 12px;
+            }
+            .student-table th,
+            .student-table td {
+                padding: 6px 8px;
+            }
+            .group-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .header-title {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 5px;
+            }
+            .header-stats {
+                flex-direction: column;
+                gap: 15px;
+            }
+            .white-box {
+                width: 100%;
+                min-width: auto;
+            }
+            .bottom-bar {
+                flex-direction: column;
+                gap: 10px;
+                padding: 10px;
+            }
+            .bottom-actions {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+        }
+        .unsubmitted-list {
+            font-size: 12px;
+            color: #4285f4;
+            margin-top: 4px;
+        }
+        .pink-bg {
+            background-color: #ff6b9d;
+            color: #fff;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 20px;
+        }
+
+        /* Tab栏样式 */
+        .tab-nav {
+            display: flex;
+            background-color: #fff;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 20px;
+        }
+        .tab-item {
+            padding: 12px 20px;
+            cursor: pointer;
+            font-size: 14px;
+            color: #666;
+            position: relative;
+        }
+        .tab-item.active {
+            color: #4285f4;
+            font-weight: bold;
+        }
+        .tab-item.active::after {
+            content: "";
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background-color: #4285f4;
+        }
+
+        /* Tab内容样式 */
+        .tab-content {
+            display: none;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            min-height: 500px;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        /* 占位内容样式（作业概况/学生作答） */
+        .placeholder-content {
+            padding: 20px;
+            color: #999;
+            text-align: center;
+            line-height: 2;
+        }
+
+        /* 学生表格样式 */
+        .student-table-container {
+            background-color: #fff;
+            border-radius: 8px;
+            overflow-x: auto;
+        }
+        .group-header {
+            background-color: #f5f5f5;
+            padding: 12px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .group-title {
+            font-size: 14px;
+            font-weight: bold;
+            color: #333;
+        }
+        .group-actions {
+            display: flex;
+            gap: 10px;
+        }
+        .search-btn {
+            background-color: transparent;
+            border: none;
+            color: #666;
+            font-size: 12px;
+            cursor: pointer;
+            padding: 6px 12px;
+            border-radius: 4px;
+        }
+        .search-btn:hover {
+            background-color: #e0e0e0;
+        }
+        .student-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        .student-table th {
+            background-color: #fafafa;
+            border: 1px solid #e0e0e0;
+            padding: 10px 15px;
+            text-align: left;
+            font-weight: bold;
+            color: #333;
+        }
+        .student-table td {
+            border: 1px solid #e0e0e0;
+            padding: 10px 15px;
+            color: #666;
+        }
+        .student-table tr:nth-child(even) {
+            background-color: #fafafa;
+        }
+        .student-table tr:hover {
+            background-color: #f0f0f0;
+        }
+        .view-detail {
+            color: #4285f4;
+            text-decoration: none;
+        }
+        .view-detail:hover {
+            text-decoration: underline;
+        }
+        
+        /* 未提交链接样式 */
+        .unsubmitted-link {
+            font-size: 12px;
+            color: #4285f4;
+            margin-top: 4px;
+            cursor: pointer;
+        }
+        .unsubmitted-link:hover {
+            text-decoration: underline;
+        }
+
+        /* AI分析栏样式 */
+        .ai-analysis-section {
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .analysis-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        .analysis-header h3 {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin: 0;
+        }
+        .analysis-controls {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 5px;
+        }
+        .reanalyze-btn {
+            background-color: #4285f4;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            padding: 6px 12px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        .reanalyze-btn:hover {
+            background-color: #3367d6;
+        }
+        .reanalyze-btn:active {
+            background-color: #2c56b4;
+        }
+        .reanalyze-btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        .analysis-date {
+            font-size: 12px;
+            color: #999;
+        }
+        /* 空状态样式 */
+        .analysis-empty {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 20px;
+            text-align: center;
+            background-color: #fafafa;
+            border: 1px dashed #ddd;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .empty-content {
+            max-width: 400px;
+        }
+        .empty-text {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.6;
+        }
+        .analysis-content {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.6;
+        }
+        .analysis-item {
+            margin-bottom: 25px;
+        }
+        .analysis-item h4 {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+        }
+        .analysis-item h4:before {
+            content: '';
+            display: inline-block;
+            width: 4px;
+            height: 16px;
+            background-color: #4285f4;
+            margin-right: 8px;
+            border-radius: 2px;
+        }
+        .knowledge-distribution {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+        .knowledge-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #f8f9fa;
+            padding: 10px 15px;
+            border-radius: 6px;
+            border-left: 4px solid #4285f4;
+        }
+        .knowledge-name {
+            font-weight: bold;
+            color: #333;
+        }
+        .knowledge-rate {
+            font-weight: bold;
+            color: #e63946;
+        }
+        .error-types {
+            list-style-type: disc;
+            padding-left: 20px;
+            margin-bottom: 10px;
+        }
+        .error-types li {
+            margin-bottom: 8px;
+        }
+        .learning-suggestions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .suggestion-item h5 {
+            font-size: 14px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .suggestion-item ul {
+            list-style-type: disc;
+            padding-left: 20px;
+        }
+        .suggestion-item li {
+            margin-bottom: 8px;
+        }
+        
+        /* 折叠功能样式 */
+        .analysis-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+        }
+        .analysis-title h4 {
+            margin: 0;
+        }
+        .collapse-btn {
+            display: inline-block;
+            font-size: 12px;
+            font-weight: bold;
+            color: #4285f4;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        .collapse-btn--hidden {
+            visibility: hidden;
+        }
+        .analysis-item--collapsed .analysis-body {
+            display: none;
+        }
+        .analysis-item--collapsed .collapse-btn {
+            transform: rotate(0deg);
+        }
+        .analysis-item:not(.analysis-item--collapsed) .collapse-btn {
+            transform: rotate(90deg);
+        }
+        .analysis-item:not(.analysis-item--collapsed):hover .collapse-btn {
+            visibility: visible;
+        }
+        
+        /* 错题分析 - 核心数据看板 */
+        .data-dashboard {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+        .dashboard-card {
+            flex: 1;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 6px;
+            border: 1px solid #eee;
+        }
+        .error-rate {
+            font-size: 28px;
+            font-weight: bold;
+            color: #e63946;
+            margin-bottom: 8px;
+        }
+        .dashboard-desc {
+            font-size: 12px;
+            color: #666;
+            line-height: 1.5;
+        }
+        .dashboard-actions {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        /* 错题分析 - 高错题目模块 */
+        .high-error-section {
+            margin-bottom: 30px;
+        }
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .section-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+        }
+        .num-select {
+            padding: 4px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        .question-card {
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 10px;
+            background-color: #fff;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+        .question-card.highlight {
+            background-color: #fff5f5; /* 勾选后高亮底色 */
+        }
+        .question-card.border-deep-red {
+            border: 2px solid #d62828;
+        }
+        .question-card.border-medium-red {
+            border: 2px solid #e63946;
+        }
+        .question-card.border-light-red {
+            border: 2px solid #f4a261;
+        }
+        .question-info {
+            width: 85%;
+        }
+        .question-text {
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 8px;
+        }
+        .question-stats {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 4px;
+        }
+        .error-rate-text {
+            font-weight: bold;
+            color: #e63946;
+        }
+        .error-tag {
+            font-size: 12px;
+            color: #999;
+        }
+        .question-actions {
+            width: 12%;
+            text-align: right;
+        }
+        .checkbox {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+        .btn-detail {
+            display: block;
+            width: 100%;
+            margin-top: 8px;
+            background-color: #eee;
+            border: none;
+            padding: 4px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        /* 错题分析 - 易错知识点模块 */
+        .error-knowledge-section {
+            margin-bottom: 30px;
+        }
+        .knowledge-cards {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+        }
+        .knowledge-card {
+            min-width: 200px;
+            background-color: #f1f1f1;
+            border-radius: 6px;
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .knowledge-card.selected {
+            border: 2px solid #4285f4;
+            background-color: #e8f0fe;
+        }
+        .knowledge-name {
+            font-size: 14px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 6px;
+        }
+        .knowledge-desc {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 4px;
+        }
+        .knowledge-rate {
+            font-size: 12px;
+            color: #e63946;
+            margin-bottom: 6px;
+        }
+        .filter-text {
+            font-size: 11px;
+            color: #4285f4;
+        }
+
+        /* 底部固定操作栏 */
+        .bottom-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: #fff;
+            border-top: 1px solid #eee;
+            padding: 12px 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            z-index: 99;
+        }
+        .bottom-count {
+            font-size: 14px;
+            color: #666;
+            position: relative;
+            left: -350px;
+        }
+        .bottom-actions {
+            display: flex;
+            gap: 10px;
+        }
+        #select-top5 {
+            position: relative;
+            left: -350px;
+        }
+        #select-all {
+            position: relative;
+            left: -350px;
+        }
+        #generate-homework {
+            position: relative;
+            left: 350px;
+        }
+
+        /* 弹窗样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            width: 600px;
+            max-width: 90%;
+            overflow-y: auto;
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        .modal-title {
+            font-size: 16px;
+            font-weight: bold;
+        }
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            color: #999;
+        }
+        .modal-body {
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+        .modal-footer {
+            text-align: right;
+        }
+        
+        /* 题目详情样式 */
+        .question-detail {
+            font-size: 14px;
+            line-height: 1.8;
+        }
+        .question-detail h4 {
+            margin-bottom: 15px;
+            font-size: 15px;
+            color: #333;
+        }
+        .question-options {
+            margin-bottom: 15px;
+            padding-left: 20px;
+        }
+        .option-item {
+            margin-bottom: 8px;
+        }
+        .question-answer {
+            margin-bottom: 15px;
+            padding: 8px 12px;
+            background-color: #f0f8ff;
+            border-radius: 4px;
+        }
+        .question-error-distribution {
+            padding: 8px 12px;
+            background-color: #fff5f5;
+            border-radius: 4px;
+        }
+
+        /* 作业生成弹窗样式 */
+        .radio-group {
+            margin-bottom: 15px;
+        }
+        .radio-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            gap: 8px;
+        }
+        .radio {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+        .radio-label {
+            font-size: 13px;
+        }
+        .form-item {
+            margin-bottom: 15px;
+        }
+        .form-label {
+            display: block;
+            font-size: 13px;
+            margin-bottom: 4px;
+            color: #666;
+        }
+        .form-input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+        
+        /* 自定义多选下拉框样式 */
+        .custom-multiselect {
+            position: relative;
+            width: 100%;
+        }
+        
+        .multiselect-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #fff;
+            cursor: pointer;
+            flex-wrap: wrap;
+            min-height: 36px;
+        }
+        
+        .selected-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            flex: 1;
+        }
+        
+        .tag {
+            display: flex;
+            align-items: center;
+            background-color: #e6f0ff;
+            color: #4285f4;
+            padding: 2px 6px;
+            border-radius: 12px;
+            font-size: 12px;
+        }
+        
+        .tag-remove {
+            margin-left: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        
+        .tag-remove:hover {
+            color: #d32f2f;
+        }
+        
+        .multiselect-arrow {
+            font-size: 10px;
+            color: #666;
+        }
+        
+        .multiselect-options {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            border: 1px solid #ddd;
+            border-top: none;
+            border-radius: 0 0 4px 4px;
+            background-color: #fff;
+            max-height: 150px;
+            overflow-y: auto;
+            z-index: 1000;
+        }
+        
+        .option {
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        
+        .option:hover {
+            background-color: #f0f8ff;
+        }
+        
+        .option[data-selected="true"] {
+            background-color: #e6f0ff;
+            color: #4285f4;
+        }
+        
+        /* 模拟输入框焦点效果 */
+        .custom-multiselect:focus-within .multiselect-header {
+            border-color: #4285f4;
+            box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <div class="top-nav">
+        <div class="nav-left">
+            <button class="nav-btn" style="margin-right: 15px;" onclick="window.location.href='index.html'">← 返回</button>
+            <div class="nav-title">作业详情</div>
+        </div>
+        <div class="nav-right">
+            <button class="nav-btn active">作业报告</button>
+            <button class="nav-btn">作业数据分析</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- 页面头部 -->
+        <div class="page-header">
+            <div class="header-content">
+                <div class="header-main">
+                    <div class="header-title-section">
+                        <div class="header-title">
+                            <span class="subject-tag">数学</span>
+                            <span class="subject-pinyin">shuxue</span>
+                            <span class="date-tag">01月23日精准作业</span>
+                            <span class="homework-type">精准作业</span>
+                        </div>
+                    </div>
+                    <div class="header-info-section">
+                        <div class="header-info">
+                            <div class="info-left">
+                                <span class="info-item">章节：统计与概率</span>
+                                <span class="info-item">详情：单项选择题20道</span>
+                                <span class="info-item">布置时间：2026-01-23 09:31:06</span>
+                                <span class="info-item">截止时间：2026-01-23 13:30:00</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="header-stats-section">
+                    <div class="header-stats">
+                        <div class="stat-item">
+                            <div class="white-box">
+                                <div class="stat-label">完成作业</div>
+                                <div class="stat-value submit-count">
+                                    <span class="green-text">27/50</span>
+                                    <div class="unsubmitted-link">查看未提交名单</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="white-box">
+                                <div class="stat-label">平均分</div>
+                                <div class="stat-value average-score">
+                                    <span class="red-text">70%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 学生知识点掌握程度分层区域 -->
+        <div style="background: #fff; border-radius: 8px; padding: 15px 20px; margin-bottom: 20px;">
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;" id="layer-buttons">
+                <button style="padding: 8px 20px; border: 2px solid #4285f4; border-radius: 4px; background: #4285f4; color: #fff; font-size: 14px; cursor: pointer; font-weight: bold;" data-layer="all">全部学生</button>
+                <button style="padding: 8px 20px; border: 2px solid #1890ff; border-radius: 4px; background: #fff; color: #1890ff; font-size: 14px; cursor: pointer; font-weight: bold;" data-layer="challenge">90%-100%(挑战层)</button>
+                <button style="padding: 8px 20px; border: 2px solid #52c41a; border-radius: 4px; background: #fff; color: #52c41a; font-size: 14px; cursor: pointer; font-weight: bold;" data-layer="advanced">75%-89%(拔高层)</button>
+                <button style="padding: 8px 20px; border: 2px solid #faad14; border-radius: 4px; background: #fff; color: #faad14; font-size: 14px; cursor: pointer; font-weight: bold;" data-layer="good">60%-74%(良好层)</button>
+                <button style="padding: 8px 20px; border: 2px solid #ff6b9d; border-radius: 4px; background: #fff; color: #ff6b9d; font-size: 14px; cursor: pointer; font-weight: bold;" data-layer="improve">40%-59%(提升层)</button>
+                <button style="padding: 8px 20px; border: 2px solid #ff4d4f; border-radius: 4px; background: #fff; color: #ff4d4f; font-size: 14px; cursor: pointer; font-weight: bold;" data-layer="basic">0%-39%(基础层)</button>
+            </div>
+        </div>
+
+        <!-- Tab栏 -->
+        <div class="tab-nav">
+            <div class="tab-item active" data-tab="overview">按学生查看</div>
+            <div class="tab-item" data-tab="student">按题目查看</div>
+            <div class="tab-item" data-tab="error-analysis">错题分析</div>
+        </div>
+
+        <!-- Tab内容 -->
+        <!-- 按学生查看 -->
+        <div class="tab-content active" id="overview">
+            <div class="student-table-container">
+                <!-- 分组标题和搜索 -->
+                <div class="group-header">
+                    <div class="group-title">默认分组</div>
+                    <div class="group-actions">
+                        <button class="search-btn">🔍 搜索</button>
+                    </div>
+                </div>
+                <table class="student-table">
+                    <thead>
+                        <tr>
+                            <th>序号</th>
+                            <th>学生姓名</th>
+                            <th>学号</th>
+                            <th>作业内容</th>
+                            <th>分数</th>
+                            <th>错题数</th>
+                            <th>完成时间</th>
+                            <th>完成用时</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>巢雅婧</td>
+                            <td>328648153</td>
+                            <td>单项选择题20道</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>未提交</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>唐锦雯</td>
+                            <td>328648143</td>
+                            <td>单项选择题20道</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>未提交</td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>潘奕琳</td>
+                            <td>328648161</td>
+                            <td>单项选择题20道</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>未提交</td>
+                        </tr>
+                        <tr>
+                            <td>4</td>
+                            <td>余诗雨</td>
+                            <td>328648159</td>
+                            <td>单项选择题20道</td>
+                            <td>25</td>
+                            <td>15</td>
+                            <td>2026-01-23日 10:03:31</td>
+                            <td>00:00:50</td>
+                            <td><a href="#" class="view-detail">查看详情</a></td>
+                        </tr>
+                        <tr>
+                            <td>5</td>
+                            <td>蔡依依</td>
+                            <td>328648157</td>
+                            <td>单项选择题20道</td>
+                            <td>100</td>
+                            <td>0</td>
+                            <td>2026-01-23日 11:55:41</td>
+                            <td>00:13:59</td>
+                            <td><a href="#" class="view-detail">查看详情</a></td>
+                        </tr>
+                        <tr>
+                            <td>6</td>
+                            <td>杨诗涵</td>
+                            <td>328648125</td>
+                            <td>单项选择题20道</td>
+                            <td>30</td>
+                            <td>14</td>
+                            <td>2026-01-23日 10:45:51</td>
+                            <td>00:00:46</td>
+                            <td><a href="#" class="view-detail">查看详情</a></td>
+                        </tr>
+                        <tr>
+                            <td>7</td>
+                            <td>黄雨萱</td>
+                            <td>328648149</td>
+                            <td>单项选择题20道</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>未提交</td>
+                        </tr>
+                        <tr>
+                            <td>8</td>
+                            <td>朱珈琳</td>
+                            <td>328648133</td>
+                            <td>单项选择题20道</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>未提交</td>
+                        </tr>
+                        <tr>
+                            <td>9</td>
+                            <td>石峻熙</td>
+                            <td>328648168</td>
+                            <td>单项选择题20道</td>
+                            <td>40</td>
+                            <td>12</td>
+                            <td>2026-01-23日 10:27:13</td>
+                            <td>00:00:34</td>
+                            <td><a href="#" class="view-detail">查看详情</a></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 按题目查看 -->
+        <div class="tab-content" id="student">
+            <div class="placeholder-content">
+                <p>按题目查看内容（原有页面表格）</p>
+                <p>如：按学生展示作答得分、用时、提交状态等</p>
+            </div>
+        </div>
+
+        <!-- 错题分析（核心视图） -->
+        <div class="tab-content" id="error-analysis">
+            <!-- AI分析栏 -->
+            <div class="ai-analysis-section">
+                <div class="analysis-header">
+                    <h3>AI智能错题分析报告</h3>
+                    <div class="analysis-controls">
+                        <div class="analysis-date" id="analysis-date" style="display: none;">分析时间：2026-01-23</div>
+                    </div>
+                </div>
+                
+                <!-- 空状态提示 -->
+                <div class="analysis-empty" id="analysis-empty">
+                    <div class="empty-content">
+                        <div class="empty-text">暂无报告内容，请点击【生成】按钮，进行生成。</div>
+                    </div>
+                </div>
+                
+                <!-- 报告内容（默认隐藏） -->
+                <div class="analysis-content" id="analysis-content" style="display: none;">
+                    <!-- 整体错误率分析 - 默认展开 -->
+                    <div class="analysis-item">
+                        <div class="analysis-title">
+                            <h4>一、整体错误率分析</h4>
+                            <span class="collapse-btn collapse-btn--hidden">▼</span>
+                        </div>
+                        <div class="analysis-body">
+                            <p>本次作业参与作答人数为27人，总题数20道，平均错误率为32%。从整体数据来看，本次作业的难度适中，但仍有较大的提升空间。</p>
+                        </div>
+                    </div>
+                    
+                    <!-- 高频错误知识点分布 - 默认展开 -->
+                    <div class="analysis-item">
+                        <div class="analysis-title">
+                            <h4>二、高频错误知识点分布</h4>
+                            <span class="collapse-btn collapse-btn--hidden">▼</span>
+                        </div>
+                        <div class="analysis-body">
+                            <div class="knowledge-distribution">
+                                <div class="knowledge-item">
+                                    <span class="knowledge-name">两位数进位加法</span>
+                                    <span class="knowledge-rate">72%</span>
+                                </div>
+                                <div class="knowledge-item">
+                                    <span class="knowledge-name">合数与偶数概念</span>
+                                    <span class="knowledge-rate">58%</span>
+                                </div>
+                                <div class="knowledge-item">
+                                    <span class="knowledge-name">统计与概率基础</span>
+                                    <span class="knowledge-rate">45%</span>
+                                </div>
+                                <div class="knowledge-item">
+                                    <span class="knowledge-name">数学逻辑推理</span>
+                                    <span class="knowledge-rate">38%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 典型错误类型归纳 - 默认折叠 -->
+                    <div class="analysis-item analysis-item--collapsed">
+                        <div class="analysis-title">
+                            <h4>三、典型错误类型归纳</h4>
+                            <span class="collapse-btn">▶</span>
+                        </div>
+                        <div class="analysis-body">
+                            <ul class="error-types">
+                                <li><strong>概念混淆型</strong>：如对合数与偶数的概念理解不清晰，导致判断错误</li>
+                                <li><strong>计算失误型</strong>：如两位数进位加法中忘记进位，导致结果错误</li>
+                                <li><strong>逻辑推理型</strong>：如在统计与概率问题中，无法正确分析数据关系</li>
+                                <li><strong>粗心大意型</strong>：如题目条件看错、答案写错位置等低级错误</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <!-- 学生常见错误原因解析 - 默认折叠 -->
+                    <div class="analysis-item analysis-item--collapsed">
+                        <div class="analysis-title">
+                            <h4>四、学生常见错误原因解析</h4>
+                            <span class="collapse-btn">▶</span>
+                        </div>
+                        <div class="analysis-body">
+                            <p>1. <strong>基础知识不扎实</strong>：部分学生对核心概念的理解不够深入，导致在应用时出现错误。</p>
+                            <p>2. <strong>解题方法单一</strong>：学生在面对不同类型的题目时，缺乏灵活的解题思路和方法。</p>
+                            <p>3. <strong>缺乏足够练习</strong>：从错误率来看，部分知识点的练习量不足，导致学生掌握不牢固。</p>
+                            <p>4. <strong>考试技巧欠缺</strong>：部分学生在答题时缺乏时间管理和检查习惯，导致不必要的失误。</p>
+                        </div>
+                    </div>
+                    
+                    <!-- 针对性的学习建议 - 默认折叠 -->
+                    <div class="analysis-item analysis-item--collapsed">
+                        <div class="analysis-title">
+                            <h4>五、针对性的学习建议</h4>
+                            <span class="collapse-btn">▶</span>
+                        </div>
+                        <div class="analysis-body">
+                            <div class="learning-suggestions">
+                                <div class="suggestion-item">
+                                    <h5>对教师的建议：</h5>
+                                    <ul>
+                                        <li>加强两位数进位加法的专项训练，重点关注进位规则的掌握</li>
+                                        <li>组织合数与偶数概念的专题复习，通过对比和实例帮助学生理解</li>
+                                        <li>设计多样化的统计与概率问题，提高学生的应用能力</li>
+                                        <li>关注学习困难学生，提供个性化的辅导和练习</li>
+                                    </ul>
+                                </div>
+                                <div class="suggestion-item">
+                                    <h5>对学生的建议：</h5>
+                                    <ul>
+                                        <li>重视基础知识的学习，确保核心概念的理解和掌握</li>
+                                        <li>多做针对性练习，尤其是自己容易出错的知识点</li>
+                                        <li>建立错题本，定期复习和总结错误原因</li>
+                                        <li>提高答题速度和准确率，养成良好的检查习惯</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 高错率题目TOP N -->
+            <div class="high-error-section">
+                <div class="section-header">
+                    <div class="section-title">高错率题目TOP5</div>
+                    <select class="num-select" id="question-num-select">
+                        <option value="3">显示3题</option>
+                        <option value="5" selected>显示5题</option>
+                        <option value="10">显示10题</option>
+                        <option value="all">显示全部</option>
+                    </select>
+                </div>
+                <!-- 题目卡片列表 -->
+                <div id="question-list">
+                    <!-- 第5题 -->
+                    <div class="question-card border-deep-red" data-id="q5" data-knowledge="两位数进位加法">
+                        <div class="question-info">
+                            <div class="question-text">【第5题】计算：28+35的结果是？（超长题干可折叠，点击展开查看全部）</div>
+                            <div class="question-stats">
+                                <span class="error-rate-text">72% 学生答错</span> | 涉及27人
+                            </div>
+                            <div class="error-tag">知识点：进位加法</div>
+                        </div>
+                        <div class="question-actions">
+                            <input type="checkbox" class="checkbox question-checkbox" data-id="q5">
+                            <button class="btn-detail" data-target="q5">查看详情</button>
+                        </div>
+                    </div>
+                    <!-- 第8题 -->
+                    <div class="question-card border-medium-red" data-id="q8" data-knowledge="合数与偶数概念">
+                        <div class="question-info">
+                            <div class="question-text">【第8题】判断：所有偶数都是合数（）</div>
+                            <div class="question-stats">
+                                <span class="error-rate-text">58% 学生答错</span> | 涉及22人
+                            </div>
+                            <div class="error-tag">知识点：概念理解</div>
+                        </div>
+                        <div class="question-actions">
+                            <input type="checkbox" class="checkbox question-checkbox" data-id="q8">
+                            <button class="btn-detail" data-target="q8">查看详情</button>
+                        </div>
+                    </div>
+                    <!-- 第12题 -->
+                    <div class="question-card border-light-red" data-id="q12" data-knowledge="两位数退位减法">
+                        <div class="question-info">
+                            <div class="question-text">【第12题】计算：73-28的结果是？</div>
+                            <div class="question-stats">
+                                <span class="error-rate-text">45% 学生答错</span> | 涉及18人
+                            </div>
+                            <div class="error-tag">知识点：计算基本功</div>
+                        </div>
+                        <div class="question-actions">
+                            <input type="checkbox" class="checkbox question-checkbox" data-id="q12">
+                            <button class="btn-detail" data-target="q12">查看详情</button>
+                        </div>
+                    </div>
+                    <!-- 第15题 -->
+                    <div class="question-card border-light-red" data-id="q15" data-knowledge="概率基础">
+                        <div class="question-info">
+                            <div class="question-text">【第15题】抛硬币10次，正面朝上5次，请问第11次正面朝上的概率是？</div>
+                            <div class="question-stats">
+                                <span class="error-rate-text">40% 学生答错</span> | 涉及16人
+                            </div>
+                            <div class="error-tag">知识点：概念理解</div>
+                        </div>
+                        <div class="question-actions">
+                            <input type="checkbox" class="checkbox question-checkbox" data-id="q15">
+                            <button class="btn-detail" data-target="q15">查看详情</button>
+                        </div>
+                    </div>
+                    <!-- 第18题 -->
+                    <div class="question-card border-light-red" data-id="q18" data-knowledge="统计图解读">
+                        <div class="question-info">
+                            <div class="question-text">【第18题】根据条形统计图，计算二班比一班多多少人？</div>
+                            <div class="question-stats">
+                                <span class="error-rate-text">35% 学生答错</span> | 涉及14人
+                            </div>
+                            <div class="error-tag">知识点：审题能力</div>
+                        </div>
+                        <div class="question-actions">
+                            <input type="checkbox" class="checkbox question-checkbox" data-id="q18">
+                            <button class="btn-detail" data-target="q18">查看详情</button>
+                        </div>
+                    </div>
+                    <!-- 第2题 -->
+                    <div class="question-card border-light-red" data-id="q2" data-knowledge="两位数乘法">
+                        <div class="question-info">
+                            <div class="question-text">【第2题】计算：45×23的结果是？</div>
+                            <div class="question-stats">
+                                <span class="error-rate-text">50% 学生答错</span> | 涉及20人
+                            </div>
+                            <div class="error-tag">知识点：计算基本功</div>
+                        </div>
+                        <div class="question-actions">
+                            <input type="checkbox" class="checkbox question-checkbox" data-id="q2">
+                            <button class="btn-detail" data-target="q2">查看详情</button>
+                        </div>
+                    </div>
+                    <!-- 第3题 -->
+                    <div class="question-card border-light-red" data-id="q3" data-knowledge="质数概念">
+                        <div class="question-info">
+                            <div class="question-text">【第3题】下列哪个是质数？</div>
+                            <div class="question-stats">
+                                <span class="error-rate-text">45% 学生答错</span> | 涉及18人
+                            </div>
+                            <div class="error-tag">知识点：概念理解</div>
+                        </div>
+                        <div class="question-actions">
+                            <input type="checkbox" class="checkbox question-checkbox" data-id="q3">
+                            <button class="btn-detail" data-target="q3">查看详情</button>
+                        </div>
+                    </div>
+                    <!-- 第6题 -->
+                    <div class="question-card border-light-red" data-id="q6" data-knowledge="三位数除法">
+                        <div class="question-info">
+                            <div class="question-text">【第6题】计算：125÷5的结果是？</div>
+                            <div class="question-stats">
+                                <span class="error-rate-text">40% 学生答错</span> | 涉及16人
+                            </div>
+                            <div class="error-tag">知识点：计算基本功</div>
+                        </div>
+                        <div class="question-actions">
+                            <input type="checkbox" class="checkbox question-checkbox" data-id="q6">
+                            <button class="btn-detail" data-target="q6">查看详情</button>
+                        </div>
+                    </div>
+                    <!-- 第9题 -->
+                    <div class="question-card border-light-red" data-id="q9" data-knowledge="三角形内角和">
+                        <div class="question-info">
+                            <div class="question-text">【第9题】三角形的内角和是多少度？</div>
+                            <div class="question-stats">
+                                <span class="error-rate-text">30% 学生答错</span> | 涉及12人
+                            </div>
+                            <div class="error-tag">知识点：概念理解</div>
+                        </div>
+                        <div class="question-actions">
+                            <input type="checkbox" class="checkbox question-checkbox" data-id="q9">
+                            <button class="btn-detail" data-target="q9">查看详情</button>
+                        </div>
+                    </div>
+                    <!-- 第10题 -->
+                    <div class="question-card border-light-red" data-id="q10" data-knowledge="两位数减法">
+                        <div class="question-info">
+                            <div class="question-text">【第10题】计算：98-49的结果是？</div>
+                            <div class="question-stats">
+                                <span class="error-rate-text">35% 学生答错</span> | 涉及14人
+                            </div>
+                            <div class="error-tag">知识点：计算基本功</div>
+                        </div>
+                        <div class="question-actions">
+                            <input type="checkbox" class="checkbox question-checkbox" data-id="q10">
+                            <button class="btn-detail" data-target="q10">查看详情</button>
+                        </div>
+                    </div>
+                    <!-- 第11题 -->
+                    <div class="question-card border-light-red" data-id="q11" data-knowledge="圆的面积公式">
+                        <div class="question-info">
+                            <div class="question-text">【第11题】圆的面积公式是什么？</div>
+                            <div class="question-stats">
+                                <span class="error-rate-text">45% 学生答错</span> | 涉及18人
+                            </div>
+                            <div class="error-tag">知识点：公式记忆</div>
+                        </div>
+                        <div class="question-actions">
+                            <input type="checkbox" class="checkbox question-checkbox" data-id="q11">
+                            <button class="btn-detail" data-target="q11">查看详情</button>
+                        </div>
+                    </div>
+                    <!-- 第13题 -->
+                    <div class="question-card border-light-red" data-id="q13" data-knowledge="小数乘法">
+                        <div class="question-info">
+                            <div class="question-text">【第13题】计算：3.14×2的结果是？</div>
+                            <div class="question-stats">
+                                <span class="error-rate-text">35% 学生答错</span> | 涉及14人
+                            </div>
+                            <div class="error-tag">知识点：计算基本功</div>
+                        </div>
+                        <div class="question-actions">
+                            <input type="checkbox" class="checkbox question-checkbox" data-id="q13">
+                            <button class="btn-detail" data-target="q13">查看详情</button>
+                        </div>
+                    </div>
+                    <!-- 第14题 -->
+                    <div class="question-card border-light-red" data-id="q14" data-knowledge="闰年判断">
+                        <div class="question-info">
+                            <div class="question-text">【第14题】下列哪个是闰年？</div>
+                            <div class="question-stats">
+                                <span class="error-rate-text">40% 学生答错</span> | 涉及16人
+                            </div>
+                            <div class="error-tag">知识点：概念理解</div>
+                        </div>
+                        <div class="question-actions">
+                            <input type="checkbox" class="checkbox question-checkbox" data-id="q14">
+                            <button class="btn-detail" data-target="q14">查看详情</button>
+                        </div>
+                    </div>
+                    <!-- 第16题 -->
+                    <div class="question-card border-light-red" data-id="q16" data-knowledge="分数加法">
+                        <div class="question-info">
+                            <div class="question-text">【第16题】计算：2/3 + 1/6的结果是？</div>
+                            <div class="question-stats">
+                                <span class="error-rate-text">45% 学生答错</span> | 涉及18人
+                            </div>
+                            <div class="error-tag">知识点：计算基本功</div>
+                        </div>
+                        <div class="question-actions">
+                            <input type="checkbox" class="checkbox question-checkbox" data-id="q16">
+                            <button class="btn-detail" data-target="q16">查看详情</button>
+                        </div>
+                    </div>
+                    <!-- 第17题 -->
+                    <div class="question-card border-light-red" data-id="q17" data-knowledge="小数乘法">
+                        <div class="question-info">
+                            <div class="question-text">【第17题】计算：1.2×0.5的结果是？</div>
+                            <div class="question-stats">
+                                <span class="error-rate-text">40% 学生答错</span> | 涉及16人
+                            </div>
+                            <div class="error-tag">知识点：计算基本功</div>
+                        </div>
+                        <div class="question-actions">
+                            <input type="checkbox" class="checkbox question-checkbox" data-id="q17">
+                            <button class="btn-detail" data-target="q17">查看详情</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 易错知识点TOP N -->
+            <div class="error-knowledge-section">
+                <div class="section-header">
+                    <div class="section-title">易错知识点TOP5</div>
+                </div>
+                <div class="knowledge-cards" id="knowledge-list">
+                    <!-- 知识点1 -->
+                    <div class="knowledge-card" data-knowledge="两位数进位加法">
+                        <div class="knowledge-name">两位数进位加法</div>
+                        <div class="knowledge-desc">涉及2道题</div>
+                        <div class="knowledge-rate">平均错误率68%</div>
+                        <div class="filter-text">点击筛选</div>
+                    </div>
+                    <!-- 知识点2 -->
+                    <div class="knowledge-card" data-knowledge="合数与偶数概念">
+                        <div class="knowledge-name">合数与偶数概念</div>
+                        <div class="knowledge-desc">涉及1道题</div>
+                        <div class="knowledge-rate">平均错误率58%</div>
+                        <div class="filter-text">点击筛选</div>
+                    </div>
+                    <!-- 知识点3 -->
+                    <div class="knowledge-card" data-knowledge="两位数退位减法">
+                        <div class="knowledge-name">两位数退位减法</div>
+                        <div class="knowledge-desc">涉及1道题</div>
+                        <div class="knowledge-rate">平均错误率45%</div>
+                        <div class="filter-text">点击筛选</div>
+                    </div>
+                    <!-- 知识点4 -->
+                    <div class="knowledge-card" data-knowledge="概率基础">
+                        <div class="knowledge-name">概率基础</div>
+                        <div class="knowledge-desc">涉及1道题</div>
+                        <div class="knowledge-rate">平均错误率40%</div>
+                        <div class="filter-text">点击筛选</div>
+                    </div>
+                    <!-- 知识点5 -->
+                    <div class="knowledge-card" data-knowledge="统计图解读">
+                        <div class="knowledge-name">统计图解读</div>
+                        <div class="knowledge-desc">涉及1道题</div>
+                        <div class="knowledge-rate">平均错误率35%</div>
+                        <div class="filter-text">点击筛选</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 底部固定操作栏 -->
+        <div class="bottom-bar">
+            <div class="bottom-count" id="bottom-selected-count">已勾选：0题</div>
+            <div class="bottom-actions">
+                <button class="btn btn-blue" id="select-top5">勾选高错TOP5题</button>
+                <button class="btn btn-blue" id="select-all">全选错题</button>
+                <button class="btn btn-blue" id="generate-homework">布置错题巩固作业</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 错题详情弹窗 -->
+    <div class="modal" id="detail-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">题目错误详情</div>
+                <button class="close-btn" id="close-detail-modal">×</button>
+            </div>
+            <div class="modal-body" id="detail-modal-body">
+                <!-- 动态填充内容 -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-gray" id="close-detail-btn">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 作业生成弹窗 -->
+    <div class="modal" id="generate-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">布置错题巩固作业</div>
+                <button class="close-btn" id="close-generate-modal">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="radio-group">
+                    <div class="radio-item">
+                        <input type="radio" name="generate-type" class="radio" checked id="type1">
+                        <label for="type1" class="radio-label">原题重做：直接布置选中的原题，适合强化纠错</label>
+                    </div>
+                    <div class="radio-item">
+                        <input type="radio" name="generate-type" class="radio" id="type2">
+                        <label for="type2" class="radio-label">举一反三：系统相似题推荐</label>
+                    </div>
+                    <div class="radio-item">
+                        <input type="radio" name="generate-type" class="radio" id="type3">
+                        <label for="type3" class="radio-label">AI变题：AI根据当前考核内容生成内核相似的变题，考察学生掌握程度</label>
+                    </div>
+                </div>
+                <!-- AI变题类型选择 -->
+                <div class="form-item" id="ai-variation-options" style="display: none; margin-top: 10px; padding-left: 20px;">
+                    <div style="display: flex; flex-wrap: wrap; gap: 15px;">
+                        <div style="display: flex; align-items: center; gap: 5px;">
+                            <input type="radio" name="ai-variation-type" class="radio" checked id="variation1">
+                            <label for="variation1" style="font-size: 12px;">题型转换</label>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 5px;">
+                            <input type="radio" name="ai-variation-type" class="radio" id="variation2">
+                            <label for="variation2" style="font-size: 12px;">情境重构</label>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 5px;">
+                            <input type="radio" name="ai-variation-type" class="radio" id="variation3">
+                            <label for="variation3" style="font-size: 12px;">数值 / 素材替换</label>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 5px;">
+                            <input type="radio" name="ai-variation-type" class="radio" id="variation4">
+                            <label for="variation4" style="font-size: 12px;">知识点融合</label>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 5px;">
+                            <input type="radio" name="ai-variation-type" class="radio" id="variation5">
+                            <label for="variation5" style="font-size: 12px;">条件变式</label>
+                        </div>
+                    </div>
+                </div>
+                <!-- 已选择题目信息 -->
+                <div class="form-item">
+                    <div class="form-label">已选择题目信息</div>
+                    <div style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; background: #f9f9f9;">
+                        <div style="margin-bottom: 8px;">
+                            <span style="font-size: 14px; color: #666;">总数：</span>
+                            <span id="selectedQuestionCount" style="font-size: 14px; color: #333; font-weight: 500;">0</span>
+                        </div>
+                        <div style="font-size: 14px; color: #666;">
+                            类型：<span id="selectedQuestionTypes" style="color: #333;">暂无选择</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- 作业截止提交时间 -->
+                <div class="form-item">
+                    <div class="form-label">作业截止提交时间</div>
+                    <input type="datetime-local" id="homeworkDeadline" value="2026-01-30T23:59" class="form-input">
+                </div>
+                <!-- 总分 -->
+                <div class="form-item">
+                    <div class="form-label">总分</div>
+                    <input type="number" id="homeworkTotalScore" value="100" min="1" max="100" class="form-input">
+                </div>
+                <div class="form-item">
+                    <div class="form-label">布置范围</div>
+                    <div style="border: 1px solid #ddd; border-radius: 4px; overflow: hidden;">
+                        <!-- 班级Tab选择 -->
+                        <div style="display: flex; gap: 10px; padding: 8px 12px; background: #f5f5f5; border-bottom: 1px solid #ddd; overflow-x: auto;">
+                            <button style="padding: 4px 12px; border: 2px solid #4285f4; border-radius: 4px; background: #4285f4; color: white; font-size: 13px; cursor: pointer; font-weight: bold;">初一班</button>
+                            <button style="padding: 4px 12px; border: 2px solid #d9d9d9; border-radius: 4px; background: white; color: #333; font-size: 13px; cursor: pointer; font-weight: bold;">五年级8班</button>
+                            <button style="padding: 4px 12px; border: 2px solid #d9d9d9; border-radius: 4px; background: white; color: #333; font-size: 13px; cursor: pointer; font-weight: bold;">六年级一班</button>
+                            <button style="padding: 4px 12px; border: 2px solid #d9d9d9; border-radius: 4px; background: white; color: #333; font-size: 13px; cursor: pointer; font-weight: bold;">同学号班</button>
+                            <button style="padding: 4px 12px; border: 2px solid #d9d9d9; border-radius: 4px; background: white; color: #333; font-size: 13px; cursor: pointer; font-weight: bold;">测试班</button>
+                            <button style="padding: 4px 12px; border: 2px solid #d9d9d9; border-radius: 4px; background: white; color: #333; font-size: 13px; cursor: pointer; font-weight: bold;">三年级3班</button>
+                            <button style="padding: 4px 12px; border: 2px solid #d9d9d9; border-radius: 4px; background: #e6f7ff; color: #4285f4; font-size: 13px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 5px;">
+                                <span>📋</span> 添加学生
+                            </button>
+                        </div>
+                        <!-- 已选中学生显示 -->
+                        <div style="padding: 12px; min-height: 60px; background: white;">
+                            <div style="font-size: 14px; color: #333;">李2、李3</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-gray" id="cancel-generate">取消</button>
+                <button class="btn btn-blue" id="confirm-generate">确认布置</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 1. Tab切换功能
+        const tabItems = document.querySelectorAll('.tab-item');
+        const tabContents = document.querySelectorAll('.tab-content');
+        const bottomBar = document.querySelector('.bottom-bar');
+        
+        // 控制底部固定栏显示
+        function toggleBottomBar(tabId) {
+            if (tabId === 'error-analysis') {
+                bottomBar.style.display = 'flex';
+            } else {
+                bottomBar.style.display = 'none';
+            }
+        }
+        
+        tabItems.forEach(item => {
+            item.addEventListener('click', () => {
+                // 移除所有active
+                tabItems.forEach(tab => tab.classList.remove('active'));
+                tabContents.forEach(content => content.classList.remove('active'));
+                // 添加当前active
+                item.classList.add('active');
+                const tabId = item.getAttribute('data-tab');
+                document.getElementById(tabId).classList.add('active');
+                // 控制底部固定栏显示
+                toggleBottomBar(tabId);
+            });
+        });
+        
+        // 初始化底部固定栏显示
+        toggleBottomBar('overview');
+        
+        // 初始化题目数量显示
+        function initQuestionDisplay() {
+            const questionNumSelect = document.getElementById('question-num-select');
+            const defaultShowNum = parseInt(questionNumSelect.value);
+            const allQuestionCards = document.querySelectorAll('.question-card');
+            
+            // 只显示默认数量的题目
+            for (let i = 0; i < allQuestionCards.length; i++) {
+                if (i < defaultShowNum) {
+                    allQuestionCards[i].style.display = 'flex';
+                } else {
+                    allQuestionCards[i].style.display = 'none';
+                }
+            }
+        }
+        
+        // 调用初始化函数
+        initQuestionDisplay();
+
+        // 2. 错题勾选功能
+        const questionCheckboxes = document.querySelectorAll('.question-checkbox');
+        const bottomSelectedCountEl = document.getElementById('bottom-selected-count');
+        let selectedCount = 0;
+
+        // 更新勾选数量
+        function updateSelectedCount() {
+            bottomSelectedCountEl.textContent = `已勾选：${selectedCount}题`;
+        }
+
+        // 单个勾选事件
+        questionCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', () => {
+                const questionCard = document.querySelector(`.question-card[data-id="${checkbox.getAttribute('data-id')}"]`);
+                if (checkbox.checked) {
+                    selectedCount++;
+                    questionCard.classList.add('highlight');
+                } else {
+                    selectedCount--;
+                    questionCard.classList.remove('highlight');
+                }
+                updateSelectedCount();
+            });
+        });
+
+        // 勾选高错TOP5题
+        document.getElementById('select-top5').addEventListener('click', () => {
+            // 清空现有勾选
+            questionCheckboxes.forEach(checkbox => {
+                checkbox.checked = false;
+                document.querySelector(`.question-card[data-id="${checkbox.getAttribute('data-id')}"]`).classList.remove('highlight');
+            });
+            selectedCount = 0;
+            // 勾选前5题
+            const top5Checkboxes = Array.from(questionCheckboxes).slice(0, 5);
+            top5Checkboxes.forEach(checkbox => {
+                checkbox.checked = true;
+                document.querySelector(`.question-card[data-id="${checkbox.getAttribute('data-id')}"]`).classList.add('highlight');
+                selectedCount++;
+            });
+            updateSelectedCount();
+        });
+
+        // 全选/取消全选功能
+        const selectAllBtn = document.getElementById('select-all');
+        
+        // 更新全选按钮状态
+        function updateSelectAllBtn() {
+            const isAllChecked = Array.from(questionCheckboxes).every(checkbox => checkbox.checked);
+            if (isAllChecked) {
+                selectAllBtn.textContent = '取消全选';
+                selectAllBtn.classList.remove('btn-blue');
+                selectAllBtn.classList.add('btn-red');
+            } else {
+                selectAllBtn.textContent = '全选错题';
+                selectAllBtn.classList.remove('btn-red');
+                selectAllBtn.classList.add('btn-blue');
+            }
+        }
+        
+        // 全选/取消全选点击事件
+        selectAllBtn.addEventListener('click', () => {
+            const isAllChecked = Array.from(questionCheckboxes).every(checkbox => checkbox.checked);
+            selectedCount = 0;
+            questionCheckboxes.forEach(checkbox => {
+                checkbox.checked = !isAllChecked;
+                const questionCard = document.querySelector(`.question-card[data-id="${checkbox.getAttribute('data-id')}"]`);
+                if (!isAllChecked) {
+                    questionCard.classList.add('highlight');
+                    selectedCount++;
+                } else {
+                    questionCard.classList.remove('highlight');
+                }
+            });
+            updateSelectedCount();
+            updateSelectAllBtn();
+        });
+        
+        // 单个题目勾选时更新全选按钮状态
+        questionCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', () => {
+                updateSelectAllBtn();
+            });
+        });
+
+
+
+        // 3. 查看详情弹窗
+        const detailBtns = document.querySelectorAll('.btn-detail');
+        const detailModal = document.getElementById('detail-modal');
+        const detailModalBody = document.getElementById('detail-modal-body');
+        const closeDetailModal = document.getElementById('close-detail-modal');
+        const closeDetailBtn = document.getElementById('close-detail-btn');
+        
+        // 4. 折叠功能实现
+        const analysisTitles = document.querySelectorAll('.analysis-title');
+        analysisTitles.forEach(title => {
+            title.addEventListener('click', () => {
+                const analysisItem = title.closest('.analysis-item');
+                const collapseBtn = title.querySelector('.collapse-btn');
+                
+                if (analysisItem.classList.contains('analysis-item--collapsed')) {
+                    // 展开
+                    analysisItem.classList.remove('analysis-item--collapsed');
+                    collapseBtn.textContent = '▼';
+                } else {
+                    // 折叠
+                    analysisItem.classList.add('analysis-item--collapsed');
+                    collapseBtn.textContent = '▶';
+                }
+            });
+        });
+        
+        // 单独处理折叠按钮的点击事件
+        const collapseBtns = document.querySelectorAll('.collapse-btn');
+        collapseBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation(); // 阻止事件冒泡
+                const analysisItem = btn.closest('.analysis-item');
+                
+                if (analysisItem.classList.contains('analysis-item--collapsed')) {
+                    // 展开
+                    analysisItem.classList.remove('analysis-item--collapsed');
+                    btn.textContent = '▼';
+                } else {
+                    // 折叠
+                    analysisItem.classList.add('analysis-item--collapsed');
+                    btn.textContent = '▶';
+                }
+            });
+        });
+        
+        // 5. 报告生成与重新分析功能实现
+        const analysisDateEl = document.getElementById('analysis-date');
+        const analysisEmptyEl = document.getElementById('analysis-empty');
+        const analysisContentEl = document.getElementById('analysis-content');
+        
+        // 分层分析报告数据（模拟）
+        const layerAnalysisData = {
+            'all': {
+                overall: '本次作业参与作答人数为27人，总题数20道，平均错误率为32%。从整体数据来看，本次作业的难度适中，但仍有较大的提升空间。',
+                knowledge: [
+                    { name: '两位数进位加法', rate: '72%' },
+                    { name: '合数与偶数概念', rate: '58%' },
+                    { name: '统计与概率基础', rate: '45%' },
+                    { name: '数学逻辑推理', rate: '38%' }
+                ],
+                errorTypes: [
+                    '概念混淆型：如对合数与偶数的概念理解不清晰，导致判断错误',
+                    '计算失误型：如两位数进位加法中忘记进位，导致结果错误',
+                    '逻辑推理型：如在统计与概率问题中，无法正确分析数据关系',
+                    '粗心大意型：如题目条件看错、答案写错位置等低级错误'
+                ],
+                errorReasons: [
+                    '基础知识不扎实：部分学生对核心概念的理解不够深入，导致在应用时出现错误。',
+                    '解题方法单一：学生在面对不同类型的题目时，缺乏灵活的解题思路和方法。',
+                    '缺乏足够练习：从错误率来看，部分知识点的练习量不足，导致学生掌握不牢固。',
+                    '考试技巧欠缺：部分学生在答题时缺乏时间管理和检查习惯，导致不必要的失误。'
+                ],
+                suggestions: {
+                    teacher: [
+                        '加强两位数进位加法的专项训练，重点关注进位规则的掌握',
+                        '组织合数与偶数概念的专题复习，通过对比和实例帮助学生理解',
+                        '设计多样化的统计与概率问题，提高学生的应用能力',
+                        '关注学习困难学生，提供个性化的辅导和练习'
+                    ],
+                    student: [
+                        '重视基础知识的学习，确保核心概念的理解和掌握',
+                        '多做针对性练习，尤其是自己容易出错的知识点',
+                        '建立错题本，定期复习和总结错误原因',
+                        '提高答题速度和准确率，养成良好的检查习惯'
+                    ]
+                }
+            },
+            'challenge': {
+                overall: '挑战层学生参与作答人数为3人，总题数20道，平均错误率为8%。从整体数据来看，这部分学生基础知识扎实，解题能力强。',
+                knowledge: [
+                    { name: '数学逻辑推理', rate: '15%' },
+                    { name: '统计与概率基础', rate: '10%' },
+                    { name: '合数与偶数概念', rate: '5%' },
+                    { name: '两位数进位加法', rate: '0%' }
+                ],
+                errorTypes: [
+                    '逻辑推理型：在复杂的数学逻辑问题中偶有失误',
+                    '粗心大意型：在简单题目上偶尔出现低级错误',
+                    '概念混淆型：对一些边缘概念的理解不够深入',
+                    '计算失误型：在复杂计算中偶尔出现错误'
+                ],
+                errorReasons: [
+                    '缺乏挑战性题目：现有题目对这部分学生来说难度不足',
+                    '解题速度过快：部分学生为了追求速度而忽略了细节',
+                    '知识拓展不够：对课本外的相关知识了解不足',
+                    '缺乏竞争机制：没有足够的动力去追求更高的目标'
+                ],
+                suggestions: {
+                    teacher: [
+                        '为这部分学生提供更具挑战性的题目，拓展知识深度',
+                        '组织数学竞赛或小组讨论，激发学习兴趣',
+                        '引导学生进行知识拓展，培养自主学习能力',
+                        '建立学习档案，跟踪学生的成长轨迹'
+                    ],
+                    student: [
+                        '主动寻求更具挑战性的题目，不断突破自我',
+                        '注重解题过程的严谨性，避免粗心大意',
+                        '拓展知识面，关注数学在实际生活中的应用',
+                        '与同学交流学习经验，共同进步'
+                    ]
+                }
+            },
+            'advanced': {
+                overall: '拔高层学生参与作答人数为3人，总题数20道，平均错误率为18%。从整体数据来看，这部分学生基础知识较好，但在一些复杂问题上仍有提升空间。',
+                knowledge: [
+                    { name: '数学逻辑推理', rate: '25%' },
+                    { name: '统计与概率基础', rate: '20%' },
+                    { name: '合数与偶数概念', rate: '15%' },
+                    { name: '两位数进位加法', rate: '10%' }
+                ],
+                errorTypes: [
+                    '逻辑推理型：在复杂的数学逻辑问题中容易出错',
+                    '概念混淆型：对一些相似概念的区分不够清晰',
+                    '计算失误型：在复杂计算中偶尔出现错误',
+                    '粗心大意型：在简单题目上偶尔出现低级错误'
+                ],
+                errorReasons: [
+                    '知识掌握不够扎实：对部分知识点的理解停留在表面',
+                    '解题方法不够灵活：面对新题型时缺乏应变能力',
+                    '练习量不足：对一些重难点的练习不够充分',
+                    '学习态度不够严谨：在学习过程中存在浮躁情绪'
+                ],
+                suggestions: {
+                    teacher: [
+                        '加强对重难点知识的讲解，确保学生真正理解',
+                        '引导学生掌握多样化的解题方法，提高应变能力',
+                        '为学生提供有针对性的练习，巩固薄弱环节',
+                        '培养学生严谨的学习态度，注重细节处理'
+                    ],
+                    student: [
+                        '加强对基础知识的复习，确保掌握扎实',
+                        '主动总结解题方法，提高解题的灵活性',
+                        '增加练习量，尤其是针对自己的薄弱环节',
+                        '培养严谨的学习态度，注重解题过程的细节'
+                    ]
+                }
+            },
+            'good': {
+                overall: '良好层学生参与作答人数为3人，总题数20道，平均错误率为30%。从整体数据来看，这部分学生基础知识一般，需要加强练习和巩固。',
+                knowledge: [
+                    { name: '合数与偶数概念', rate: '40%' },
+                    { name: '统计与概率基础', rate: '35%' },
+                    { name: '数学逻辑推理', rate: '30%' },
+                    { name: '两位数进位加法', rate: '25%' }
+                ],
+                errorTypes: [
+                    '概念混淆型：对数学概念的理解不够清晰',
+                    '计算失误型：在计算过程中容易出现错误',
+                    '逻辑推理型：在解决逻辑问题时缺乏思路',
+                    '粗心大意型：在答题过程中经常出现低级错误'
+                ],
+                errorReasons: [
+                    '基础知识不扎实：对核心概念的理解不够深入',
+                    '练习量不足：缺乏足够的练习来巩固所学知识',
+                    '学习方法不当：没有掌握有效的学习方法',
+                    '学习态度不够端正：缺乏学习的主动性和积极性'
+                ],
+                suggestions: {
+                    teacher: [
+                        '加强基础知识的讲解和巩固，确保学生理解核心概念',
+                        '为学生提供足够的练习机会，巩固所学知识',
+                        '指导学生掌握有效的学习方法，提高学习效率',
+                        '激发学生的学习兴趣，培养学习的主动性'
+                    ],
+                    student: [
+                        '重视基础知识的学习，确保理解核心概念',
+                        '增加练习量，通过反复练习巩固所学知识',
+                        '主动寻求适合自己的学习方法，提高学习效率',
+                        '培养学习的主动性和积极性，树立学习目标'
+                    ]
+                }
+            },
+            'improve': {
+                overall: '提升层学生参与作答人数为3人，总题数20道，平均错误率为45%。从整体数据来看，这部分学生基础知识薄弱，需要加强基础训练。',
+                knowledge: [
+                    { name: '两位数进位加法', rate: '60%' },
+                    { name: '合数与偶数概念', rate: '55%' },
+                    { name: '统计与概率基础', rate: '45%' },
+                    { name: '数学逻辑推理', rate: '40%' }
+                ],
+                errorTypes: [
+                    '计算失误型：在基本计算中经常出现错误',
+                    '概念混淆型：对数学概念的理解模糊',
+                    '逻辑推理型：在解决问题时缺乏逻辑思维能力',
+                    '粗心大意型：在答题过程中频繁出现低级错误'
+                ],
+                errorReasons: [
+                    '基础知识严重不足：对基本概念和规则的理解不够',
+                    '学习方法不当：没有掌握正确的学习方法',
+                    '练习量严重不足：缺乏足够的练习来巩固所学知识',
+                    '学习态度不端正：缺乏学习的积极性和主动性'
+                ],
+                suggestions: {
+                    teacher: [
+                        '从基础知识入手，逐步建立学生的知识体系',
+                        '为学生提供个性化的学习计划，针对性地解决问题',
+                        '增加基础练习的比例，确保学生掌握基本技能',
+                        '与家长沟通，共同关注学生的学习情况'
+                    ],
+                    student: [
+                        '重视基础知识的学习，从简单题目开始逐步提高',
+                        '主动寻求老师和同学的帮助，及时解决学习中的问题',
+                        '增加练习量，通过反复练习巩固基础知识',
+                        '培养学习兴趣，树立学习信心'
+                    ]
+                }
+            },
+            'basic': {
+                overall: '基础层学生参与作答人数为5人，总题数20道，平均错误率为65%。从整体数据来看，这部分学生基础知识非常薄弱，需要从最基本的概念开始学习。',
+                knowledge: [
+                    { name: '两位数进位加法', rate: '85%' },
+                    { name: '合数与偶数概念', rate: '75%' },
+                    { name: '统计与概率基础', rate: '65%' },
+                    { name: '数学逻辑推理', rate: '55%' }
+                ],
+                errorTypes: [
+                    '计算失误型：在基本计算中频繁出现错误',
+                    '概念混淆型：对数学概念的理解几乎空白',
+                    '逻辑推理型：在解决问题时缺乏基本的逻辑思维能力',
+                    '粗心大意型：在答题过程中普遍出现低级错误'
+                ],
+                errorReasons: [
+                    '基础知识几乎空白：对基本概念和规则完全不理解',
+                    '学习方法完全不当：没有掌握任何有效的学习方法',
+                    '练习量几乎为零：缺乏最基本的练习',
+                    '学习态度极其不端正：完全没有学习的积极性和主动性'
+                ],
+                suggestions: {
+                    teacher: [
+                        '从最基本的概念开始，重新建立学生的知识体系',
+                        '为学生提供一对一的辅导，针对性地解决问题',
+                        '设计简单有趣的教学活动，激发学生的学习兴趣',
+                        '与家长密切沟通，共同制定学生的学习计划'
+                    ],
+                    student: [
+                        '从最基本的概念开始学习，逐步建立知识体系',
+                        '积极配合老师的教学安排，按时完成作业',
+                        '增加基础练习的时间，通过反复练习巩固基础知识',
+                        '培养学习兴趣，树立学习信心，相信自己能够进步'
+                    ]
+                }
+            }
+        };
+        
+        // 生成分析报告
+        function generateAnalysisReport(layer = 'all') {
+            const analysisDateEl = document.getElementById('analysis-date');
+            const analysisEmptyEl = document.getElementById('analysis-empty');
+            const analysisContentEl = document.getElementById('analysis-content');
+            
+            if (analysisDateEl && analysisEmptyEl && analysisContentEl) {
+                // 更新分析时间为当前时间
+                const now = new Date();
+                const formattedDate = now.getFullYear() + '-' + 
+                    String(now.getMonth() + 1).padStart(2, '0') + '-' + 
+                    String(now.getDate()).padStart(2, '0');
+                const formattedTime = String(now.getHours()).padStart(2, '0') + ':' + 
+                    String(now.getMinutes()).padStart(2, '0') + ':' +
+                    String(now.getSeconds()).padStart(2, '0');
+                
+                analysisDateEl.textContent = `分析时间：${formattedDate} ${formattedTime}`;
+                analysisDateEl.style.display = 'block';
+                
+                // 获取对应层次的分析数据
+                const analysisData = layerAnalysisData[layer] || layerAnalysisData['all'];
+                
+                // 构建报告内容
+                let knowledgeHtml = '';
+                analysisData.knowledge.forEach(item => {
+                    knowledgeHtml += `
+                        <div class="knowledge-item">
+                            <span class="knowledge-name">${item.name}</span>
+                            <span class="knowledge-rate">${item.rate}</span>
+                        </div>
+                    `;
+                });
+                
+                let errorTypesHtml = '';
+                analysisData.errorTypes.forEach(item => {
+                    errorTypesHtml += `<li>${item}</li>`;
+                });
+                
+                let errorReasonsHtml = '';
+                analysisData.errorReasons.forEach(item => {
+                    errorReasonsHtml += `<p>${item}</p>`;
+                });
+                
+                let teacherSuggestionsHtml = '';
+                analysisData.suggestions.teacher.forEach(item => {
+                    teacherSuggestionsHtml += `<li>${item}</li>`;
+                });
+                
+                let studentSuggestionsHtml = '';
+                analysisData.suggestions.student.forEach(item => {
+                    studentSuggestionsHtml += `<li>${item}</li>`;
+                });
+                
+                // 更新报告内容
+                analysisContentEl.innerHTML = `
+                    <!-- 整体错误率分析 - 默认展开 -->
+                    <div class="analysis-item">
+                        <div class="analysis-title">
+                            <h4>一、整体错误率分析</h4>
+                            <span class="collapse-btn collapse-btn--hidden">▼</span>
+                        </div>
+                        <div class="analysis-body">
+                            <p>${analysisData.overall}</p>
+                        </div>
+                    </div>
+                    
+                    <!-- 高频错误知识点分布 - 默认展开 -->
+                    <div class="analysis-item">
+                        <div class="analysis-title">
+                            <h4>二、高频错误知识点分布</h4>
+                            <span class="collapse-btn collapse-btn--hidden">▼</span>
+                        </div>
+                        <div class="analysis-body">
+                            <div class="knowledge-distribution">
+                                ${knowledgeHtml}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 典型错误类型归纳 - 默认折叠 -->
+                    <div class="analysis-item analysis-item--collapsed">
+                        <div class="analysis-title">
+                            <h4>三、典型错误类型归纳</h4>
+                            <span class="collapse-btn">▶</span>
+                        </div>
+                        <div class="analysis-body">
+                            <ul class="error-types">
+                                ${errorTypesHtml}
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <!-- 学生常见错误原因解析 - 默认折叠 -->
+                    <div class="analysis-item analysis-item--collapsed">
+                        <div class="analysis-title">
+                            <h4>四、学生常见错误原因解析</h4>
+                            <span class="collapse-btn">▶</span>
+                        </div>
+                        <div class="analysis-body">
+                            ${errorReasonsHtml}
+                        </div>
+                    </div>
+                    
+                    <!-- 针对性的学习建议 - 默认折叠 -->
+                    <div class="analysis-item analysis-item--collapsed">
+                        <div class="analysis-title">
+                            <h4>五、针对性的学习建议</h4>
+                            <span class="collapse-btn">▶</span>
+                        </div>
+                        <div class="analysis-body">
+                            <div class="learning-suggestions">
+                                <div class="suggestion-item">
+                                    <h5>对教师的建议：</h5>
+                                    <ul>
+                                        ${teacherSuggestionsHtml}
+                                    </ul>
+                                </div>
+                                <div class="suggestion-item">
+                                    <h5>对学生的建议：</h5>
+                                    <ul>
+                                        ${studentSuggestionsHtml}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                // 显示报告内容，隐藏空状态
+                analysisEmptyEl.style.display = 'none';
+                analysisContentEl.style.display = 'block';
+                
+                // 重新绑定折叠功能
+                bindCollapseEvents();
+            }
+        }
+        
+        // 绑定折叠事件
+        function bindCollapseEvents() {
+            const analysisTitles = document.querySelectorAll('.analysis-title');
+            analysisTitles.forEach(title => {
+                title.addEventListener('click', () => {
+                    const analysisItem = title.closest('.analysis-item');
+                    const collapseBtn = title.querySelector('.collapse-btn');
+                    
+                    if (analysisItem.classList.contains('analysis-item--collapsed')) {
+                        // 展开
+                        analysisItem.classList.remove('analysis-item--collapsed');
+                        collapseBtn.textContent = '▼';
+                    } else {
+                        // 折叠
+                        analysisItem.classList.add('analysis-item--collapsed');
+                        collapseBtn.textContent = '▶';
+                    }
+                });
+            });
+            
+            // 单独处理折叠按钮的点击事件
+            const collapseBtns = document.querySelectorAll('.collapse-btn');
+            collapseBtns.forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation(); // 阻止事件冒泡
+                    const analysisItem = btn.closest('.analysis-item');
+                    
+                    if (analysisItem.classList.contains('analysis-item--collapsed')) {
+                        // 展开
+                        analysisItem.classList.remove('analysis-item--collapsed');
+                        btn.textContent = '▼';
+                    } else {
+                        // 折叠
+                        analysisItem.classList.add('analysis-item--collapsed');
+                        btn.textContent = '▶';
+                    }
+                });
+            });
+        }
+        
+        // 进入页面后自动生成报告
+        window.addEventListener('load', () => {
+            // 延迟一点时间，模拟生成过程
+            setTimeout(() => {
+                generateAnalysisReport();
+            }, 500);
+        });
+        
+        // AI变题类型选择功能
+        const generateTypeRadios = document.querySelectorAll('input[name="generate-type"]');
+        const aiVariationOptions = document.getElementById('ai-variation-options');
+        
+        generateTypeRadios.forEach(radio => {
+            radio.addEventListener('change', () => {
+                if (radio.id === 'type3') {
+                    // 选中AI变题时显示类型选择
+                    aiVariationOptions.style.display = 'block';
+                } else {
+                    // 未选中AI变题时隐藏类型选择
+                    aiVariationOptions.style.display = 'none';
+                }
+            });
+        });
+
+        // 错题详情数据
+        // 完整的题目信息数据库
+        const questionData = {
+            q5: {
+                title: '【第5题】计算：28+35的结果是？',
+                options: {
+                    A: '53',
+                    B: '63',
+                    C: '52',
+                    D: '62'
+                },
+                answer: 'B',
+                answerText: '63',
+                errorDistribution: 'A选项（60%，答案53）、B选项（30%，答案63）、其他（10%）'
+            },
+            q8: {
+                title: '【第8题】判断：所有偶数都是合数（）',
+                options: {
+                    A: '√',
+                    B: '×'
+                },
+                answer: 'B',
+                answerText: '×',
+                errorDistribution: '√（80%）、×（20%）'
+            },
+            q12: {
+                title: '【第12题】计算：73-28的结果是？',
+                options: {
+                    A: '45',
+                    B: '55',
+                    C: '47',
+                    D: '57'
+                },
+                answer: 'A',
+                answerText: '45',
+                errorDistribution: 'A选项（60%，答案45）、B选项（25%，答案55）、其他（15%）'
+            },
+            q15: {
+                title: '【第15题】抛硬币10次，正面朝上5次，请问第11次正面朝上的概率是？',
+                options: {
+                    A: '50%',
+                    B: '10%',
+                    C: '60%',
+                    D: '40%'
+                },
+                answer: 'A',
+                answerText: '50%',
+                errorDistribution: 'A选项（70%，答案50%）、B选项（20%，答案10%）、其他（10%）'
+            },
+            q18: {
+                title: '【第18题】根据条形统计图，计算二班比一班多多少人？',
+                options: {
+                    A: '8人',
+                    B: '10人',
+                    C: '5人',
+                    D: '12人'
+                },
+                answer: 'B',
+                answerText: '10人',
+                errorDistribution: 'A选项（65%，答案8人）、B选项（25%，答案10人）、其他（10%）'
+            },
+            q2: {
+                title: '【第2题】计算：45×23的结果是？',
+                options: {
+                    A: '1035',
+                    B: '935',
+                    C: '1045',
+                    D: '945'
+                },
+                answer: 'A',
+                answerText: '1035',
+                errorDistribution: 'A选项（50%，答案1035）、B选项（35%，答案935）、其他（15%）'
+            },
+            q3: {
+                title: '【第3题】下列哪个是质数？',
+                options: {
+                    A: '12',
+                    B: '13',
+                    C: '14',
+                    D: '15'
+                },
+                answer: 'B',
+                answerText: '13',
+                errorDistribution: 'A选项（45%，答案12）、B选项（40%，答案13）、其他（15%）'
+            },
+            q6: {
+                title: '【第6题】计算：125÷5的结果是？',
+                options: {
+                    A: '25',
+                    B: '35',
+                    C: '20',
+                    D: '30'
+                },
+                answer: 'A',
+                answerText: '25',
+                errorDistribution: 'A选项（60%，答案25）、C选项（25%，答案20）、其他（15%）'
+            },
+            q9: {
+                title: '【第9题】三角形的内角和是多少度？',
+                options: {
+                    A: '90度',
+                    B: '180度',
+                    C: '270度',
+                    D: '360度'
+                },
+                answer: 'B',
+                answerText: '180度',
+                errorDistribution: 'A选项（30%，答案90度）、B选项（60%，答案180度）、其他（10%）'
+            },
+            q10: {
+                title: '【第10题】计算：98-49的结果是？',
+                options: {
+                    A: '49',
+                    B: '51',
+                    C: '48',
+                    D: '50'
+                },
+                answer: 'A',
+                answerText: '49',
+                errorDistribution: 'A选项（55%，答案49）、B选项（30%，答案51）、其他（15%）'
+            },
+            q11: {
+                title: '【第11题】圆的面积公式是什么？',
+                options: {
+                    A: 'πr',
+                    B: '2πr',
+                    C: 'πr²',
+                    D: 'π²r'
+                },
+                answer: 'C',
+                answerText: 'πr²',
+                errorDistribution: 'A选项（35%，答案πr）、C选项（55%，答案πr²）、其他（10%）'
+            },
+            q13: {
+                title: '【第13题】计算：3.14×2的结果是？',
+                options: {
+                    A: '6.28',
+                    B: '6.18',
+                    C: '6.24',
+                    D: '6.38'
+                },
+                answer: 'A',
+                answerText: '6.28',
+                errorDistribution: 'A选项（65%，答案6.28）、B选项（25%，答案6.18）、其他（10%）'
+            },
+            q14: {
+                title: '【第14题】下列哪个是闰年？',
+                options: {
+                    A: '2021年',
+                    B: '2022年',
+                    C: '2023年',
+                    D: '2024年'
+                },
+                answer: 'D',
+                answerText: '2024年',
+                errorDistribution: 'A选项（25%，答案2021年）、D选项（60%，答案2024年）、其他（15%）'
+            },
+            q16: {
+                title: '【第16题】计算：2/3 + 1/6的结果是？',
+                options: {
+                    A: '5/6',
+                    B: '3/9',
+                    C: '1/2',
+                    D: '7/6'
+                },
+                answer: 'A',
+                answerText: '5/6',
+                errorDistribution: 'A选项（55%，答案5/6）、C选项（30%，答案1/2）、其他（15%）'
+            },
+            q17: {
+                title: '【第17题】计算：1.2×0.5的结果是？',
+                options: {
+                    A: '0.6',
+                    B: '6',
+                    C: '0.06',
+                    D: '60'
+                },
+                answer: 'A',
+                answerText: '0.6',
+                errorDistribution: 'A选项（60%，答案0.6）、B选项（30%，答案6）、其他（10%）'
+            }
+        };
+
+        detailBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const questionId = btn.getAttribute('data-target');
+                const question = questionData[questionId];
+                
+                if (question) {
+                    // 构建完整的题目详情HTML
+                    let optionsHtml = '';
+                    for (const [key, value] of Object.entries(question.options)) {
+                        optionsHtml += `<div class="option-item">${key}. ${value}</div>`;
+                    }
+                    
+                    const detailHtml = `
+                        <div class="question-detail">
+                            <h4>${question.title}</h4>
+                            <div class="question-options">
+                                ${optionsHtml}
+                            </div>
+                            <div class="question-answer">
+                                <strong>参考答案：</strong>${question.answer}（${question.answerText}）
+                            </div>
+                            <div class="question-error-distribution">
+                                <strong>常见错误答案分布：</strong>${question.errorDistribution}
+                            </div>
+                        </div>
+                    `;
+                    
+                    detailModalBody.innerHTML = detailHtml;
+                } else {
+                    detailModalBody.innerHTML = '<div class="question-detail"><p>暂无错误详情</p></div>';
+                }
+                
+                detailModal.style.display = 'flex';
+            });
+        });
+
+        // 关闭详情弹窗
+        function closeDetail() {
+            detailModal.style.display = 'none';
+        }
+        closeDetailModal.addEventListener('click', closeDetail);
+        closeDetailBtn.addEventListener('click', closeDetail);
+
+        // 4. 知识点筛选功能
+        const knowledgeCards = document.querySelectorAll('.knowledge-card');
+        const questionList = document.getElementById('question-list');
+        const allQuestions = Array.from(document.querySelectorAll('.question-card'));
+        let currentFilter = null;
+        
+        knowledgeCards.forEach(card => {
+            const filterText = card.querySelector('.filter-text');
+            
+            filterText.addEventListener('click', (e) => {
+                e.stopPropagation();
+                
+                const knowledge = card.getAttribute('data-knowledge');
+                
+                if (currentFilter === knowledge) {
+                    // 取消筛选
+                    allQuestions.forEach(question => {
+                        question.style.display = 'flex';
+                    });
+                    card.classList.remove('selected');
+                    filterText.textContent = '点击筛选';
+                    currentFilter = null;
+                } else {
+                    // 应用筛选
+                    allQuestions.forEach(question => {
+                        if (question.getAttribute('data-knowledge') === knowledge) {
+                            question.style.display = 'flex';
+                        } else {
+                            question.style.display = 'none';
+                        }
+                    });
+                    
+                    // 更新所有卡片状态
+                    knowledgeCards.forEach(c => c.classList.remove('selected'));
+                    card.classList.add('selected');
+                    filterText.textContent = '取消筛选';
+                    currentFilter = knowledge;
+                }
+            });
+        });
+
+        // 5. 布置错题巩固作业弹窗
+        const generateBtn = document.getElementById('generate-homework');
+        const generateModal = document.getElementById('generate-modal');
+        const closeGenerateModal = document.getElementById('close-generate-modal');
+        const cancelGenerate = document.getElementById('cancel-generate');
+        const confirmGenerate = document.getElementById('confirm-generate');
+        
+        generateBtn.addEventListener('click', () => {
+            if (selectedCount === 0) {
+                alert('请先勾选需要布置的错题！');
+                return;
+            }
+            
+            // 更新已选择题目信息
+            const selectedQuestionCount = document.getElementById('selectedQuestionCount');
+            const selectedQuestionTypes = document.getElementById('selectedQuestionTypes');
+            
+            if (selectedQuestionCount) {
+                selectedQuestionCount.textContent = selectedCount;
+            }
+            
+            if (selectedQuestionTypes) {
+                // 这里可以根据实际选中的题目类型进行统计
+                // 由于我们没有实际的题目类型数据，这里使用模拟数据
+                selectedQuestionTypes.textContent = '单项选择题 3 题，判断题 2 题';
+            }
+            
+            generateModal.style.display = 'flex';
+        });
+        
+        // 关闭生成弹窗
+        function closeGenerate() {
+            generateModal.style.display = 'none';
+        }
+        closeGenerateModal.addEventListener('click', closeGenerate);
+        cancelGenerate.addEventListener('click', closeGenerate);
+        
+        // 确认布置
+        confirmGenerate.addEventListener('click', () => {
+            closeGenerate();
+            window.location.href = 'preview.html';
+        });
+        
+        // 6. 自定义多选下拉框功能
+        const multiselect = document.getElementById('custom-multiselect');
+        const multiselectHeader = document.getElementById('multiselect-header');
+        const multiselectOptions = document.getElementById('multiselect-options');
+        const selectedTags = document.getElementById('selected-tags');
+        const options = multiselect.querySelectorAll('.option');
+        
+        // 切换下拉框显示/隐藏
+        multiselectHeader.addEventListener('click', () => {
+            multiselectOptions.style.display = multiselectOptions.style.display === 'none' ? 'block' : 'none';
+        });
+        
+        // 处理选项点击
+        options.forEach(option => {
+            option.addEventListener('click', () => {
+                const value = option.getAttribute('data-value');
+                const label = option.getAttribute('data-label');
+                const isSelected = option.getAttribute('data-selected') === 'true';
+                
+                if (isSelected) {
+                    // 取消选中
+                    option.setAttribute('data-selected', 'false');
+                    const tag = selectedTags.querySelector(`[data-value="${value}"]`);
+                    if (tag) {
+                        tag.remove();
+                    }
+                } else {
+                    // 选中
+                    option.setAttribute('data-selected', 'true');
+                    const tag = document.createElement('span');
+                    tag.className = 'tag';
+                    tag.setAttribute('data-value', value);
+                    tag.innerHTML = `${label}<span class="tag-remove">×</span>`;
+                    selectedTags.appendChild(tag);
+                    
+                    // 添加标签移除事件
+                    tag.querySelector('.tag-remove').addEventListener('click', () => {
+                        tag.remove();
+                        option.setAttribute('data-selected', 'false');
+                    });
+                }
+            });
+        });
+        
+        // 点击外部关闭下拉框
+        document.addEventListener('click', (e) => {
+            if (!multiselect.contains(e.target)) {
+                multiselectOptions.style.display = 'none';
+            }
+        });
+        
+        // 初始化标签移除事件
+        selectedTags.querySelectorAll('.tag-remove').forEach(removeBtn => {
+            removeBtn.addEventListener('click', () => {
+                const tag = removeBtn.closest('.tag');
+                const value = tag.getAttribute('data-value');
+                tag.remove();
+                const option = multiselect.querySelector(`[data-value="${value}"]`);
+                if (option) {
+                    option.setAttribute('data-selected', 'false');
+                }
+            });
+        });
+
+        // 7. 切换显示题目数量
+        const questionNumSelect = document.getElementById('question-num-select');
+        
+        questionNumSelect.addEventListener('change', () => {
+            const value = questionNumSelect.value;
+            const allQuestionCards = document.querySelectorAll('.question-card');
+            
+            if (value === 'all') {
+                // 显示全部题目
+                for (let i = 0; i < allQuestionCards.length; i++) {
+                    allQuestionCards[i].style.display = 'flex';
+                }
+                // 更新标题
+                document.querySelector('.high-error-section .section-title').textContent = '高错率题目';
+            } else {
+                // 显示指定数量题目
+                const showNum = parseInt(value);
+                for (let i = 0; i < allQuestionCards.length; i++) {
+                    if (i < showNum) {
+                        allQuestionCards[i].style.display = 'flex';
+                    } else {
+                        allQuestionCards[i].style.display = 'none';
+                    }
+                }
+                // 更新标题
+                document.querySelector('.high-error-section .section-title').textContent = `高错率题目TOP${showNum}`;
+            }
+        });
+        // 8. 学生分层按钮交互功能
+        const layerButtons = document.querySelectorAll('#layer-buttons button');
+        let currentLayer = 'all';
+        
+        // 分层学生数据（模拟）
+        const layerStudents = {
+            'all': [
+                { name: '巢雅婧', id: '328648153', content: '单项选择题20道', score: 0, errors: 0, time: '-', duration: '-', status: '未提交' },
+                { name: '唐锦雯', id: '328648143', content: '单项选择题20道', score: 0, errors: 0, time: '-', duration: '-', status: '未提交' },
+                { name: '潘奕琳', id: '328648161', content: '单项选择题20道', score: 0, errors: 0, time: '-', duration: '-', status: '未提交' },
+                { name: '余诗雨', id: '328648159', content: '单项选择题20道', score: 25, errors: 15, time: '2026-01-23 10:03:31', duration: '00:00:50', status: '查看详情' },
+                { name: '蔡依依', id: '328648157', content: '单项选择题20道', score: 100, errors: 0, time: '2026-01-23 11:55:41', duration: '00:13:59', status: '查看详情' },
+                { name: '杨诗涵', id: '328648125', content: '单项选择题20道', score: 30, errors: 14, time: '2026-01-23 10:45:51', duration: '00:00:46', status: '查看详情' },
+                { name: '黄雨萱', id: '328648149', content: '单项选择题20道', score: 0, errors: 0, time: '-', duration: '-', status: '未提交' },
+                { name: '朱珈琳', id: '328648133', content: '单项选择题20道', score: 0, errors: 0, time: '-', duration: '-', status: '未提交' },
+                { name: '石峻熙', id: '328648168', content: '单项选择题20道', score: 40, errors: 12, time: '2026-01-23 10:27:13', duration: '00:00:34', status: '查看详情' }
+            ],
+            'challenge': [
+                { name: '蔡依依', id: '328648157', content: '单项选择题20道', score: 100, errors: 0, time: '2026-01-23 11:55:41', duration: '00:13:59', status: '查看详情' },
+                { name: '张明辉', id: '328648120', content: '单项选择题20道', score: 95, errors: 1, time: '2026-01-23 09:15:22', duration: '00:08:45', status: '查看详情' },
+                { name: '李思思', id: '328648135', content: '单项选择题20道', score: 92, errors: 2, time: '2026-01-23 10:30:18', duration: '00:10:12', status: '查看详情' }
+            ],
+            'advanced': [
+                { name: '余诗雨', id: '328648159', content: '单项选择题20道', score: 85, errors: 3, time: '2026-01-23 10:03:31', duration: '00:00:50', status: '查看详情' },
+                { name: '王浩然', id: '328648142', content: '单项选择题20道', score: 82, errors: 4, time: '2026-01-23 11:20:33', duration: '00:12:08', status: '查看详情' },
+                { name: '陈雨欣', id: '328648156', content: '单项选择题20道', score: 78, errors: 5, time: '2026-01-23 09:45:19', duration: '00:09:33', status: '查看详情' }
+            ],
+            'good': [
+                { name: '杨诗涵', id: '328648125', content: '单项选择题20道', score: 70, errors: 6, time: '2026-01-23 10:45:51', duration: '00:00:46', status: '查看详情' },
+                { name: '刘子涵', id: '328648148', content: '单项选择题20道', score: 68, errors: 7, time: '2026-01-23 14:22:45', duration: '00:15:22', status: '查看详情' },
+                { name: '赵子轩', id: '328648160', content: '单项选择题20道', score: 65, errors: 8, time: '2026-01-23 13:10:08', duration: '00:11:45', status: '查看详情' }
+            ],
+            'improve': [
+                { name: '石峻熙', id: '328648168', content: '单项选择题20道', score: 55, errors: 9, time: '2026-01-23 10:27:13', duration: '00:00:34', status: '查看详情' },
+                { name: '孙伟杰', id: '328648152', content: '单项选择题20道', score: 52, errors: 10, time: '2026-01-23 15:33:22', duration: '00:18:16', status: '查看详情' },
+                { name: '周雅琪', id: '328648164', content: '单项选择题20道', score: 48, errors: 11, time: '2026-01-23 16:45:39', duration: '00:20:08', status: '查看详情' }
+            ],
+            'basic': [
+                { name: '巢雅婧', id: '328648153', content: '单项选择题20道', score: 35, errors: 13, time: '2026-01-23 17:22:11', duration: '00:25:33', status: '查看详情' },
+                { name: '唐锦雯', id: '328648143', content: '单项选择题20道', score: 30, errors: 14, time: '2026-01-23 18:01:45', duration: '00:22:19', status: '查看详情' },
+                { name: '潘奕琳', id: '328648161', content: '单项选择题20道', score: 25, errors: 15, time: '2026-01-23 18:30:22', duration: '00:28:44', status: '查看详情' },
+                { name: '黄雨萱', id: '328648149', content: '单项选择题20道', score: 20, errors: 16, time: '2026-01-23 19:15:08', duration: '00:30:12', status: '查看详情' },
+                { name: '朱珈琳', id: '328648133', content: '单项选择题20道', score: 15, errors: 17, time: '2026-01-23 19:45:33', duration: '00:32:55', status: '查看详情' }
+            ]
+        };
+        
+        // 分层题目数据（模拟）
+        const layerQuestions = {
+            'all': ['q5', 'q8', 'q12', 'q15', 'q18', 'q2', 'q3', 'q6', 'q9', 'q10', 'q11', 'q13', 'q14', 'q16', 'q17'],
+            'challenge': ['q3', 'q6', 'q9', 'q11'],
+            'advanced': ['q2', 'q10', 'q13', 'q14', 'q16'],
+            'good': ['q8', 'q12', 'q15', 'q17'],
+            'improve': ['q5', 'q18', 'q11'],
+            'basic': ['q5', 'q8', 'q12', 'q15', 'q18']
+        };
+        
+        // 更新学生表格
+        function updateStudentTable(layer) {
+            const tbody = document.querySelector('#overview .student-table tbody');
+            const students = layerStudents[layer] || [];
+            
+            let html = '';
+            students.forEach((student, index) => {
+                html += `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>${student.name}</td>
+                        <td>${student.id}</td>
+                        <td>${student.content}</td>
+                        <td>${student.score}</td>
+                        <td>${student.errors}</td>
+                        <td>${student.time}</td>
+                        <td>${student.duration}</td>
+                        <td>${student.status === '未提交' ? '未提交' : '<a href="#" class="view-detail">查看详情</a>'}</td>
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = html;
+        }
+        
+        // 更新题目列表
+        function updateQuestionList(layer) {
+            const allQuestionCards = document.querySelectorAll('.question-card');
+            const questionIds = layerQuestions[layer] || [];
+            const showSet = new Set(questionIds);
+            
+            allQuestionCards.forEach(card => {
+                const questionId = card.getAttribute('data-id');
+                if (showSet.has(questionId)) {
+                    card.style.display = 'flex';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+            
+            // 更新标题
+            const sectionTitle = document.querySelector('.high-error-section .section-title');
+            if (layer === 'all') {
+                sectionTitle.textContent = '高错率题目TOP5';
+            } else {
+                const layerNames = {
+                    'challenge': '挑战层',
+                    'advanced': '拔高层',
+                    'good': '良好层',
+                    'improve': '提升层',
+                    'basic': '基础层'
+                };
+                sectionTitle.textContent = `高错率题目TOP5（${layerNames[layer]}）`;
+            }
+        }
+        
+        // 按钮点击事件
+        layerButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const layer = btn.getAttribute('data-layer');
+                
+                if (currentLayer === layer) {
+                    return;
+                }
+                
+                currentLayer = layer;
+                
+                // 更新按钮样式
+                layerButtons.forEach(b => {
+                    const btnLayer = b.getAttribute('data-layer');
+                    let bgColor, borderColor, textColor;
+                    
+                    switch(btnLayer) {
+                        case 'all':
+                            bgColor = '#4285f4';
+                            borderColor = '#4285f4';
+                            textColor = '#fff';
+                            break;
+                        case 'challenge':
+                            bgColor = '#1890ff';
+                            borderColor = '#1890ff';
+                            textColor = '#fff';
+                            break;
+                        case 'advanced':
+                            bgColor = '#52c41a';
+                            borderColor = '#52c41a';
+                            textColor = '#fff';
+                            break;
+                        case 'good':
+                            bgColor = '#faad14';
+                            borderColor = '#faad14';
+                            textColor = '#fff';
+                            break;
+                        case 'improve':
+                            bgColor = '#ff6b9d';
+                            borderColor = '#ff6b9d';
+                            textColor = '#fff';
+                            break;
+                        case 'basic':
+                            bgColor = '#ff4d4f';
+                            borderColor = '#ff4d4f';
+                            textColor = '#fff';
+                            break;
+                    }
+                    
+                    if (btnLayer === layer) {
+                        b.style.backgroundColor = bgColor;
+                        b.style.borderColor = borderColor;
+                        b.style.color = textColor;
+                    } else {
+                        b.style.backgroundColor = '#fff';
+                        b.style.borderColor = borderColor;
+                        b.style.color = borderColor;
+                    }
+                });
+                
+                // 更新学生表格
+                updateStudentTable(layer);
+                
+                // 更新题目列表
+                updateQuestionList(layer);
+                
+                // 生成对应层次的分析报告
+                generateAnalysisReport(layer);
+                
+                console.log('已选择分层:', layer);
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,1836 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能布置作业 - Sigma Education</title>
+    <style>
+        :root {
+            --primary-color: #1890ff;
+            --bg-color: #f0f2f5;
+            --text-color: #333;
+            --text-secondary: #666;
+            --border-color: #d9d9d9;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding-bottom: 80px;
+        }
+
+        /* 顶部导航 */
+        .header {
+            background: #fff;
+            padding: 0 20px;
+            height: 50px; /* 稍微调矮一点 */
+            display: flex;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            margin-bottom: 15px;
+        }
+
+        .logo {
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .back-link {
+            margin: 10px auto 10px auto;
+            max-width: 1200px;
+            padding: 0 20px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 14px;
+        }
+
+        /* 主容器 */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Banner */
+        .banner {
+            background: linear-gradient(90deg, #ffca88 0%, #ff85c0 100%);
+            border-radius: 8px;
+            padding: 20px 25px; /* 减小高度 */
+            color: white;
+            margin-bottom: 15px;
+        }
+        .banner h2 { margin-bottom: 5px; font-size: 20px; }
+        .banner p { opacity: 0.9; font-size: 13px; margin: 0; }
+
+        /* 卡片通用样式 */
+        .card {
+            background: #fff;
+            border-radius: 8px;
+            padding: 20px; /* 默认padding */
+            margin-bottom: 20px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+
+        /* 顶部紧凑卡片特别样式 */
+        .compact-card {
+            padding: 15px 20px; /* 更紧凑的内边距 */
+            height: 100%; /* 撑满高度以保持对齐 */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        /* 步骤标题 */
+        .step-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px; /* 减小间距 */
+            border-bottom: 1px solid #f0f0f0;
+            padding-bottom: 10px; /* 减小间距 */
+        }
+
+        .step-num {
+            background: #faad14;
+            color: white;
+            width: 24px; /* 稍微缩小 */
+            height: 24px;
+            font-size: 14px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 24px;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+
+        .step-title {
+            font-size: 16px; /* 稍微缩小字体 */
+            font-weight: bold;
+        }
+
+        .tab-title {
+            cursor: pointer;
+            color: #999;
+            padding-bottom: 2px;
+            transition: all 0.3s;
+        }
+        
+        .tab-title.active-tab {
+            color: #333;
+            border-bottom: 2px solid var(--primary-color);
+        }
+
+        .tab-title:hover {
+            color: var(--primary-color);
+        }
+
+        /* 知识点标签样式 */
+        .knowledge-points-bar {
+            margin-bottom: 20px;
+            padding: 10px 15px;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+        }
+        .kp-label {
+            font-weight: bold;
+            color: var(--text-secondary);
+        }
+        .kp-tag {
+            background: #e6f7ff;
+            color: #1890ff;
+            border: 1px solid #91d5ff;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        /* 顶部单行选择布局 */
+        .single-line-selects {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            width: 100%;
+        }
+        
+        .select-box {
+            border: 1px solid var(--border-color);
+            padding: 6px 10px; /* 更紧凑 */
+            border-radius: 4px;
+            background: #fff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--text-secondary);
+            font-size: 13px; /* 字体改小适应单行 */
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            cursor: pointer;
+        }
+
+        /* 设置区域 */
+        .settings-item {
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .settings-item label {
+            display: inline-block;
+            width: 100px;
+            text-align: right;
+            margin-right: 15px;
+            color: var(--text-secondary);
+        }
+
+        .number-input {
+            width: 80px;
+            padding: 5px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        /* 难度分布条 */
+        .difficulty-row {
+            display: flex;
+            align-items: center;
+            margin-left: 115px;
+            margin-bottom: 10px;
+            font-size: 13px;
+        }
+        .diff-input {
+            width: 50px;
+            margin: 0 5px;
+            padding: 4px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        /* 开关样式 */
+        .switch-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px dashed #e8e8e8;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 22px;
+            margin-right: 10px;
+        }
+
+        .switch input { opacity: 0; width: 0; height: 0; }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 2px;
+            bottom: 2px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--primary-color);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(22px);
+        }
+
+        /* 个性化作业表格样式 */
+        .personal-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        .personal-table th, .personal-table td {
+            border: 1px solid #e8e8e8;
+            padding: 10px; /* 表格也稍微紧凑点 */
+            text-align: left;
+        }
+
+        .personal-table th {
+            background-color: #fafafa;
+            font-weight: 500;
+            color: #333;
+            font-size: 13px;
+        }
+
+        .layer-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 13px;
+            font-weight: bold;
+            min-width: 80px;
+            text-align: center;
+            line-height: 1.4;
+        }
+        .layer-5 { background: #e6f7ff; color: #1890ff; border: 1px solid #91d5ff; }
+        .layer-4 { background: #f6ffed; color: #52c41a; border: 1px solid #b7eb8f; }
+        .layer-3 { background: #fffbe6; color: #faad14; border: 1px solid #ffe58f; }
+        .layer-2 { background: #fff0f6; color: #eb2f96; border: 1px solid #ffadd2; }
+        .layer-1 { background: #fff1f0; color: #f5222d; border: 1px solid #ffa39e; }
+
+        /* 拖拽区域 */
+        .student-zone {
+            min-height: 40px;
+            background: #fafafa;
+            border: 1px dashed #d9d9d9;
+            border-radius: 4px;
+            padding: 4px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+
+        .student-tag {
+            background: white;
+            border: 1px solid #d9d9d9;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            cursor: move;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .student-tag:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .student-tag.dragging {
+            opacity: 0.5;
+            background: #e6f7ff;
+        }
+
+        /* 底部按钮 */
+        .footer-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: white;
+            box-shadow: 0 -2px 8px rgba(0,0,0,0.05);
+            padding: 15px;
+            text-align: center;
+            z-index: 100;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 35px;
+            border-radius: 4px;
+            font-size: 15px;
+            cursor: pointer;
+        }
+
+        .config-inputs-mini {
+            display: flex;
+            gap: 4px;
+            margin-top: 5px;
+            font-size: 10px;
+            color: #888;
+        }
+        .config-inputs-mini div {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .mini-input {
+            width: 35px;
+            border: 1px solid #d9d9d9;
+            border-radius: 2px;
+            text-align: center;
+            font-size: 11px;
+            padding: 2px 0;
+        }
+
+        /* 个性化模式下的顶部设置栏 */
+        .personalized-header-settings {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            background: #fcfcfc;
+            border: 1px solid #f0f0f0;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+        }
+
+        .ph-item {
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+        }
+        .ph-item label {
+            margin-right: 8px;
+            color: #666;
+        }
+
+        .hidden { display: none; }
+        
+        /* 顶部两列布局 */
+        .top-section { 
+            display: grid; 
+            grid-template-columns: 3fr 2fr; /* 左边稍微宽一点给4个下拉框，右边窄一点 */
+            gap: 15px; 
+            margin-bottom: 15px; /* 减少间距 */
+        }
+
+        /* AI 按钮样式 */
+        .btn-ai {
+            background: linear-gradient(135deg, #722ed1, #b37feb);
+            color: white;
+            border: none;
+            padding: 5px 15px;
+            border-radius: 4px;
+            font-size: 13px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.3s;
+            box-shadow: 0 2px 5px rgba(114, 46, 209, 0.2);
+        }
+        .btn-ai:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(114, 46, 209, 0.3);
+        }
+        .btn-ai:disabled {
+            background: #d9d9d9;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* AI分析报告弹窗样式 */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-header {
+            padding: 20px 25px;
+            border-bottom: 1px solid #e8e8e8;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            font-size: 18px;
+            flex: 1;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #999;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-close:hover {
+            color: #333;
+        }
+
+        .modal-body {
+            padding: 25px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .analysis-report {
+            font-size: 14px;
+            line-height: 1.8;
+            color: #333;
+        }
+
+        .analysis-report h4 {
+            color: var(--primary-color);
+            margin: 20px 0 10px 0;
+            font-size: 16px;
+        }
+
+        .analysis-report h4:first-child {
+            margin-top: 0;
+        }
+
+        .knowledge-point-item {
+            background: #f9f9f9;
+            padding: 8px 12px;
+            margin: 5px 0;
+            border-radius: 4px;
+            border-left: 3px solid var(--primary-color);
+        }
+
+        .student-analysis-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+            font-size: 13px;
+        }
+
+        .student-analysis-table th,
+        .student-analysis-table td {
+            border: 1px solid #e8e8e8;
+            padding: 8px;
+            text-align: left;
+        }
+
+        .student-analysis-table th {
+            background: #fafafa;
+            font-weight: 500;
+        }
+
+        .mastery-score {
+            font-weight: bold;
+            padding: 2px 8px;
+            border-radius: 4px;
+            display: inline-block;
+        }
+
+        .mastery-excellent { background: #e6f7ff; color: #1890ff; }
+        .mastery-good { background: #f6ffed; color: #52c41a; }
+        .mastery-medium { background: #fffbe6; color: #faad14; }
+        .mastery-poor { background: #fff0f6; color: #eb2f96; }
+        .mastery-weak { background: #fff1f0; color: #f5222d; }
+
+        .recommendation-box {
+            background: #e6f7ff;
+            border: 1px solid #91d5ff;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+
+        .recommendation-box strong {
+            color: var(--primary-color);
+        }
+
+        .modal-footer {
+            padding: 15px 25px;
+            border-top: 1px solid #e8e8e8;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .btn-secondary {
+            background: #fff;
+            color: #666;
+            border: 1px solid #d9d9d9;
+            padding: 8px 20px;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .typing-cursor {
+            display: inline-block;
+            width: 2px;
+            height: 1em;
+            background: var(--primary-color);
+            margin-left: 2px;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="logo">
+            <svg width="24" height="24" viewBox="0 0 100 100" fill="#1890ff">
+                <circle cx="50" cy="50" r="45" stroke="#1890ff" stroke-width="5" fill="none"/>
+                <path d="M30 50 L50 70 L80 30" stroke="#1890ff" stroke-width="8" fill="none"/>
+            </svg>
+            兆涵科技 <span style="font-size: 14px; font-weight: normal; color: #666; margin-left: 5px;">Sigma Education</span>
+        </div>
+        <div style="margin-left: auto;">
+             <button class="btn-primary" style="padding: 5px 15px; font-size: 13px;">新手教程</button>
+        </div>
+    </div>
+
+    <div class="back-link" onclick="window.location.href='mistake-notebook.html'" style="cursor: pointer;">← 返回</div>
+
+    <div class="container">
+        <div class="banner">
+            <h2>错题巩固作业（智能分层）</h2>
+            <p>根据学生掌握程度分层布置不同难度的题目</p>
+        </div>
+
+        <div class="top-section">
+            <div class="card compact-card" style="padding: 15px 20px; height: 100px; position: relative;">
+                <div class="step-header" style="margin-bottom: 8px; padding-bottom: 8px;">
+                    <div class="step-num">1</div>
+                    <div class="step-title" style="font-size: 14px;">当前已选择题目的信息</div>
+                    <button class="btn-secondary" onclick="showSelectedQuestionsModal()" style="padding: 4px 12px; font-size: 11px; margin-left: auto;">查看详情</button>
+                </div>
+                <div style="display: flex; align-items: center; gap: 25px;">
+                    <div style="display: flex; align-items: baseline; gap: 5px;">
+                        <span style="font-size: 13px; font-weight: 500; color: var(--text-secondary);">总数：</span>
+                        <span style="font-size: 24px; font-weight: bold; color: var(--primary-color);">9</span>
+                        <span style="font-size: 12px; color: var(--text-secondary);">题</span>
+                    </div>
+                    <div style="flex: 1; font-size: 12px; line-height: 1.6;">
+                        <div style="color: var(--text-secondary); margin-bottom: 2px;">题型分布：</div>
+                        <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                            <span style="background: #e6f7ff; color: #1890ff; padding: 2px 8px; border-radius: 3px; font-size: 11px;">单选 3题</span>
+                            <span style="background: #f6ffed; color: #52c41a; padding: 2px 8px; border-radius: 3px; font-size: 11px;">判断 2题</span>
+                            <span style="background: #fff7e6; color: #fa8c16; padding: 2px 8px; border-radius: 3px; font-size: 11px;">填空 2题</span>
+                            <span style="background: #fff0f6; color: #eb2f96; padding: 2px 8px; border-radius: 3px; font-size: 11px;">应用 2题</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card compact-card" style="padding: 5px 20px; height: 100px;">
+                <div class="step-header" style="margin-bottom: 2px; border-bottom: none;">
+                    <div class="step-num">2</div>
+                    <div class="step-title" style="flex-grow: 1; display: flex; gap: 10px; font-size: 12px; align-items: center;">
+                        <span style="color: var(--primary-color); border-bottom: 2px solid var(--primary-color); padding-bottom: 2px; font-size: 13px; font-weight: bold;">初一2班</span>
+                        <span>五年级8班</span>
+                        <span>六年级...</span>
+                    </div>
+                    <button style="border: 1px solid var(--primary-color); background: #fff; color: var(--primary-color); padding: 2px 6px; border-radius: 4px; font-size: 10px; white-space: nowrap;">+ 添加</button>
+                </div>
+                <div style="color: #999; font-size: 10px; margin-left: 35px; margin-top: 2px;">已选: 张伟, 李娜, 王强 等 45 人</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="step-header">
+                <div class="step-num">3</div>
+                <div class="step-title">作业设置</div>
+            </div>
+            
+            <div class="knowledge-points-bar">
+                <span class="kp-label">主要知识点：</span>
+                <span class="kp-tag">寓言故事理解</span>
+                <span class="kp-tag">文言文实词</span>
+                <span class="kp-tag">因果逻辑</span>
+                <span class="kp-tag">背诵全文</span>
+            </div>
+
+            <div id="standard-view" class="settings-form hidden">
+                <div class="settings-item">
+                    <label class="required">作业类型：</label>
+                    <label style="width:auto; text-align:left;"><input type="radio" name="type" checked> 课后巩固</label>
+                </div>
+
+                <div class="settings-item">
+                    <label class="required">题目数量：</label>
+                    <input type="number" class="number-input" value="20"> &nbsp;个
+                </div>
+
+                <div class="settings-item" style="align-items: flex-start;">
+                    <label class="required" style="margin-top: 8px;">题目难度分布：</label>
+                    <div>
+                        <div class="select-box" style="width: 120px; margin-bottom: 10px;">轻松应对 ▾</div>
+                        <div class="difficulty-group">
+                            <div class="difficulty-row">基础 <input type="text" class="diff-input" value="30">%</div>
+                            <div class="difficulty-row">容易 <input type="text" class="diff-input" value="50">%</div>
+                            <div class="difficulty-row">中等 <input type="text" class="diff-input" value="20">%</div>
+                            <div class="difficulty-row">困难 <input type="text" class="diff-input" value="0">%</div>
+                            <div class="difficulty-row">挑战 <input type="text" class="diff-input" value="0">%</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-item">
+                    <label class="required">题目总分：</label>
+                    <input type="text" class="number-input" value="100"> &nbsp;分
+                </div>
+
+                <div class="settings-item">
+                    <label class="required">截止提交时间：</label>
+                    <div class="select-box" style="margin-right: 10px;">2024-05-20</div>
+                    <div class="select-box">18:00</div>
+                </div>
+            </div>
+
+            <div id="personalized-view">
+                
+                <div class="personalized-header-settings">
+                    <div class="ph-item">
+                        <label>题目总分：</label>
+                        <input type="number" class="number-input" value="100"> &nbsp;分
+                    </div>
+                    <div class="ph-item">
+                        <label>截止提交时间：</label>
+                        <div class="select-box" style="padding: 5px 10px; width: 120px; margin-right: 5px;">2024-05-20</div>
+                        <div class="select-box" style="padding: 5px 10px; width: 80px;">18:00</div>
+                    </div>
+                    <div class="ph-item" style="margin-left: auto;">
+                        <button class="btn-ai" onclick="autoAssignStudents()" style="padding: 6px 15px; font-size: 13px;">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 2L15 9H22L16 14L19 21L12 17L5 21L8 14L2 9H9L12 2Z" />
+                            </svg>
+                            AI自动分配学生
+                        </button>
+                    </div>
+                </div>
+
+                <table class="personal-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 12%">知识点掌握程度</th>
+                            <th style="width: 13%">题目类型</th>
+                            <th style="width: 20%">题目难度配置</th>
+                            <th style="width: 55%">学生名单 (可拖拽调整)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="layers-body">
+                        
+                        <tr>
+                            <td>
+                                <span class="layer-badge layer-5">90%-100% (挑战层)</span>
+                            </td>
+                            <td>
+                                <select class="question-type-select" data-layer="layer-5" onchange="handleQuestionTypeChange(this, 'layer-5')" style="width: 100%; padding: 6px; border: 1px solid #d9d9d9; border-radius: 4px; font-size: 12px;">
+                                    <option value="original">原题重做</option>
+                                    <option value="similar">举一反三</option>
+                                    <option value="aiVariation" selected>AI变题</option>
+                                </select>
+                                <div class="ai-variation-type" id="ai-type-layer-5" style="display: block; margin-top: 8px;">
+                                    <select style="width: 100%; padding: 4px; border: 1px solid #d9d9d9; border-radius: 4px; font-size: 11px;">
+                                        <option value="">选择变题类型</option>
+                                        <option value="questionType">题型转换</option>
+                                        <option value="context">情境重构</option>
+                                        <option value="data">数值/素材替换</option>
+                                        <option value="knowledge">知识点融合</option>
+                                        <option value="condition">条件变式</option>
+                                    </select>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="difficulty-config" id="difficulty-config-layer-5">
+                                    <div style="margin-bottom: 5px;">
+                                        <span style="font-size: 11px;">难度预设:</span>
+                                        <select class="difficulty-preset-select" style="padding: 3px; border-radius: 4px; border: 1px solid #d9d9d9; font-size: 11px;" onchange="changeDifficultyPreset(this, 'layer-5')">
+                                            <option value="relax">轻松应对</option>
+                                            <option value="easy">专注一下</option>
+                                            <option value="medium">小有难度</option>
+                                            <option value="hard">颇有难度</option>
+                                            <option value="challenge" selected>挑战自我</option>
+                                        </select>
+                                    </div>
+                                    <div class="config-inputs-mini" id="difficulty-layer-5">
+                                        <div><span>基础</span><input type="text" class="mini-input" value="0">%</div>
+                                        <div><span>容易</span><input type="text" class="mini-input" value="10">%</div>
+                                        <div><span>中等</span><input type="text" class="mini-input" value="20">%</div>
+                                        <div><span>困难</span><input type="text" class="mini-input" value="40">%</div>
+                                        <div><span>挑战</span><input type="text" class="mini-input" value="30">%</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="student-zone" id="zone-layer-5" ondrop="drop(event)" ondragover="allowDrop(event)">
+                                    <!-- Empty initially -->
+                                </div>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>
+                                <span class="layer-badge layer-4">75%-89% (拔高层)</span>
+                            </td>
+                            <td>
+                                <select class="question-type-select" data-layer="layer-4" onchange="handleQuestionTypeChange(this, 'layer-4')" style="width: 100%; padding: 6px; border: 1px solid #d9d9d9; border-radius: 4px; font-size: 12px;">
+                                    <option value="original">原题重做</option>
+                                    <option value="similar" selected>举一反三</option>
+                                    <option value="aiVariation">AI变题</option>
+                                </select>
+                                <div class="ai-variation-type" id="ai-type-layer-4" style="display: none; margin-top: 8px;">
+                                    <select style="width: 100%; padding: 4px; border: 1px solid #d9d9d9; border-radius: 4px; font-size: 11px;">
+                                        <option value="">选择变题类型</option>
+                                        <option value="questionType">题型转换</option>
+                                        <option value="context">情境重构</option>
+                                        <option value="data">数值/素材替换</option>
+                                        <option value="knowledge">知识点融合</option>
+                                        <option value="condition">条件变式</option>
+                                    </select>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="difficulty-config" id="difficulty-config-layer-4">
+                                    <div style="margin-bottom: 5px;">
+                                        <span style="font-size: 11px;">难度预设:</span>
+                                        <select class="difficulty-preset-select" style="padding: 3px; border-radius: 4px; border: 1px solid #d9d9d9; font-size: 11px;" onchange="changeDifficultyPreset(this, 'layer-4')">
+                                            <option value="relax">轻松应对</option>
+                                            <option value="easy">专注一下</option>
+                                            <option value="medium">小有难度</option>
+                                            <option value="hard" selected>颇有难度</option>
+                                            <option value="challenge">挑战自我</option>
+                                        </select>
+                                    </div>
+                                    <div class="config-inputs-mini" id="difficulty-layer-4">
+                                        <div><span>基础</span><input type="text" class="mini-input" value="10">%</div>
+                                        <div><span>容易</span><input type="text" class="mini-input" value="20">%</div>
+                                        <div><span>中等</span><input type="text" class="mini-input" value="40">%</div>
+                                        <div><span>困难</span><input type="text" class="mini-input" value="20">%</div>
+                                        <div><span>挑战</span><input type="text" class="mini-input" value="10">%</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="student-zone" id="zone-layer-4" ondrop="drop(event)" ondragover="allowDrop(event)">
+                                    <!-- Empty initially -->
+                                </div>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>
+                                <span class="layer-badge layer-3">60%-74% (良好层)</span>
+                            </td>
+                            <td>
+                                <select class="question-type-select" data-layer="layer-3" onchange="handleQuestionTypeChange(this, 'layer-3')" style="width: 100%; padding: 6px; border: 1px solid #d9d9d9; border-radius: 4px; font-size: 12px;">
+                                    <option value="original">原题重做</option>
+                                    <option value="similar" selected>举一反三</option>
+                                    <option value="aiVariation">AI变题</option>
+                                </select>
+                                <div class="ai-variation-type" id="ai-type-layer-3" style="display: none; margin-top: 8px;">
+                                    <select style="width: 100%; padding: 4px; border: 1px solid #d9d9d9; border-radius: 4px; font-size: 11px;">
+                                        <option value="">选择变题类型</option>
+                                        <option value="questionType">题型转换</option>
+                                        <option value="context">情境重构</option>
+                                        <option value="data">数值/素材替换</option>
+                                        <option value="knowledge">知识点融合</option>
+                                        <option value="condition">条件变式</option>
+                                    </select>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="difficulty-config" id="difficulty-config-layer-3">
+                                    <div style="margin-bottom: 5px;">
+                                        <span style="font-size: 11px;">难度预设:</span>
+                                        <select class="difficulty-preset-select" style="padding: 3px; border-radius: 4px; border: 1px solid #d9d9d9; font-size: 11px;" onchange="changeDifficultyPreset(this, 'layer-3')">
+                                            <option value="relax">轻松应对</option>
+                                            <option value="easy">专注一下</option>
+                                            <option value="medium" selected>小有难度</option>
+                                            <option value="hard">颇有难度</option>
+                                            <option value="challenge">挑战自我</option>
+                                        </select>
+                                    </div>
+                                    <div class="config-inputs-mini" id="difficulty-layer-3">
+                                        <div><span>基础</span><input type="text" class="mini-input" value="20">%</div>
+                                        <div><span>容易</span><input type="text" class="mini-input" value="30">%</div>
+                                        <div><span>中等</span><input type="text" class="mini-input" value="30">%</div>
+                                        <div><span>困难</span><input type="text" class="mini-input" value="15">%</div>
+                                        <div><span>挑战</span><input type="text" class="mini-input" value="5">%</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="student-zone" id="zone-layer-3" ondrop="drop(event)" ondragover="allowDrop(event)">
+                                    <!-- Empty initially -->
+                                </div>
+                            </td>
+                        </tr>
+
+                         <tr>
+                            <td>
+                                <span class="layer-badge layer-2">40%-59% (提升层)</span>
+                            </td>
+                            <td>
+                                <select class="question-type-select" data-layer="layer-2" onchange="handleQuestionTypeChange(this, 'layer-2')" style="width: 100%; padding: 6px; border: 1px solid #d9d9d9; border-radius: 4px; font-size: 12px;">
+                                    <option value="original" selected>原题重做</option>
+                                    <option value="similar">举一反三</option>
+                                    <option value="aiVariation">AI变题</option>
+                                </select>
+                                <div class="ai-variation-type" id="ai-type-layer-2" style="display: none; margin-top: 8px;">
+                                    <select style="width: 100%; padding: 4px; border: 1px solid #d9d9d9; border-radius: 4px; font-size: 11px;">
+                                        <option value="">选择变题类型</option>
+                                        <option value="questionType">题型转换</option>
+                                        <option value="context">情境重构</option>
+                                        <option value="data">数值/素材替换</option>
+                                        <option value="knowledge">知识点融合</option>
+                                        <option value="condition">条件变式</option>
+                                    </select>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="difficulty-config" id="difficulty-config-layer-2" style="opacity: 0.6;">
+                                    <div style="margin-bottom: 5px;">
+                                        <span style="font-size: 11px;">难度预设:</span>
+                                        <select class="difficulty-preset-select" style="padding: 3px; border-radius: 4px; border: 1px solid #d9d9d9; font-size: 11px; background-color: #f5f5f5; color: #999; cursor: not-allowed;" onchange="changeDifficultyPreset(this, 'layer-2')" disabled>
+                                            <option value="relax">轻松应对</option>
+                                            <option value="easy" selected>专注一下</option>
+                                            <option value="medium">小有难度</option>
+                                            <option value="hard">颇有难度</option>
+                                            <option value="challenge">挑战自我</option>
+                                        </select>
+                                    </div>
+                                    <div class="config-inputs-mini" id="difficulty-layer-2">
+                                        <div><span>基础</span><input type="text" class="mini-input" value="40" disabled style="background-color: #f5f5f5; color: #999; cursor: not-allowed;">%</div>
+                                        <div><span>容易</span><input type="text" class="mini-input" value="40" disabled style="background-color: #f5f5f5; color: #999; cursor: not-allowed;">%</div>
+                                        <div><span>中等</span><input type="text" class="mini-input" value="15" disabled style="background-color: #f5f5f5; color: #999; cursor: not-allowed;">%</div>
+                                        <div><span>困难</span><input type="text" class="mini-input" value="5" disabled style="background-color: #f5f5f5; color: #999; cursor: not-allowed;">%</div>
+                                        <div><span>挑战</span><input type="text" class="mini-input" value="0" disabled style="background-color: #f5f5f5; color: #999; cursor: not-allowed;">%</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="student-zone" id="zone-layer-2" ondrop="drop(event)" ondragover="allowDrop(event)">
+                                    <!-- Empty initially -->
+                                </div>
+                            </td>
+                        </tr>
+
+                         <tr>
+                            <td>
+                                <span class="layer-badge layer-1">0%-39% (基础层)</span>
+                            </td>
+                            <td>
+                                <select class="question-type-select" data-layer="layer-1" onchange="handleQuestionTypeChange(this, 'layer-1')" style="width: 100%; padding: 6px; border: 1px solid #d9d9d9; border-radius: 4px; font-size: 12px;">
+                                    <option value="original" selected>原题重做</option>
+                                    <option value="similar">举一反三</option>
+                                    <option value="aiVariation">AI变题</option>
+                                </select>
+                                <div class="ai-variation-type" id="ai-type-layer-1" style="display: none; margin-top: 8px;">
+                                    <select style="width: 100%; padding: 4px; border: 1px solid #d9d9d9; border-radius: 4px; font-size: 11px;">
+                                        <option value="">选择变题类型</option>
+                                        <option value="questionType">题型转换</option>
+                                        <option value="context">情境重构</option>
+                                        <option value="data">数值/素材替换</option>
+                                        <option value="knowledge">知识点融合</option>
+                                        <option value="condition">条件变式</option>
+                                    </select>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="difficulty-config" id="difficulty-config-layer-1" style="opacity: 0.6;">
+                                    <div style="margin-bottom: 5px;">
+                                        <span style="font-size: 11px; color: #999;">难度预设:</span>
+                                        <select class="difficulty-preset-select" style="padding: 3px; border-radius: 4px; border: 1px solid #d9d9d9; font-size: 11px; color: #999; background-color: #f5f5f5;" onchange="changeDifficultyPreset(this, 'layer-1')" disabled>
+                                            <option value="relax" selected>轻松应对</option>
+                                            <option value="easy">专注一下</option>
+                                            <option value="medium">小有难度</option>
+                                            <option value="hard">颇有难度</option>
+                                            <option value="challenge">挑战自我</option>
+                                        </select>
+                                    </div>
+                                    <div class="config-inputs-mini" id="difficulty-layer-1">
+                                        <div><span style="color: #999;">基础</span><input type="text" class="mini-input" value="60" disabled style="color: #999; background-color: #f5f5f5;">%</div>
+                                        <div><span style="color: #999;">容易</span><input type="text" class="mini-input" value="30" disabled style="color: #999; background-color: #f5f5f5;">%</div>
+                                        <div><span style="color: #999;">中等</span><input type="text" class="mini-input" value="10" disabled style="color: #999; background-color: #f5f5f5;">%</div>
+                                        <div><span style="color: #999;">困难</span><input type="text" class="mini-input" value="0" disabled style="color: #999; background-color: #f5f5f5;">%</div>
+                                        <div><span style="color: #999;">挑战</span><input type="text" class="mini-input" value="0" disabled style="color: #999; background-color: #f5f5f5;">%</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="student-zone" id="zone-layer-1" ondrop="drop(event)" ondragover="allowDrop(event)">
+                                    <!-- Empty initially -->
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div style="margin-top: 20px; text-align: right; color: #666; font-size: 12px;">
+                    * 拖拽学生姓名可调整所属层级
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="footer-bar">
+        <button class="btn-primary" onclick="window.location.href='preview2.html'">生成作业</button>
+    </div>
+
+    <!-- 已选题目详情弹窗 -->
+    <div class="modal-overlay" id="selectedQuestionsModal">
+        <div class="modal-content" style="max-width: 900px;">
+            <div class="modal-header">
+                <h3>已选择题目详情</h3>
+                <button class="modal-close" onclick="closeSelectedQuestionsModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div style="margin-bottom: 20px; padding: 15px; background: #f9f9f9; border-radius: 4px; display: flex; align-items: center; gap: 30px;">
+                    <div style="display: flex; align-items: baseline; gap: 5px;">
+                        <span style="font-size: 13px; font-weight: 500; color: var(--text-secondary);">总数：</span>
+                        <span style="font-size: 24px; font-weight: bold; color: var(--primary-color);">9</span>
+                        <span style="font-size: 12px; color: var(--text-secondary);">题</span>
+                    </div>
+                    <div style="flex: 1; font-size: 12px;">
+                        <div style="color: var(--text-secondary); margin-bottom: 5px;">题型分布：</div>
+                        <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                            <span style="background: #e6f7ff; color: #1890ff; padding: 2px 8px; border-radius: 3px; font-size: 11px;">单选 3题</span>
+                            <span style="background: #f6ffed; color: #52c41a; padding: 2px 8px; border-radius: 3px; font-size: 11px;">判断 2题</span>
+                            <span style="background: #fff7e6; color: #fa8c16; padding: 2px 8px; border-radius: 3px; font-size: 11px;">填空 2题</span>
+                            <span style="background: #fff0f6; color: #eb2f96; padding: 2px 8px; border-radius: 3px; font-size: 11px;">应用 2题</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 题目列表 -->
+                <div class="selected-questions-list">
+                    <!-- 题目1 -->
+                    <div class="mistake-item" style="margin-bottom: 15px;">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
+                            <div style="flex: 1;">
+                                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                                    <span style="padding: 2px 8px; background: #e6f7ff; border-radius: 4px; color: #1890ff; font-size: 12px;">单项选择题</span>
+                                    <span style="font-size: 13px; color: var(--text-secondary);">知识点：加法运算、进位加法</span>
+                                </div>
+                                <h3 style="font-size: 15px; font-weight: 500; color: var(--text-color); margin-bottom: 8px;">计算：28 + 35 = ?</h3>
+                                <div style="font-size: 13px; color: var(--text-secondary); line-height: 1.6;">
+                                    <div style="margin-bottom: 3px;">A. 53</div>
+                                    <div style="margin-bottom: 3px;">B. 63</div>
+                                    <div style="margin-bottom: 3px;">C. 73</div>
+                                    <div>D. 83</div>
+                                </div>
+                                <div style="margin-top: 8px; font-size: 12px; color: #52c41a;">
+                                    <strong>参考答案：</strong>B
+                                </div>
+                            </div>
+                            <div style="text-align: right; margin-left: 20px;">
+                                <div style="font-size: 20px; font-weight: bold; color: #ff4d4f; margin-bottom: 3px;">25/40</div>
+                                <div style="font-size: 12px; color: var(--text-secondary);">错误人数/完成人数</div>
+                                <div style="font-size: 12px; color: var(--text-secondary); margin-top: 3px;">错误率：62.5%</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 题目2 -->
+                    <div class="mistake-item" style="margin-bottom: 15px;">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
+                            <div style="flex: 1;">
+                                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                                    <span style="padding: 2px 8px; background: #e6f7ff; border-radius: 4px; color: #1890ff; font-size: 12px;">单项选择题</span>
+                                    <span style="font-size: 13px; color: var(--text-secondary);">知识点：做饭、合数、质数</span>
+                                </div>
+                                <h3 style="font-size: 15px; font-weight: 500; color: var(--text-color); margin-bottom: 8px;">下列哪个数既是偶数又是质数？</h3>
+                                <div style="font-size: 13px; color: var(--text-secondary); line-height: 1.6;">
+                                    <div style="margin-bottom: 3px;">A. 1</div>
+                                    <div style="margin-bottom: 3px;">B. 2</div>
+                                    <div style="margin-bottom: 3px;">C. 3</div>
+                                    <div>D. 4</div>
+                                </div>
+                                <div style="margin-top: 8px; font-size: 12px; color: #52c41a;">
+                                    <strong>参考答案：</strong>B
+                                </div>
+                            </div>
+                            <div style="text-align: right; margin-left: 20px;">
+                                <div style="font-size: 20px; font-weight: bold; color: #ff4d4f; margin-bottom: 3px;">18/40</div>
+                                <div style="font-size: 12px; color: var(--text-secondary);">错误人数/完成人数</div>
+                                <div style="font-size: 12px; color: var(--text-secondary); margin-top: 3px;">错误率：45%</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 题目3 -->
+                    <div class="mistake-item" style="margin-bottom: 15px;">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
+                            <div style="flex: 1;">
+                                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                                    <span style="padding: 2px 8px; background: #e6f7ff; border-radius: 4px; color: #1890ff; font-size: 12px;">单项选择题</span>
+                                    <span style="font-size: 13px; color: var(--text-secondary);">知识点：倍数、因数</span>
+                                </div>
+                                <h3 style="font-size: 15px; font-weight: 500; color: var(--text-color); margin-bottom: 8px;">12的因数有哪些？</h3>
+                                <div style="font-size: 13px; color: var(--text-secondary); line-height: 1.6;">
+                                    <div style="margin-bottom: 3px;">A. 1, 2, 3, 4, 6, 12</div>
+                                    <div style="margin-bottom: 3px;">B. 1, 2, 3, 4, 6</div>
+                                    <div style="margin-bottom: 3px;">C. 2, 3, 4, 6, 12</div>
+                                    <div>D. 1, 2, 4, 6, 12</div>
+                                </div>
+                                <div style="margin-top: 8px; font-size: 12px; color: #52c41a;">
+                                    <strong>参考答案：</strong>A
+                                </div>
+                            </div>
+                            <div style="text-align: right; margin-left: 20px;">
+                                <div style="font-size: 20px; font-weight: bold; color: #ff4d4f; margin-bottom: 3px;">15/40</div>
+                                <div style="font-size: 12px; color: var(--text-secondary);">错误人数/完成人数</div>
+                                <div style="font-size: 12px; color: var(--text-secondary); margin-top: 3px;">错误率：37.5%</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 题目4 -->
+                    <div class="mistake-item" style="margin-bottom: 15px;">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
+                            <div style="flex: 1;">
+                                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                                    <span style="padding: 2px 8px; background: #f6ffed; border-radius: 4px; color: #52c41a; font-size: 12px;">判断题</span>
+                                    <span style="font-size: 13px; color: var(--text-secondary);">知识点：偶数、合数、质数</span>
+                                </div>
+                                <h3 style="font-size: 15px; font-weight: 500; color: var(--text-color); margin-bottom: 8px;">所有偶数都是合数。（）</h3>
+                                <div style="margin-top: 8px; font-size: 12px; color: #52c41a;">
+                                    <strong>参考答案：</strong>B
+                                </div>
+                            </div>
+                            <div style="text-align: right; margin-left: 20px;">
+                                <div style="font-size: 20px; font-weight: bold; color: #ff4d4f; margin-bottom: 3px;">18/40</div>
+                                <div style="font-size: 12px; color: var(--text-secondary);">错误人数/完成人数</div>
+                                <div style="font-size: 12px; color: var(--text-secondary); margin-top: 3px;">错误率：45%</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 题目5 -->
+                    <div class="mistake-item" style="margin-bottom: 15px;">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
+                            <div style="flex: 1;">
+                                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                                    <span style="padding: 2px 8px; background: #f6ffed; border-radius: 4px; color: #52c41a; font-size: 12px;">判断题</span>
+                                    <span style="font-size: 13px; color: var(--text-secondary);">知识点：因果逻辑、寓言理解</span>
+                                </div>
+                                <h3 style="font-size: 15px; font-weight: 500; color: var(--text-color); margin-bottom: 8px;">《守株待兔》告诉我们不劳而获是可以的。（）</h3>
+                                <div style="margin-top: 8px; font-size: 12px; color: #52c41a;">
+                                    <strong>参考答案：</strong>错误
+                                </div>
+                            </div>
+                            <div style="text-align: right; margin-left: 20px;">
+                                <div style="font-size: 20px; font-weight: bold; color: #ff4d4f; margin-bottom: 3px;">12/40</div>
+                                <div style="font-size: 12px; color: var(--text-secondary);">错误人数/完成人数</div>
+                                <div style="font-size: 12px; color: var(--text-secondary); margin-top: 3px;">错误率：30%</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 题目6 -->
+                    <div class="mistake-item" style="margin-bottom: 15px;">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
+                            <div style="flex: 1;">
+                                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                                    <span style="padding: 2px 8px; background: #fff7e6; border-radius: 4px; color: #fa8c16; font-size: 12px;">填空题</span>
+                                    <span style="font-size: 13px; color: var(--text-secondary);">知识点：文言文实词</span>
+                                </div>
+                                <h3 style="font-size: 15px; font-weight: 500; color: var(--text-color); margin-bottom: 8px;">《守株待兔》中"株"的意思是_______。</h3>
+                                <div style="margin-top: 8px; font-size: 12px; color: #52c41a;">
+                                    <strong>参考答案：</strong>树桩
+                                </div>
+                            </div>
+                            <div style="text-align: right; margin-left: 20px;">
+                                <div style="font-size: 20px; font-weight: bold; color: #ff4d4f; margin-bottom: 3px;">20/40</div>
+                                <div style="font-size: 12px; color: var(--text-secondary);">错误人数/完成人数</div>
+                                <div style="font-size: 12px; color: var(--text-secondary); margin-top: 3px;">错误率：50%</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 题目7 -->
+                    <div class="mistake-item" style="margin-bottom: 15px;">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
+                            <div style="flex: 1;">
+                                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                                    <span style="padding: 2px 8px; background: #fff7e6; border-radius: 4px; color: #fa8c16; font-size: 12px;">填空题</span>
+                                    <span style="font-size: 13px; color: var(--text-secondary);">知识点：寓言故事理解</span>
+                                </div>
+                                <h3 style="font-size: 15px; font-weight: 500; color: var(--text-color); margin-bottom: 8px;">《守株待兔》这个故事告诉我们_______的道理。</h3>
+                                <div style="margin-top: 8px; font-size: 12px; color: #52c41a;">
+                                    <strong>参考答案：</strong>不能心存侥幸，要通过自己的努力获得成功
+                                </div>
+                            </div>
+                            <div style="text-align: right; margin-left: 20px;">
+                                <div style="font-size: 20px; font-weight: bold; color: #ff4d4f; margin-bottom: 3px;">16/40</div>
+                                <div style="font-size: 12px; color: var(--text-secondary);">错误人数/完成人数</div>
+                                <div style="font-size: 12px; color: var(--text-secondary); margin-top: 3px;">错误率：40%</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 题目8 -->
+                    <div class="mistake-item" style="margin-bottom: 15px;">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
+                            <div style="flex: 1;">
+                                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                                    <span style="padding: 2px 8px; background: #fff0f6; border-radius: 4px; color: #eb2f96; font-size: 12px;">应用题</span>
+                                    <span style="font-size: 13px; color: var(--text-secondary);">知识点：加法运算、应用题</span>
+                                </div>
+                                <h3 style="font-size: 15px; font-weight: 500; color: var(--text-color); margin-bottom: 8px;">小明有28个苹果，小红有35个苹果，他们一共有多少个苹果？</h3>
+                                <div style="margin-top: 8px; font-size: 12px; color: #52c41a;">
+                                    <strong>参考答案：</strong>28 + 35 = 63（个）
+                                </div>
+                            </div>
+                            <div style="text-align: right; margin-left: 20px;">
+                                <div style="font-size: 20px; font-weight: bold; color: #ff4d4f; margin-bottom: 3px;">22/40</div>
+                                <div style="font-size: 12px; color: var(--text-secondary);">错误人数/完成人数</div>
+                                <div style="font-size: 12px; color: var(--text-secondary); margin-top: 3px;">错误率：55%</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 题目9 -->
+                    <div class="mistake-item" style="margin-bottom: 15px;">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
+                            <div style="flex: 1;">
+                                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                                    <span style="padding: 2px 8px; background: #fff0f6; border-radius: 4px; color: #eb2f96; font-size: 12px;">应用题</span>
+                                    <span style="font-size: 13px; color: var(--text-secondary);">知识点：背诵全文、文言文理解</span>
+                                </div>
+                                <h3 style="font-size: 15px; font-weight: 500; color: var(--text-color); margin-bottom: 8px;">请默写《守株待兔》全文。</h3>
+                                <div style="margin-top: 8px; font-size: 12px; color: #52c41a;">
+                                    <strong>参考答案：</strong>宋人有耕者。田中有株，兔走触株，折颈而死。因释其耒而守株，冀复得兔。兔不可复得，而身为宋国笑。
+                                </div>
+                            </div>
+                            <div style="text-align: right; margin-left: 20px;">
+                                <div style="font-size: 20px; font-weight: bold; color: #ff4d4f; margin-bottom: 3px;">28/40</div>
+                                <div style="font-size: 12px; color: var(--text-secondary);">错误人数/完成人数</div>
+                                <div style="font-size: 12px; color: var(--text-secondary); margin-top: 3px;">错误率：70%</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeSelectedQuestionsModal()">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI分析报告弹窗 -->
+    <div class="modal-overlay" id="analysisModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#722ed1" stroke-width="2">
+                    <path d="M12 2L15 9H22L16 14L19 21L12 17L5 21L8 14L2 9H9L12 2Z" />
+                </svg>
+                <h3>AI智能分析报告</h3>
+                <button class="modal-close" onclick="closeAnalysisModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="analysis-report" id="analysisReportContent">
+                    <!-- 流式输出内容将在这里显示 -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeAnalysisModal()">取消</button>
+                <button class="btn-primary" id="adoptBtn" onclick="adoptAnalysis()" disabled>采用分配方案</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 难度预设配置
+        const difficultyPresets = {
+            'relax': { // 轻松应对
+                basic: 60,
+                easy: 30,
+                medium: 10,
+                hard: 0,
+                challenge: 0
+            },
+            'easy': { // 专注一下
+                basic: 40,
+                easy: 40,
+                medium: 15,
+                hard: 5,
+                challenge: 0
+            },
+            'medium': { // 小有难度
+                basic: 20,
+                easy: 30,
+                medium: 30,
+                hard: 15,
+                challenge: 5
+            },
+            'hard': { // 颇有难度
+                basic: 10,
+                easy: 20,
+                medium: 40,
+                hard: 20,
+                challenge: 10
+            },
+            'challenge': { // 挑战自我
+                basic: 0,
+                easy: 10,
+                medium: 20,
+                hard: 40,
+                challenge: 30
+            }
+        };
+
+        // 切换难度预设
+        function changeDifficultyPreset(selectElement, layerId) {
+            const preset = selectElement.value;
+            const config = difficultyPresets[preset];
+            
+            if (!config) return;
+            
+            // 获取对应层级的难度配置输入框
+            const difficultyContainer = document.getElementById('difficulty-' + layerId);
+            const inputs = difficultyContainer.querySelectorAll('.mini-input');
+            
+            // 更新各个难度的百分比
+            inputs[0].value = config.basic;    // 基础
+            inputs[1].value = config.easy;     // 容易
+            inputs[2].value = config.medium;   // 中等
+            inputs[3].value = config.hard;     // 困难
+            inputs[4].value = config.challenge; // 挑战
+        }
+
+        // 处理题目类型变化
+        function handleQuestionTypeChange(selectElement, layerId) {
+            const questionType = selectElement.value;
+            const aiTypeDiv = document.getElementById('ai-type-' + layerId);
+            const difficultyConfig = document.getElementById('difficulty-config-' + layerId);
+            const difficultyPresetSelect = difficultyConfig.querySelector('.difficulty-preset-select');
+            const difficultyInputs = difficultyConfig.querySelectorAll('.mini-input');
+            
+            // 显示/隐藏AI变题类型选择
+            if (questionType === 'aiVariation') {
+                aiTypeDiv.style.display = 'block';
+            } else {
+                aiTypeDiv.style.display = 'none';
+            }
+            
+            // 根据题目类型启用/禁用难度配置
+            if (questionType === 'original') {
+                // 原题重做：禁用难度配置，添加灰色样式
+                difficultyPresetSelect.disabled = true;
+                difficultyPresetSelect.style.backgroundColor = '#f5f5f5';
+                difficultyPresetSelect.style.color = '#999';
+                difficultyPresetSelect.style.cursor = 'not-allowed';
+                
+                difficultyInputs.forEach(input => {
+                    input.disabled = true;
+                    input.style.backgroundColor = '#f5f5f5';
+                    input.style.color = '#999';
+                    input.style.cursor = 'not-allowed';
+                });
+                
+                // 添加整体灰色效果
+                difficultyConfig.style.opacity = '0.6';
+            } else {
+                // 举一反三或AI变题：启用难度配置
+                difficultyPresetSelect.disabled = false;
+                difficultyPresetSelect.style.backgroundColor = '';
+                difficultyPresetSelect.style.color = '';
+                difficultyPresetSelect.style.cursor = '';
+                
+                difficultyInputs.forEach(input => {
+                    input.disabled = false;
+                    input.style.backgroundColor = '';
+                    input.style.color = '';
+                    input.style.cursor = '';
+                });
+                
+                // 恢复正常透明度
+                difficultyConfig.style.opacity = '1';
+            }
+        }
+
+        function switchStep1Tab(element, type) {
+            // Update Tab Styles
+            const tabs = document.querySelectorAll('.tab-title');
+            tabs.forEach(t => t.classList.remove('active-tab'));
+            element.classList.add('active-tab');
+
+            // Toggle Content
+            const textbookContent = document.getElementById('content-textbook');
+            const knowledgeContent = document.getElementById('content-knowledge');
+
+            if (type === 'textbook') {
+                textbookContent.classList.remove('hidden');
+                knowledgeContent.classList.add('hidden');
+            } else {
+                textbookContent.classList.add('hidden');
+                knowledgeContent.classList.remove('hidden');
+            }
+        }
+
+        function toggleMode() {
+            const checkBox = document.getElementById("personalizationToggle");
+            const standardView = document.getElementById("standard-view");
+            const personalizedView = document.getElementById("personalized-view");
+            const aiBtn = document.getElementById("aiAssignBtn");
+
+            if (checkBox.checked) {
+                standardView.classList.add("hidden");
+                personalizedView.classList.remove("hidden");
+                aiBtn.style.display = "inline-flex"; // 显示 AI 按钮
+            } else {
+                standardView.classList.remove("hidden");
+                personalizedView.classList.add("hidden");
+                aiBtn.style.display = "none"; // 隐藏 AI 按钮
+            }
+        }
+
+        // Student Data for Simulation
+        const studentData = {
+            'zone-layer-5': ['张伟', '王芳', '李娜'],
+            'zone-layer-4': ['赵强', '刘洋'],
+            'zone-layer-3': ['陈静', '杨柳', '黄勇'],
+            'zone-layer-2': ['吴磊', '周杰'],
+            'zone-layer-1': ['郑辉', '孙丽']
+        };
+
+        // 学生详细数据（用于AI分析）
+        const studentDetailData = [
+            { name: '张伟', mastery: 95, layer: 5 },
+            { name: '王芳', mastery: 92, layer: 5 },
+            { name: '李娜', mastery: 90, layer: 5 },
+            { name: '赵强', mastery: 85, layer: 4 },
+            { name: '刘洋', mastery: 78, layer: 4 },
+            { name: '陈静', mastery: 72, layer: 3 },
+            { name: '杨柳', mastery: 68, layer: 3 },
+            { name: '黄勇', mastery: 62, layer: 3 },
+            { name: '吴磊', mastery: 55, layer: 2 },
+            { name: '周杰', mastery: 48, layer: 2 },
+            { name: '郑辉', mastery: 35, layer: 1 },
+            { name: '孙丽', mastery: 28, layer: 1 }
+        ];
+
+        // 缓存AI分析报告状态
+        let analysisReportGenerated = false;
+
+        // AI分析报告内容
+        const analysisReportText = `
+<h4>📚 当前课程知识点分析</h4>
+<p>本次错题巩固作业主要涵盖以下核心知识点：</p>
+<div class="knowledge-point-item">1. 寓言故事理解与寓意提炼</div>
+<div class="knowledge-point-item">2. 文言文实词的理解与运用</div>
+<div class="knowledge-point-item">3. 因果逻辑关系的分析能力</div>
+<div class="knowledge-point-item">4. 课文背诵与默写能力</div>
+
+<h4>📊 学生知识点掌握程度分析</h4>
+<p>基于选中学生的历史学习数据及作业完成情况，AI系统对每位学生在上述知识点的掌握程度进行了综合评估：</p>
+
+<table class="student-analysis-table">
+    <thead>
+        <tr>
+            <th style="width: 12%;">学生姓名</th>
+            <th style="width: 15%;">寓言理解</th>
+            <th style="width: 15%;">文言实词</th>
+            <th style="width: 15%;">因果逻辑</th>
+            <th style="width: 15%;">背诵默写</th>
+            <th style="width: 13%;">综合掌握度</th>
+            <th style="width: 15%;">建议层级</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>张伟</td>
+            <td><span class="mastery-score mastery-excellent">98%</span></td>
+            <td><span class="mastery-score mastery-excellent">95%</span></td>
+            <td><span class="mastery-score mastery-excellent">92%</span></td>
+            <td><span class="mastery-score mastery-excellent">95%</span></td>
+            <td><strong><span class="mastery-score mastery-excellent">95%</span></strong></td>
+            <td>90%-100%</td>
+        </tr>
+        <tr>
+            <td>王芳</td>
+            <td><span class="mastery-score mastery-excellent">90%</span></td>
+            <td><span class="mastery-score mastery-excellent">92%</span></td>
+            <td><span class="mastery-score mastery-excellent">95%</span></td>
+            <td><span class="mastery-score mastery-excellent">92%</span></td>
+            <td><strong><span class="mastery-score mastery-excellent">92%</span></strong></td>
+            <td>90%-100%</td>
+        </tr>
+        <tr>
+            <td>李娜</td>
+            <td><span class="mastery-score mastery-excellent">92%</span></td>
+            <td><span class="mastery-score mastery-good">88%</span></td>
+            <td><span class="mastery-score mastery-excellent">90%</span></td>
+            <td><span class="mastery-score mastery-excellent">90%</span></td>
+            <td><strong><span class="mastery-score mastery-excellent">90%</span></strong></td>
+            <td>90%-100%</td>
+        </tr>
+        <tr>
+            <td>赵强</td>
+            <td><span class="mastery-score mastery-good">88%</span></td>
+            <td><span class="mastery-score mastery-good">85%</span></td>
+            <td><span class="mastery-score mastery-good">82%</span></td>
+            <td><span class="mastery-score mastery-good">85%</span></td>
+            <td><strong><span class="mastery-score mastery-good">85%</span></strong></td>
+            <td>75%-89%</td>
+        </tr>
+        <tr>
+            <td>刘洋</td>
+            <td><span class="mastery-score mastery-good">80%</span></td>
+            <td><span class="mastery-score mastery-good">75%</span></td>
+            <td><span class="mastery-score mastery-good">78%</span></td>
+            <td><span class="mastery-score mastery-good">80%</span></td>
+            <td><strong><span class="mastery-score mastery-good">78%</span></strong></td>
+            <td>75%-89%</td>
+        </tr>
+        <tr>
+            <td>陈静</td>
+            <td><span class="mastery-score mastery-medium">75%</span></td>
+            <td><span class="mastery-score mastery-medium">70%</span></td>
+            <td><span class="mastery-score mastery-medium">72%</span></td>
+            <td><span class="mastery-score mastery-medium">70%</span></td>
+            <td><strong><span class="mastery-score mastery-medium">72%</span></strong></td>
+            <td>60%-74%</td>
+        </tr>
+        <tr>
+            <td>杨柳</td>
+            <td><span class="mastery-score mastery-medium">70%</span></td>
+            <td><span class="mastery-score mastery-medium">65%</span></td>
+            <td><span class="mastery-score mastery-medium">68%</span></td>
+            <td><span class="mastery-score mastery-medium">70%</span></td>
+            <td><strong><span class="mastery-score mastery-medium">68%</span></strong></td>
+            <td>60%-74%</td>
+        </tr>
+        <tr>
+            <td>黄勇</td>
+            <td><span class="mastery-score mastery-medium">65%</span></td>
+            <td><span class="mastery-score mastery-poor">58%</span></td>
+            <td><span class="mastery-score mastery-medium">62%</span></td>
+            <td><span class="mastery-score mastery-medium">65%</span></td>
+            <td><strong><span class="mastery-score mastery-medium">62%</span></strong></td>
+            <td>60%-74%</td>
+        </tr>
+        <tr>
+            <td>吴磊</td>
+            <td><span class="mastery-score mastery-poor">58%</span></td>
+            <td><span class="mastery-score mastery-poor">52%</span></td>
+            <td><span class="mastery-score mastery-poor">55%</span></td>
+            <td><span class="mastery-score mastery-poor">55%</span></td>
+            <td><strong><span class="mastery-score mastery-poor">55%</span></strong></td>
+            <td>40%-59%</td>
+        </tr>
+        <tr>
+            <td>周杰</td>
+            <td><span class="mastery-score mastery-poor">50%</span></td>
+            <td><span class="mastery-score mastery-poor">45%</span></td>
+            <td><span class="mastery-score mastery-poor">48%</span></td>
+            <td><span class="mastery-score mastery-poor">50%</span></td>
+            <td><strong><span class="mastery-score mastery-poor">48%</span></strong></td>
+            <td>40%-59%</td>
+        </tr>
+        <tr>
+            <td>郑辉</td>
+            <td><span class="mastery-score mastery-weak">38%</span></td>
+            <td><span class="mastery-score mastery-weak">32%</span></td>
+            <td><span class="mastery-score mastery-weak">35%</span></td>
+            <td><span class="mastery-score mastery-weak">35%</span></td>
+            <td><strong><span class="mastery-score mastery-weak">35%</span></strong></td>
+            <td>0%-39%</td>
+        </tr>
+        <tr>
+            <td>孙丽</td>
+            <td><span class="mastery-score mastery-weak">30%</span></td>
+            <td><span class="mastery-score mastery-weak">25%</span></td>
+            <td><span class="mastery-score mastery-weak">28%</span></td>
+            <td><span class="mastery-score mastery-weak">30%</span></td>
+            <td><strong><span class="mastery-score mastery-weak">28%</span></strong></td>
+            <td>0%-39%</td>
+        </tr>
+    </tbody>
+</table>
+
+<p style="font-size: 13px; color: #666; margin-top: 10px;">
+    <strong>说明：</strong>综合掌握度 = 当前知识点掌握情况百分比的平均数，根据综合掌握度确定建议层级。
+</p>
+
+<h4>💡 AI智能分层建议</h4>
+<div class="recommendation-box">
+    <p><strong>分层依据：</strong>根据学生对当前知识点的综合掌握程度，系统建议将45名学生分为5个层次：</p>
+    <ul style="margin: 10px 0; padding-left: 20px;">
+        <li><strong>90%-100% (挑战层)</strong>：3名学生 - 张伟、王芳、李娜<br>
+        <span style="font-size: 12px; color: #666;">特征：各知识点掌握均衡且优秀，寓言理解和逻辑分析能力突出<br>
+        建议：提供高难度题目，培养深度思考和拓展能力</span></li>
+        
+        <li><strong>75%-89% (拔高层)</strong>：2名学生 - 赵强、刘洋<br>
+        <span style="font-size: 12px; color: #666;">特征：整体掌握良好，个别知识点需要强化（如刘洋的文言实词较弱）<br>
+        建议：适度增加难度，巩固优势并挑战更高水平</span></li>
+        
+        <li><strong>60%-74% (良好层)</strong>：3名学生 - 陈静、杨柳、黄勇<br>
+        <span style="font-size: 12px; color: #666;">特征：基础知识掌握尚可，但在文言实词和逻辑分析上有待提升<br>
+        建议：平衡基础与提升，重点突破薄弱环节</span></li>
+        
+        <li><strong>40%-59% (提升层)</strong>：2名学生 - 吴磊、周杰<br>
+        <span style="font-size: 12px; color: #666;">特征：各知识点掌握不够扎实，文言实词理解较为薄弱<br>
+        建议：强化基础训练，逐步提升理解能力</span></li>
+        
+        <li><strong>0%-39% (基础层)</strong>：2名学生 - 郑辉、孙丽<br>
+        <span style="font-size: 12px; color: #666;">特征：基础知识掌握不足，需要从基本概念开始系统学习<br>
+        建议：从基础知识入手，建立学习信心</span></li>
+    </ul>
+</div>
+
+<p style="color: #666; font-size: 13px; margin-top: 20px;">
+    <strong>提示：</strong>该分层方案基于AI算法综合分析生成，您可以点击"采用分配方案"自动将学生分配到对应层级，也可以后续手动调整。
+</p>
+`;
+
+        // 流式输出函数
+        async function streamText(text, containerId, speed = 20) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            
+            // 创建一个临时div来解析HTML
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = text.trim();
+            
+            // 递归处理节点
+            async function processNode(node, targetElement) {
+                if (node.nodeType === Node.TEXT_NODE) {
+                    // 文本节点，逐字输出
+                    const textContent = node.textContent;
+                    for (let char of textContent) {
+                        targetElement.appendChild(document.createTextNode(char));
+                        await new Promise(resolve => setTimeout(resolve, speed));
+                    }
+                } else if (node.nodeType === Node.ELEMENT_NODE) {
+                    // 元素节点，创建相同的元素
+                    const newElement = document.createElement(node.tagName);
+                    
+                    // 复制属性
+                    for (let attr of node.attributes) {
+                        newElement.setAttribute(attr.name, attr.value);
+                    }
+                    
+                    targetElement.appendChild(newElement);
+                    
+                    // 递归处理子节点
+                    for (let child of node.childNodes) {
+                        await processNode(child, newElement);
+                    }
+                }
+            }
+            
+            // 处理所有子节点
+            for (let child of tempDiv.childNodes) {
+                await processNode(child, container);
+            }
+        }
+
+        function autoAssignStudents() {
+            // 显示AI分析弹窗
+            showAnalysisModal();
+        }
+
+        function showAnalysisModal() {
+            const modal = document.getElementById('analysisModal');
+            const adoptBtn = document.getElementById('adoptBtn');
+            const reportContent = document.getElementById('analysisReportContent');
+            
+            modal.classList.add('show');
+            
+            // 如果报告已经生成过，直接显示缓存的内容
+            if (analysisReportGenerated && reportContent.innerHTML.trim() !== '') {
+                adoptBtn.disabled = false;
+            } else {
+                // 首次生成，需要流式输出
+                adoptBtn.disabled = true;
+                reportContent.innerHTML = ''; // 清空内容
+                
+                // 开始流式输出
+                streamText(analysisReportText, 'analysisReportContent', 15).then(() => {
+                    // 输出完成后启用采用按钮并标记已生成
+                    adoptBtn.disabled = false;
+                    analysisReportGenerated = true;
+                });
+            }
+        }
+
+        function regenerateAnalysis() {
+            const adoptBtn = document.getElementById('adoptBtn');
+            const reportContent = document.getElementById('analysisReportContent');
+            
+            // 重置状态
+            analysisReportGenerated = false;
+            adoptBtn.disabled = true;
+            reportContent.innerHTML = '';
+            
+            // 重新生成流式输出
+            streamText(analysisReportText, 'analysisReportContent', 15).then(() => {
+                adoptBtn.disabled = false;
+                analysisReportGenerated = true;
+            });
+        }
+
+        function closeAnalysisModal() {
+            const modal = document.getElementById('analysisModal');
+            modal.classList.remove('show');
+        }
+
+        function adoptAnalysis() {
+            const btn = document.getElementById('adoptBtn');
+            const originalContent = btn.innerHTML;
+            
+            // Loading State
+            btn.disabled = true;
+            btn.innerHTML = '正在分配...';
+            
+            setTimeout(() => {
+                // Populate students based on analysis
+                for (const [zoneId, names] of Object.entries(studentData)) {
+                    const zone = document.getElementById(zoneId);
+                    zone.innerHTML = ''; // Clear first
+                    
+                    names.forEach((name, index) => {
+                        const span = document.createElement('span');
+                        span.className = 'student-tag';
+                        span.draggable = true;
+                        span.id = `s-${zoneId}-${index}`;
+                        span.textContent = name;
+                        span.ondragstart = drag;
+                        
+                        span.style.animation = `fadeIn 0.5s ease forwards`;
+                        span.style.opacity = '0';
+                        
+                        zone.appendChild(span);
+                        
+                        setTimeout(() => {
+                            span.style.opacity = '1';
+                        }, index * 100);
+                    });
+                }
+
+                // 关闭弹窗
+                closeAnalysisModal();
+                
+                // 显示成功提示
+                btn.innerHTML = '✅ 分配完成';
+                btn.style.background = "#52c41a";
+                
+                setTimeout(() => {
+                    btn.disabled = false;
+                    btn.innerHTML = originalContent;
+                    btn.style.background = "";
+                }, 1500);
+
+            }, 1000);
+        }
+        
+        function allowDrop(ev) { ev.preventDefault(); }
+        function drag(ev) { 
+            ev.dataTransfer.setData("text", ev.target.id);
+            ev.target.classList.add('dragging');
+        }
+        function drop(ev) {
+            ev.preventDefault();
+            var data = ev.dataTransfer.getData("text");
+            var draggedElement = document.getElementById(data);
+            if (draggedElement) {
+                draggedElement.classList.remove('dragging');
+                if (ev.target.classList.contains('student-zone')) {
+                    ev.target.appendChild(draggedElement);
+                } else if (ev.target.classList.contains('student-tag')) {
+                    ev.target.parentNode.appendChild(draggedElement);
+                }
+            }
+        }
+
+        // 显示已选题目详情弹窗
+        function showSelectedQuestionsModal() {
+            const modal = document.getElementById('selectedQuestionsModal');
+            modal.classList.add('show');
+            // 为题目项添加卡片背景样式
+            addCardStylesToQuestions();
+        }
+
+        // 关闭已选题目详情弹窗
+        function closeSelectedQuestionsModal() {
+            const modal = document.getElementById('selectedQuestionsModal');
+            modal.classList.remove('show');
+        }
+
+        // 为题目项添加卡片背景样式
+        function addCardStylesToQuestions() {
+            const questionItems = document.querySelectorAll('.mistake-item');
+            questionItems.forEach(item => {
+                item.style.background = '#fff';
+                item.style.borderRadius = '6px';
+                item.style.padding = '15px';
+                item.style.boxShadow = '0 1px 2px rgba(0,0,0,0.05)';
+                item.style.border = '1px solid #f0f0f0';
+                // 移除可能存在的margin-bottom样式，使用外部容器的gap
+                const childDivs = item.querySelectorAll('div');
+                childDivs.forEach(div => {
+                    if (div.style.marginBottom === '15px') {
+                        div.style.marginBottom = '0';
+                    }
+                });
+            });
+        }
+    </script>
+</body>
+</html>
