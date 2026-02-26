@@ -526,8 +526,8 @@
                 </button>
                 <!-- Tab切换功能 - 移到左侧 -->
                 <div style="display: flex; align-items: center; gap: 0;">
-                    <button id="classTabTop" onclick="switchTab('class')" style="padding: 8px 20px; background: var(--primary-color); color: white; border: none; border-radius: 4px 0 0 4px; font-size: 14px; cursor: pointer; transition: all 0.3s ease; font-weight: 500;">班级错题数据</button>
-                    <button id="personalTabTop" onclick="switchTab('personal')" style="padding: 8px 20px; background: #f0f0f0; color: var(--text-color); border: none; border-radius: 0 4px 4px 0; font-size: 14px; cursor: pointer; transition: all 0.3s ease;">个人错题数据</button>
+                    <button id="classTabTop" onclick="switchTab('class')" style="padding: 8px 20px; background: var(--primary-color); color: white; border: none; border-radius: 4px 0 0 4px; font-size: 14px; cursor: pointer; transition: all 0.3s ease; font-weight: 500;">班级共性错题</button>
+                    <button id="personalTabTop" onclick="switchTab('personal')" style="padding: 8px 20px; background: #f0f0f0; color: var(--text-color); border: none; border-radius: 0 4px 4px 0; font-size: 14px; cursor: pointer; transition: all 0.3s ease;">学生个性错题</button>
                 </div>
                 <!-- 学生选择器 - 个人模式时显示 -->
                 <div id="studentSelectorTop" style="display: none; align-items: center; gap: 10px;">
@@ -571,9 +571,9 @@
         <!-- 主体内容 -->
         <div class="body-content">
             <!-- 整合的统计与搜索区域 -->
-            <div style="background: white; border-radius: 8px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); width: 300px; position: absolute; left: 20px; top: 120px; z-index: 50;">
+            <div id="statsContainer" style="background: white; border-radius: 8px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); width: 300px; position: absolute; left: 20px; top: 120px; z-index: 50;">
                 <!-- 统计数据与分布分析 - 紧凑单行 -->
-                <div style="display: flex; align-items: center; justify-content: space-between; padding: 8px 0;">
+                <div id="statsInner" style="display: flex; align-items: center; justify-content: center; padding: 8px 0;">
                     <!-- 左侧组：统计数据 -->
                 <div style="display: flex; align-items: center; gap: 30px;">
                     <!-- 统计概览 -->
@@ -595,7 +595,7 @@
                                     </div>
                                     <span style="font-size: 11px; color: var(--text-secondary);">总错题人数</span>
                                 </div> -->
-                                <div style="display: flex; flex-direction: column; align-items: center; gap: 2px;">
+                                <div class="class-only-stat" style="display: flex; flex-direction: column; align-items: center; gap: 2px;">
                                     <div style="display: flex; align-items: center; gap: 6px;">
                                         <span style="font-size: 18px;">📈</span>
                                         <span style="font-size: 20px; font-weight: bold; color: #faad14;">47.5%</span>
@@ -681,7 +681,7 @@
                                     </div>
                                     <span style="font-size: 11px; color: var(--text-secondary);">总错题人数</span>
                                 </div> -->
-                                <div style="display: flex; flex-direction: column; align-items: center; gap: 2px;">
+                                <div class="class-only-stat" style="display: flex; flex-direction: column; align-items: center; gap: 2px;">
                                     <div style="display: flex; align-items: center; gap: 6px;">
                                         <span style="font-size: 18px;">📈</span>
                                         <span style="font-size: 20px; font-weight: bold; color: #faad14;">47.5%</span>
@@ -767,7 +767,7 @@
                                     <p>错误类型：计算错误、进位错误</p>
                                 </div>
                             </div>
-                            <div style="text-align: right;">
+                            <div class="class-only-stat" style="text-align: right;">
                                 <div style="font-size: 24px; font-weight: bold; color: #ff4d4f; margin-bottom: 5px;">25/40</div>
                                 <div style="font-size: 14px; color: var(--text-secondary);">错题人数/答题人数</div>
                                 <div style="font-size: 14px; color: var(--text-secondary); margin-top: 5px;">错误率：62.5%</div>
@@ -800,7 +800,7 @@
                                     <p>错误类型：概念混淆</p>
                                 </div>
                             </div>
-                            <div style="text-align: right;">
+                            <div class="class-only-stat" style="text-align: right;">
                                 <div style="font-size: 24px; font-weight: bold; color: #ff4d4f; margin-bottom: 5px;">18/40</div>
                                 <div style="font-size: 14px; color: var(--text-secondary);">错题人数/答题人数</div>
                                 <div style="font-size: 14px; color: var(--text-secondary); margin-top: 5px;">错误率：45.0%</div>
@@ -833,7 +833,7 @@
                                     <p>错误类型：语境误用</p>
                                 </div>
                             </div>
-                            <div style="text-align: right;">
+                            <div class="class-only-stat" style="text-align: right;">
                                 <div style="font-size: 24px; font-weight: bold; color: #ff4d4f; margin-bottom: 5px;">15/40</div>
                                 <div style="font-size: 14px; color: var(--text-secondary);">错题人数/答题人数</div>
                                 <div style="font-size: 14px; color: var(--text-secondary); margin-top: 5px;">错误率：37.5%</div>
@@ -866,7 +866,7 @@
                                     <p>错误类型：语法错误、主谓一致</p>
                                 </div>
                             </div>
-                            <div style="text-align: right;">
+                            <div class="class-only-stat" style="text-align: right;">
                                 <div style="font-size: 24px; font-weight: bold; color: #ff4d4f; margin-bottom: 5px;">12/40</div>
                                 <div style="font-size: 14px; color: var(--text-secondary);">错题人数/答题人数</div>
                                 <div style="font-size: 14px; color: var(--text-secondary); margin-top: 5px;">错误率：30.0%</div>
@@ -939,6 +939,9 @@
     <script>
         // 当前页码
         let currentPage = 1;
+        
+        // 当前Tab模式：'class' 或 'personal'
+        let currentTabMode = 'class';
         
         // 模拟完整的错题数据
         const allMistakes = [
@@ -1355,8 +1358,8 @@
                             </div>
                             <span style="font-size: 11px; color: var(--text-secondary);">错题总数</span>
                         </div>
-                        <div style="width: 1px; height: 35px; background: #e8e8e8;"></div>
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: 2px;">
+                        <div class="class-only-stat" style="width: 1px; height: 35px; background: #e8e8e8;"></div>
+                        <div class="class-only-stat" style="display: flex; flex-direction: column; align-items: center; gap: 2px;">
                             <div style="display: flex; align-items: center; gap: 6px;">
                                 <span style="font-size: 18px;">👥</span>
                                 <span style="font-size: 20px; font-weight: bold; color: #ff4d4f;">${stats.totalErrorCount}</span>
@@ -1364,8 +1367,8 @@
                             </div>
                             <span style="font-size: 11px; color: var(--text-secondary);">总错题人数</span>
                         </div>
-                        <div style="width: 1px; height: 35px; background: #e8e8e8;"></div>
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: 2px;">
+                        <div class="class-only-stat" style="width: 1px; height: 35px; background: #e8e8e8;"></div>
+                        <div class="class-only-stat" style="display: flex; flex-direction: column; align-items: center; gap: 2px;">
                             <div style="display: flex; align-items: center; gap: 6px;">
                                 <span style="font-size: 18px;">📈</span>
                                 <span style="font-size: 20px; font-weight: bold; color: #faad14;">${stats.avgErrorRate}%</span>
@@ -1424,12 +1427,12 @@
                     <div class="mistake-item" style="position: relative; padding: 15px;">
                         <!-- 右上角区域：统计信息 + 选择框 -->
                         <div style="position: absolute; top: 15px; right: 15px; display: flex; align-items: center; gap: 12px;">
-                                <div style="font-size: 12px; color: var(--text-secondary); padding: 3px 8px; background: #fff1f0; border-radius: 4px;">
+                                <div class="class-only-stat" style="font-size: 12px; color: var(--text-secondary); padding: 3px 8px; background: #fff1f0; border-radius: 4px;">
                                     错误率：${m.errorRate}%
                                 </div>
-                                <span style="font-size: 12px; color: var(--text-secondary);">错题人数/答题人数</span>
-                                <span onclick="showStudentList('${m.question}', ${m.errorCount})" style="font-size: 20px; font-weight: bold; color: #ff4d4f; text-decoration: underline; cursor: pointer;">${m.errorCount}/${m.totalCount || 40}</span>
-                                <input type="checkbox" class="question-checkbox" onchange="updateSelectionCount()" style="width: 18px; height: 18px; cursor: pointer; margin-left: 8px;">
+                                <span class="class-only-stat" style="font-size: 12px; color: var(--text-secondary);">错题人数/答题人数</span>
+                                <span class="class-only-stat" onclick="showStudentList('${m.question}', ${m.errorCount})" style="font-size: 20px; font-weight: bold; color: #ff4d4f; text-decoration: underline; cursor: pointer;">${m.errorCount}/${m.totalCount || 40}</span>
+                                <input type="checkbox" class="question-checkbox class-only-stat" onchange="updateSelectionCount()" style="width: 18px; height: 18px; cursor: pointer; margin-left: 8px;">
                             </div>
                         
                         <div style="padding-right: 280px;">
@@ -1466,6 +1469,12 @@
             updateStats(stats);
             updateMistakeList(filteredMistakes);
             updateKnowledgeTree(filteredMistakes);
+            
+            // 重新应用班级专属统计的显示/隐藏状态
+            const classOnlyStats = document.querySelectorAll('.class-only-stat');
+            classOnlyStats.forEach(el => {
+                el.style.display = currentTabMode === 'class' ? '' : 'none';
+            });
         }
         
         // 更新知识点树 - 保持树形结构，只显示有错题的知识点
@@ -1966,6 +1975,9 @@
         
         // Tab切换功能
         function switchTab(tabType) {
+            // 更新当前Tab模式
+            currentTabMode = tabType;
+            
             // 获取Tab按钮
             const classTab = document.getElementById('classTabTop');
             const personalTab = document.getElementById('personalTabTop');
@@ -2006,8 +2018,38 @@
                 }
             }
             
+            // 切换排序选项：个人模式只保留时间排序
+            const sortSelect = document.getElementById('sortOption');
+            if (sortSelect) {
+                if (tabType === 'personal') {
+                    sortSelect.innerHTML = `
+                        <option value="dateDesc">时间（从新到旧）</option>
+                        <option value="dateAsc">时间（从旧到新）</option>
+                    `;
+                } else {
+                    sortSelect.innerHTML = `
+                        <option value="comprehensiveDesc">综合排序（从高到低）</option>
+                        <option value="comprehensiveAsc">综合排序（从低到高）</option>
+                        <option value="dateDesc">时间（从新到旧）</option>
+                        <option value="dateAsc">时间（从旧到新）</option>
+                    `;
+                }
+            }
+            
+            // 切换统计区域居中：始终居中显示
+            const statsInner = document.getElementById('statsInner');
+            if (statsInner) {
+                statsInner.style.justifyContent = 'center';
+            }
+            
             // 重新应用筛选和更新显示
             applyFiltersAndUpdate();
+            
+            // 切换班级专属统计数据的显示/隐藏
+            const classOnlyStats = document.querySelectorAll('.class-only-stat');
+            classOnlyStats.forEach(el => {
+                el.style.display = tabType === 'class' ? '' : 'none';
+            });
         }
     </script>
     
