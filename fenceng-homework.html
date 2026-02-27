@@ -1028,7 +1028,21 @@
     </div>
 
     <div class="footer-bar">
-        <button class="btn-primary" onclick="window.location.href='preview2.html'">生成作业</button>
+        <button class="btn-primary" onclick="handleGenerateHomework()">生成作业</button>
+    </div>
+
+    <!-- AI变题生成loading弹窗 -->
+    <div class="modal-overlay" id="aiLoadingModal">
+        <div class="modal-content" style="width: 450px; text-align: center; padding: 40px 30px; max-height: none;">
+            <div style="font-size: 40px; margin-bottom: 15px;">🤖</div>
+            <h3 style="font-size: 18px; color: #333; margin-bottom: 10px;">AI正在生成变题</h3>
+            <p id="ai-loading-desc" style="font-size: 13px; color: #999; margin-bottom: 20px;">正在根据各层次配置智能生成变式题目...</p>
+            <div style="width: 100%; height: 8px; background: #e0e0e0; border-radius: 4px; overflow: hidden; margin-bottom: 10px;">
+                <div id="ai-progress-bar" style="height: 100%; width: 0%; background: linear-gradient(90deg, #722ed1, #b37feb); border-radius: 4px; transition: width 0.5s ease;"></div>
+            </div>
+            <div id="ai-progress-text" style="font-size: 13px; color: #666;">进度：0%</div>
+            <div id="ai-progress-step" style="font-size: 12px; color: #999; margin-top: 8px;">正在分析原题知识点...</div>
+        </div>
     </div>
 
     <!-- 已选题目详情弹窗 -->
@@ -1830,6 +1844,54 @@
                     }
                 });
             });
+        }
+
+        // 生成作业：检查是否有层使用了AI变题
+        function handleGenerateHomework() {
+            const selects = document.querySelectorAll('.question-type-select');
+            let hasAiVariation = false;
+            selects.forEach(sel => {
+                if (sel.value === 'aiVariation') hasAiVariation = true;
+            });
+
+            if (hasAiVariation) {
+                startAiGeneration();
+            } else {
+                window.location.href = 'preview2.html';
+            }
+        }
+
+        function startAiGeneration() {
+            const modal = document.getElementById('aiLoadingModal');
+            const progressBar = document.getElementById('ai-progress-bar');
+            const progressText = document.getElementById('ai-progress-text');
+            const progressStep = document.getElementById('ai-progress-step');
+
+            modal.classList.add('show');
+            progressBar.style.width = '0%';
+
+            const steps = [
+                { pct: 15, text: '正在分析原题知识点...', time: 1000 },
+                { pct: 30, text: '正在匹配各层次变题策略...', time: 2500 },
+                { pct: 50, text: '正在为挑战层生成变式题目...', time: 4000 },
+                { pct: 70, text: '正在为其他层次生成变式题目...', time: 5500 },
+                { pct: 85, text: '正在校验题目质量...', time: 7000 },
+                { pct: 95, text: '正在生成参考答案与解析...', time: 8000 },
+                { pct: 100, text: '生成完成！', time: 9000 }
+            ];
+
+            steps.forEach(step => {
+                setTimeout(() => {
+                    progressBar.style.width = step.pct + '%';
+                    progressText.textContent = '进度：' + step.pct + '%';
+                    progressStep.textContent = step.text;
+                }, step.time);
+            });
+
+            setTimeout(() => {
+                modal.classList.remove('show');
+                window.location.href = 'preview2.html';
+            }, 10000);
         }
     </script>
 </body>
