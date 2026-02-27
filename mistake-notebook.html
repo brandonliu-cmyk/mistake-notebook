@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
@@ -122,9 +122,9 @@
             overflow: hidden;
             position: absolute;
             left: 20px;
-            top: 120px;
+            top: 220px;
             bottom: 20px;
-            height: calc(100vh - 140px);
+            height: calc(100vh - 240px);
         }
 
         /* 知识点树头部 */
@@ -205,8 +205,7 @@
         .content-area {
             flex: 1;
             overflow-y: auto;
-            padding: 20px;
-            padding-bottom: 100px;
+            padding: 0 20px 100px 20px;
             background: linear-gradient(135deg, #f0f2f5 0%, #e6e8eb 100%);
             position: absolute;
             left: 340px;
@@ -228,10 +227,11 @@
         /* 错题本内容 */
         .mistake-notebook {
             background: white;
-            border-radius: 8px;
+            border-radius: 12px;
             padding: 25px;
             box-shadow: 0 4px 16px rgba(0,0,0,0.08);
             transition: all 0.3s ease;
+            margin-top: -20px;
         }
 
         .mistake-notebook:hover {
@@ -519,11 +519,31 @@
         </div>
 
         <!-- 返回按钮和筛选下拉框 -->
-        <div style="position: absolute; top: 70px; left: 20px; right: 20px; z-index: 100; display: flex; align-items: center; justify-content: space-between;">
-            <button onclick="window.location.href='index.html'" style="background: none; border: none; font-size: 16px; cursor: pointer; color: var(--text-color); display: flex; align-items: center; gap: 5px;">
-                ← 返回
-            </button>
-            <div style="display: flex; align-items: center; gap: 10px;">
+        <div style="position: absolute; top: 70px; left: 20px; right: 20px; z-index: 100; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 15px;">
+            <div style="display: flex; align-items: center; gap: 20px;">
+                <button onclick="window.location.href='index.html'" style="background: none; border: none; font-size: 16px; cursor: pointer; color: var(--text-color); display: flex; align-items: center; gap: 5px;">
+                    ← 返回
+                </button>
+                <!-- Tab切换功能 - 移到左侧 -->
+                <div style="display: flex; align-items: center; gap: 0;">
+                    <button id="classTabTop" onclick="switchTab('class')" style="padding: 8px 20px; background: var(--primary-color); color: white; border: none; border-radius: 4px 0 0 4px; font-size: 14px; cursor: pointer; transition: all 0.3s ease; font-weight: 500;">班级共性错题</button>
+                    <button id="personalTabTop" onclick="switchTab('personal')" style="padding: 8px 20px; background: #f0f0f0; color: var(--text-color); border: none; border-radius: 0 4px 4px 0; font-size: 14px; cursor: pointer; transition: all 0.3s ease;">学生个性错题</button>
+                </div>
+                <!-- 学生选择器 - 个人模式时显示 -->
+                <div id="studentSelectorTop" style="display: none; align-items: center; gap: 10px;">
+                    <span style="font-size: 14px; color: var(--text-secondary);">学生：</span>
+                    <select id="studentFilter" onchange="applyFilters()" style="padding: 6px 12px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 13px;">
+                        <option value="all">全部学生</option>
+                        <option value="student1">张三</option>
+                        <option value="student2">李四</option>
+                        <option value="student3">王五</option>
+                        <option value="student4">赵六</option>
+                        <option value="student5">钱七</option>
+                    </select>
+                </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                <!-- 其他筛选器 -->
                 <select id="dateRangeFilter" style="padding: 6px 12px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 13px;">
                     <option value="all">全部数据</option>
                     <option value="week">近一周数据</option>
@@ -550,231 +570,11 @@
 
         <!-- 主体内容 -->
         <div class="body-content">
-            <!-- 左侧知识点树 -->
-            <div class="knowledge-tree">
-                <!-- 知识点树头部 -->
-                <div class="tree-header">
-                </div>
-                
-                <!-- 知识点树标题 -->
-                <div class="tree-title">知识点</div>
-                
-                <!-- 知识点树内容 -->
-                <div class="tree-content">
-                    <!-- 数与代数 -->
-                    <div class="tree-node">
-                        <div class="tree-node-content">
-                            <span class="tree-toggle" onclick="toggleTreeNode(this)">▼</span>
-                            <input type="checkbox" onchange="toggleNodeCheck(this)">
-                            <span>数与代数</span>
-                        </div>
-                        <div class="tree-node-children">
-                            <div class="tree-node">
-                                <div class="tree-node-content">
-                                    <span class="tree-toggle" onclick="toggleTreeNode(this)">▶</span>
-                                    <input type="checkbox" onchange="toggleNodeCheck(this)">
-                                    <span>数的认识</span>
-                                </div>
-                                <div class="tree-node-children" style="display: none;">
-                                    <div class="tree-node">
-                                        <div class="tree-node-content">
-                                            <span class="tree-toggle">　</span>
-                                            <input type="checkbox">
-                                            <span>整数</span>
-                                        </div>
-                                    </div>
-                                    <div class="tree-node">
-                                        <div class="tree-node-content">
-                                            <span class="tree-toggle">　</span>
-                                            <input type="checkbox">
-                                            <span>小数</span>
-                                        </div>
-                                    </div>
-                                    <div class="tree-node">
-                                        <div class="tree-node-content">
-                                            <span class="tree-toggle">　</span>
-                                            <input type="checkbox">
-                                            <span>分数</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="tree-node">
-                                <div class="tree-node-content">
-                                    <span class="tree-toggle" onclick="toggleTreeNode(this)">▶</span>
-                                    <input type="checkbox" onchange="toggleNodeCheck(this)">
-                                    <span>数的运算</span>
-                                </div>
-                                <div class="tree-node-children" style="display: none;">
-                                    <div class="tree-node">
-                                        <div class="tree-node-content">
-                                            <span class="tree-toggle">　</span>
-                                            <input type="checkbox">
-                                            <span>加法</span>
-                                        </div>
-                                    </div>
-                                    <div class="tree-node">
-                                        <div class="tree-node-content">
-                                            <span class="tree-toggle">　</span>
-                                            <input type="checkbox">
-                                            <span>减法</span>
-                                        </div>
-                                    </div>
-                                    <div class="tree-node">
-                                        <div class="tree-node-content">
-                                            <span class="tree-toggle">　</span>
-                                            <input type="checkbox">
-                                            <span>乘法</span>
-                                        </div>
-                                    </div>
-                                    <div class="tree-node">
-                                        <div class="tree-node-content">
-                                            <span class="tree-toggle">　</span>
-                                            <input type="checkbox">
-                                            <span>除法</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="tree-node">
-                                <div class="tree-node-content">
-                                    <span class="tree-toggle" onclick="toggleTreeNode(this)">▶</span>
-                                    <input type="checkbox" onchange="toggleNodeCheck(this)">
-                                    <span>式与方程</span>
-                                </div>
-                                <div class="tree-node-children" style="display: none;">
-                                    <div class="tree-node">
-                                        <div class="tree-node-content">
-                                            <span class="tree-toggle">　</span>
-                                            <input type="checkbox">
-                                            <span>代数式</span>
-                                        </div>
-                                    </div>
-                                    <div class="tree-node">
-                                        <div class="tree-node-content">
-                                            <span class="tree-toggle">　</span>
-                                            <input type="checkbox">
-                                            <span>方程</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="tree-node">
-                                <div class="tree-node-content">
-                                    <span class="tree-toggle" onclick="toggleTreeNode(this)">▶</span>
-                                    <input type="checkbox" onchange="toggleNodeCheck(this)">
-                                    <span>比和比例</span>
-                                </div>
-                                <div class="tree-node-children" style="display: none;">
-                                    <div class="tree-node">
-                                        <div class="tree-node-content">
-                                            <span class="tree-toggle">　</span>
-                                            <input type="checkbox">
-                                            <span>比</span>
-                                        </div>
-                                    </div>
-                                    <div class="tree-node">
-                                        <div class="tree-node-content">
-                                            <span class="tree-toggle">　</span>
-                                            <input type="checkbox">
-                                            <span>比例</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="tree-node">
-                                <div class="tree-node-content">
-                                    <span class="tree-toggle">　</span>
-                                    <input type="checkbox">
-                                    <span>常见的量</span>
-                                </div>
-                            </div>
-                            <div class="tree-node">
-                                <div class="tree-node-content">
-                                    <span class="tree-toggle">　</span>
-                                    <input type="checkbox">
-                                    <span>应用题</span>
-                                </div>
-                            </div>
-                            <div class="tree-node">
-                                <div class="tree-node-content">
-                                    <span class="tree-toggle">　</span>
-                                    <input type="checkbox">
-                                    <span>探索规律</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- 图形与几何 -->
-                    <div class="tree-node">
-                        <div class="tree-node-content">
-                            <span class="tree-toggle" onclick="toggleTreeNode(this)">▶</span>
-                            <input type="checkbox" onchange="toggleNodeCheck(this)">
-                            <span>图形与几何</span>
-                        </div>
-                        <div class="tree-node-children" style="display: none;">
-                            <div class="tree-node">
-                                <div class="tree-node-content">
-                                    <span class="tree-toggle">　</span>
-                                    <input type="checkbox">
-                                    <span>平面图形</span>
-                                </div>
-                            </div>
-                            <div class="tree-node">
-                                <div class="tree-node-content">
-                                    <span class="tree-toggle">　</span>
-                                    <input type="checkbox">
-                                    <span>立体图形</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- 统计与概率 -->
-                    <div class="tree-node">
-                        <div class="tree-node-content">
-                            <span class="tree-toggle" onclick="toggleTreeNode(this)">▶</span>
-                            <input type="checkbox" onchange="toggleNodeCheck(this)">
-                            <span>统计与概率</span>
-                        </div>
-                        <div class="tree-node-children" style="display: none;">
-                            <div class="tree-node">
-                                <div class="tree-node-content">
-                                    <span class="tree-toggle">　</span>
-                                    <input type="checkbox">
-                                    <span>统计</span>
-                                </div>
-                            </div>
-                            <div class="tree-node">
-                                <div class="tree-node-content">
-                                    <span class="tree-toggle">　</span>
-                                    <input type="checkbox">
-                                    <span>概率</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- 数学竞赛 -->
-                    <div class="tree-node">
-                        <div class="tree-node-content">
-                            <span class="tree-toggle">　</span>
-                            <input type="checkbox">
-                            <span>数学竞赛</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- 右侧内容区域 -->
-            <div class="content-area">
-                
-                <!-- 整合的统计与搜索区域 -->
-                <div style="background: white; border-radius: 8px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
-                    <!-- 统计数据与分布分析 - 紧凑单行 -->
-                    <div style="display: flex; align-items: center; justify-content: space-between; padding: 8px 0;">
-                        <!-- 左侧组：统计数据 -->
+            <!-- 整合的统计与搜索区域 -->
+            <div id="statsContainer" style="background: white; border-radius: 8px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); width: 300px; position: absolute; left: 20px; top: 120px; z-index: 50;">
+                <!-- 统计数据与分布分析 - 紧凑单行 -->
+                <div id="statsInner" style="display: flex; align-items: center; justify-content: center; padding: 8px 0;">
+                    <!-- 左侧组：统计数据 -->
                 <div style="display: flex; align-items: center; gap: 30px;">
                     <!-- 统计概览 -->
                     <div style="display: flex; align-items: center; gap: 30px;">
@@ -786,15 +586,16 @@
                                     </div>
                                     <span style="font-size: 11px; color: var(--text-secondary);">错题总数</span>
                                 </div>
-                                <div style="display: flex; flex-direction: column; align-items: center; gap: 2px;">
+                                <!-- 总错题人数 (已隐藏) -->
+                                <!-- <div style="display: flex; flex-direction: column; align-items: center; gap: 2px;">
                                     <div style="display: flex; align-items: center; gap: 6px;">
                                         <span style="font-size: 18px;">👥</span>
                                         <span style="font-size: 20px; font-weight: bold; color: #ff4d4f;">70</span>
                                         <span style="font-size: 13px; color: var(--text-secondary);">人</span>
                                     </div>
                                     <span style="font-size: 11px; color: var(--text-secondary);">总错题人数</span>
-                                </div>
-                                <div style="display: flex; flex-direction: column; align-items: center; gap: 2px;">
+                                </div> -->
+                                <div class="class-only-stat" style="display: flex; flex-direction: column; align-items: center; gap: 2px;">
                                     <div style="display: flex; align-items: center; gap: 6px;">
                                         <span style="font-size: 18px;">📈</span>
                                         <span style="font-size: 20px; font-weight: bold; color: #faad14;">47.5%</span>
@@ -804,11 +605,11 @@
                             </div>
                         </div>
                         
-                        <!-- 中间分隔线 -->
-                        <div style="width: 2px; height: 30px; background: linear-gradient(to bottom, transparent, #d9d9d9, transparent); margin: 0 30px;"></div>
+                        <!-- 中间分隔线 (已隐藏) -->
+                        <!-- <div style="width: 2px; height: 30px; background: linear-gradient(to bottom, transparent, #d9d9d9, transparent); margin: 0 30px;"></div> -->
                         
-                        <!-- 右侧：错误最多的知识点 -->
-                        <div style="flex: 1; display: flex; align-items: center; gap: 15px; font-size: 12px;">
+                        <!-- 错误最多的知识点 (已隐藏) -->
+                        <!-- <div style="flex: 1; display: flex; align-items: center; gap: 15px; font-size: 12px;">
                             <span style="color: var(--text-secondary); font-weight: 500; white-space: nowrap;">错误最多的知识点:</span>
                             <div style="display: flex; gap: 15px; flex-wrap: wrap;">
                                 <span style="display: flex; align-items: center; gap: 4px;">
@@ -832,17 +633,103 @@
                                     <span>成语运用(15人)</span>
                                 </span>
                             </div>
+                        </div> -->
+                    </div>
+                </div>
+            
+            <!-- 左侧知识点树 -->
+            <div class="knowledge-tree">
+                <!-- 知识点树头部 -->
+                <div class="tree-header">
+                </div>
+                
+                <!-- 知识点树标题 -->
+                <div class="tree-title">知识点</div>
+                
+                <!-- 知识点树内容 -->
+                <div class="tree-content">
+                    <!-- 知识点将动态生成 -->
+                    <div style="text-align: center; padding: 20px; color: var(--text-secondary);">加载中...</div>
+                </div>
+            </div>
+            
+            <!-- 右侧内容区域 -->
+            <div class="content-area">
+                
+                <!-- 整合的统计与搜索区域 (已隐藏) -->
+                <div style="background: white; border-radius: 8px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); width: 300px; display: none;">
+                    <!-- 统计数据与分布分析 - 紧凑单行 -->
+                    <div style="display: flex; align-items: center; justify-content: space-between; padding: 8px 0;">
+                        <!-- 左侧组：统计数据 -->
+                <div style="display: flex; align-items: center; gap: 30px;">
+                    <!-- 统计概览 -->
+                    <div style="display: flex; align-items: center; gap: 30px;">
+                                <div style="display: flex; flex-direction: column; align-items: center; gap: 2px;">
+                                    <div style="display: flex; align-items: center; gap: 6px;">
+                                        <span style="font-size: 18px;">📊</span>
+                                        <span style="font-size: 20px; font-weight: bold; color: var(--primary-color);">42</span>
+                                        <span style="font-size: 13px; color: var(--text-secondary);">题</span>
+                                    </div>
+                                    <span style="font-size: 11px; color: var(--text-secondary);">错题总数</span>
+                                </div>
+                                <!-- 总错题人数 (已隐藏) -->
+                                <!-- <div style="display: flex; flex-direction: column; align-items: center; gap: 2px;">
+                                    <div style="display: flex; align-items: center; gap: 6px;">
+                                        <span style="font-size: 18px;">👥</span>
+                                        <span style="font-size: 20px; font-weight: bold; color: #ff4d4f;">70</span>
+                                        <span style="font-size: 13px; color: var(--text-secondary);">人</span>
+                                    </div>
+                                    <span style="font-size: 11px; color: var(--text-secondary);">总错题人数</span>
+                                </div> -->
+                                <div class="class-only-stat" style="display: flex; flex-direction: column; align-items: center; gap: 2px;">
+                                    <div style="display: flex; align-items: center; gap: 6px;">
+                                        <span style="font-size: 18px;">📈</span>
+                                        <span style="font-size: 20px; font-weight: bold; color: #faad14;">47.5%</span>
+                                    </div>
+                                    <span style="font-size: 11px; color: var(--text-secondary);">平均错误率</span>
+                                </div>
+                            </div>
                         </div>
+                        
+                        <!-- 中间分隔线 (已隐藏) -->
+                        <!-- <div style="width: 2px; height: 30px; background: linear-gradient(to bottom, transparent, #d9d9d9, transparent); margin: 0 30px;"></div> -->
+                        
+                        <!-- 错误最多的知识点 (已隐藏) -->
+                        <!-- <div style="flex: 1; display: flex; align-items: center; gap: 15px; font-size: 12px;">
+                            <span style="color: var(--text-secondary); font-weight: 500; white-space: nowrap;">错误最多的知识点:</span>
+                            <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                                <span style="display: flex; align-items: center; gap: 4px;">
+                                    <span style="width: 8px; height: 8px; border-radius: 50%; background: #ff4d4f;"></span>
+                                    <span>加法运算(25人)</span>
+                                </span>
+                                <span style="display: flex; align-items: center; gap: 4px;">
+                                    <span style="width: 8px; height: 8px; border-radius: 50%; background: #ff7a45;"></span>
+                                    <span>分数加法(20人)</span>
+                                </span>
+                                <span style="display: flex; align-items: center; gap: 4px;">
+                                    <span style="width: 8px; height: 8px; border-radius: 50%; background: #ffa940;"></span>
+                                    <span>偶数(18人)</span>
+                                </span>
+                                <span style="display: flex; align-items: center; gap: 4px;">
+                                    <span style="width: 8px; height: 8px; border-radius: 50%; background: #ffc53d;"></span>
+                                    <span>be动词(16人)</span>
+                                </span>
+                                <span style="display: flex; align-items: center; gap: 4px;">
+                                    <span style="width: 8px; height: 8px; border-radius: 50%; background: #fadb14;"></span>
+                                    <span>成语运用(15人)</span>
+                                </span>
+                            </div>
+                        </div> -->
                     </div>
                 </div>
             
             <div class="mistake-notebook">
                 <div class="notebook-header">
-                    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-                        <div style="display: flex; align-items: center; gap: 15px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; flex-wrap: wrap; gap: 15px;">
+                        <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
                             <div class="notebook-title">错题集</div>
                             <!-- 排序选项 -->
-                            <div style="display: flex; align-items: center; gap: 10px; padding-left: 15px; border-left: 1px solid #e8e8e8;">
+                            <div style="display: flex; align-items: center; gap: 10px;">
                                 <span style="font-size: 14px; color: var(--text-secondary);">排序：</span>
                                 <select id="sortOption" onchange="sortMistakes()" style="padding: 6px 12px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 13px;">
                                     <option value="comprehensiveDesc">综合排序（从高到低）</option>
@@ -851,15 +738,6 @@
                                     <option value="dateAsc">时间（从旧到新）</option>
                                 </select>
                             </div>
-                        </div>
-                        <div style="display: flex; align-items: center; gap: 10px;">
-                            <!-- 搜索框 -->
-                            <div style="position: relative; width: 250px;">
-                                <input type="text" id="searchInput" placeholder="输入错题关键词" style="width: 100%; padding: 6px 12px 6px 35px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 13px;">
-                                <span style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #999; font-size: 13px;">🔍</span>
-                            </div>
-                            <button onclick="applyFilters()" style="padding: 6px 16px; background: var(--primary-color); color: white; border: none; border-radius: 4px; font-size: 13px; cursor: pointer; white-space: nowrap;">筛选</button>
-                            <button onclick="resetFilters()" style="padding: 6px 16px; background: #f0f0f0; color: var(--text-color); border: 1px solid var(--border-color); border-radius: 4px; font-size: 13px; cursor: pointer; white-space: nowrap;">重置</button>
                         </div>
                     </div>
                 </div>
@@ -880,7 +758,7 @@
                                     <p>错误类型：计算错误、进位错误</p>
                                 </div>
                             </div>
-                            <div style="text-align: right;">
+                            <div class="class-only-stat" style="text-align: right;">
                                 <div style="font-size: 24px; font-weight: bold; color: #ff4d4f; margin-bottom: 5px;">25/40</div>
                                 <div style="font-size: 14px; color: var(--text-secondary);">错题人数/答题人数</div>
                                 <div style="font-size: 14px; color: var(--text-secondary); margin-top: 5px;">错误率：62.5%</div>
@@ -913,7 +791,7 @@
                                     <p>错误类型：概念混淆</p>
                                 </div>
                             </div>
-                            <div style="text-align: right;">
+                            <div class="class-only-stat" style="text-align: right;">
                                 <div style="font-size: 24px; font-weight: bold; color: #ff4d4f; margin-bottom: 5px;">18/40</div>
                                 <div style="font-size: 14px; color: var(--text-secondary);">错题人数/答题人数</div>
                                 <div style="font-size: 14px; color: var(--text-secondary); margin-top: 5px;">错误率：45.0%</div>
@@ -946,7 +824,7 @@
                                     <p>错误类型：语境误用</p>
                                 </div>
                             </div>
-                            <div style="text-align: right;">
+                            <div class="class-only-stat" style="text-align: right;">
                                 <div style="font-size: 24px; font-weight: bold; color: #ff4d4f; margin-bottom: 5px;">15/40</div>
                                 <div style="font-size: 14px; color: var(--text-secondary);">错题人数/答题人数</div>
                                 <div style="font-size: 14px; color: var(--text-secondary); margin-top: 5px;">错误率：37.5%</div>
@@ -979,7 +857,7 @@
                                     <p>错误类型：语法错误、主谓一致</p>
                                 </div>
                             </div>
-                            <div style="text-align: right;">
+                            <div class="class-only-stat" style="text-align: right;">
                                 <div style="font-size: 24px; font-weight: bold; color: #ff4d4f; margin-bottom: 5px;">12/40</div>
                                 <div style="font-size: 14px; color: var(--text-secondary);">错题人数/答题人数</div>
                                 <div style="font-size: 14px; color: var(--text-secondary); margin-top: 5px;">错误率：30.0%</div>
@@ -1052,6 +930,9 @@
     <script>
         // 当前页码
         let currentPage = 1;
+        
+        // 当前Tab模式：'class' 或 'personal'
+        let currentTabMode = 'class';
         
         // 模拟完整的错题数据
         const allMistakes = [
@@ -1384,13 +1265,23 @@
             mistake.classId = classes[index % classes.length];
         });
         
-        let currentFilters = {subject: 'math', dateRange: 'all', searchTerm: '', classId: 'all'};
+        let currentFilters = {subject: 'math', dateRange: 'all', searchTerm: '', classId: 'all', knowledgePoints: []};
         
         function filterMistakes() {
             return allMistakes.filter(m => {
                 if (currentFilters.subject && m.subject !== currentFilters.subject) return false;
                 if (currentFilters.classId && currentFilters.classId !== 'all' && m.classId !== currentFilters.classId) return false;
                 if (currentFilters.searchTerm && !m.question.toLowerCase().includes(currentFilters.searchTerm.toLowerCase())) return false;
+                
+                // 知识点筛选
+                if (currentFilters.knowledgePoints && currentFilters.knowledgePoints.length > 0) {
+                    const questionPoints = m.knowledgePoints.split('、').map(p => p.trim());
+                    const hasMatchingPoint = currentFilters.knowledgePoints.some(filterPoint => 
+                        questionPoints.some(qp => qp.includes(filterPoint) || filterPoint.includes(qp))
+                    );
+                    if (!hasMatchingPoint) return false;
+                }
+                
                 if (currentFilters.dateRange && currentFilters.dateRange !== 'all') {
                     const questionDate = new Date(m.date);
                     const today = new Date();
@@ -1458,8 +1349,8 @@
                             </div>
                             <span style="font-size: 11px; color: var(--text-secondary);">错题总数</span>
                         </div>
-                        <div style="width: 1px; height: 35px; background: #e8e8e8;"></div>
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: 2px;">
+                        <div class="class-only-stat" style="width: 1px; height: 35px; background: #e8e8e8;"></div>
+                        <div class="class-only-stat" style="display: flex; flex-direction: column; align-items: center; gap: 2px;">
                             <div style="display: flex; align-items: center; gap: 6px;">
                                 <span style="font-size: 18px;">👥</span>
                                 <span style="font-size: 20px; font-weight: bold; color: #ff4d4f;">${stats.totalErrorCount}</span>
@@ -1467,8 +1358,8 @@
                             </div>
                             <span style="font-size: 11px; color: var(--text-secondary);">总错题人数</span>
                         </div>
-                        <div style="width: 1px; height: 35px; background: #e8e8e8;"></div>
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: 2px;">
+                        <div class="class-only-stat" style="width: 1px; height: 35px; background: #e8e8e8;"></div>
+                        <div class="class-only-stat" style="display: flex; flex-direction: column; align-items: center; gap: 2px;">
                             <div style="display: flex; align-items: center; gap: 6px;">
                                 <span style="font-size: 18px;">📈</span>
                                 <span style="font-size: 20px; font-weight: bold; color: #faad14;">${stats.avgErrorRate}%</span>
@@ -1527,12 +1418,12 @@
                     <div class="mistake-item" style="position: relative; padding: 15px;">
                         <!-- 右上角区域：统计信息 + 选择框 -->
                         <div style="position: absolute; top: 15px; right: 15px; display: flex; align-items: center; gap: 12px;">
-                                <div style="font-size: 12px; color: var(--text-secondary); padding: 3px 8px; background: #fff1f0; border-radius: 4px;">
+                                <div class="class-only-stat" style="font-size: 12px; color: var(--text-secondary); padding: 3px 8px; background: #fff1f0; border-radius: 4px;">
                                     错误率：${m.errorRate}%
                                 </div>
-                                <span style="font-size: 12px; color: var(--text-secondary);">错题人数/答题人数</span>
-                                <span onclick="showStudentList('${m.question}', ${m.errorCount})" style="font-size: 20px; font-weight: bold; color: #ff4d4f; text-decoration: underline; cursor: pointer;">${m.errorCount}/${m.totalCount || 40}</span>
-                                <input type="checkbox" class="question-checkbox" onchange="updateSelectionCount()" style="width: 18px; height: 18px; cursor: pointer; margin-left: 8px;">
+                                <span class="class-only-stat" style="font-size: 12px; color: var(--text-secondary);">错题人数/答题人数</span>
+                                <span class="class-only-stat" onclick="showStudentList('${m.question}', ${m.errorCount})" style="font-size: 20px; font-weight: bold; color: #ff4d4f; text-decoration: underline; cursor: pointer;">${m.errorCount}/${m.totalCount || 40}</span>
+                                <input type="checkbox" class="question-checkbox class-only-stat" onchange="updateSelectionCount()" style="width: 18px; height: 18px; cursor: pointer; margin-left: 8px;">
                             </div>
                         
                         <div style="padding-right: 280px;">
@@ -1568,6 +1459,253 @@
             const stats = calculateStats(filteredMistakes);
             updateStats(stats);
             updateMistakeList(filteredMistakes);
+            updateKnowledgeTree(filteredMistakes);
+            
+            // 重新应用班级专属统计的显示/隐藏状态
+            const classOnlyStats = document.querySelectorAll('.class-only-stat');
+            classOnlyStats.forEach(el => {
+                el.style.display = currentTabMode === 'class' ? '' : 'none';
+            });
+        }
+        
+        // 更新知识点树 - 保持树形结构，只显示有错题的知识点
+        function updateKnowledgeTree(mistakes) {
+            const treeContent = document.querySelector('.tree-content');
+            if (!treeContent) return;
+            
+            // 统计知识点及其错题数量（基于原始数据，不受知识点筛选影响）
+            const baseMistakes = allMistakes.filter(m => {
+                if (currentFilters.subject && m.subject !== currentFilters.subject) return false;
+                if (currentFilters.classId && currentFilters.classId !== 'all' && m.classId !== currentFilters.classId) return false;
+                return true;
+            });
+            
+            const knowledgeCount = {};
+            baseMistakes.forEach(m => {
+                const points = m.knowledgePoints.split('、');
+                points.forEach(point => {
+                    const trimmedPoint = point.trim();
+                    if (trimmedPoint) {
+                        if (!knowledgeCount[trimmedPoint]) {
+                            knowledgeCount[trimmedPoint] = 0;
+                        }
+                        knowledgeCount[trimmedPoint]++;
+                    }
+                });
+            });
+            
+            // 定义知识点树结构
+            const knowledgeTree = {
+                '数与代数': {
+                    children: {
+                        '数的认识': ['整数', '小数', '分数'],
+                        '数的运算': ['加法运算', '进位加法', '减法', '乘法口诀', '乘法运算', '除法应用', '平均分配', '分数加法', '通分'],
+                        '式与方程': ['代数式', '方程'],
+                        '比和比例': ['比', '比例', '百分数应用', '折扣计算'],
+                        '常见的量': [],
+                        '应用题': [],
+                        '探索规律': []
+                    }
+                },
+                '图形与几何': {
+                    children: {
+                        '平面图形': ['角的认识', '角的分类'],
+                        '立体图形': ['圆的面积', '公式应用']
+                    }
+                },
+                '统计与概率': {
+                    children: {
+                        '统计': [],
+                        '概率': []
+                    }
+                },
+                '数学概念': {
+                    children: {
+                        '数的性质': ['偶数', '合数', '质数', '小数比较', '小数大小']
+                    }
+                }
+            };
+            
+            // 收集所有知识点用于父节点选中时的子节点收集
+            const categoryToPoints = {};
+            
+            // 生成树形HTML
+            let html = '';
+            
+            for (const [category, data] of Object.entries(knowledgeTree)) {
+                // 计算该分类下所有知识点的错题总数
+                let categoryCount = 0;
+                const childrenWithCount = {};
+                const categoryPoints = [];
+                
+                for (const [subCategory, items] of Object.entries(data.children)) {
+                    let subCount = knowledgeCount[subCategory] || 0;
+                    const itemsWithCount = [];
+                    const subPoints = [subCategory];
+                    
+                    items.forEach(item => {
+                        const count = knowledgeCount[item] || 0;
+                        if (count > 0) {
+                            itemsWithCount.push({ name: item, count });
+                            subCount += count;
+                            subPoints.push(item);
+                        }
+                    });
+                    
+                    if (subCount > 0 || itemsWithCount.length > 0) {
+                        childrenWithCount[subCategory] = {
+                            count: subCount,
+                            items: itemsWithCount,
+                            allPoints: subPoints
+                        };
+                        categoryCount += subCount;
+                        categoryPoints.push(...subPoints);
+                    }
+                }
+                
+                categoryToPoints[category] = categoryPoints;
+                
+                // 只显示有错题的分类
+                if (categoryCount > 0) {
+                    const categoryPointsJson = JSON.stringify(categoryPoints).replace(/"/g, '&quot;');
+                    html += `
+                        <div class="tree-node">
+                            <div class="tree-node-content">
+                                <span class="tree-toggle" onclick="toggleTreeNode(this)">▼</span>
+                                <input type="checkbox" onchange="handleKnowledgeFilter(this, ${categoryPointsJson})">
+                                <span>${category}</span>
+                                <span style="color: #ff4d4f; font-size: 12px; margin-left: auto;">(${categoryCount})</span>
+                            </div>
+                            <div class="tree-node-children">`;
+                    
+                    for (const [subCategory, subData] of Object.entries(childrenWithCount)) {
+                        const hasItems = subData.items.length > 0;
+                        const subPointsJson = JSON.stringify(subData.allPoints).replace(/"/g, '&quot;');
+                        html += `
+                                <div class="tree-node">
+                                    <div class="tree-node-content">
+                                        <span class="tree-toggle" ${hasItems ? 'onclick="toggleTreeNode(this)"' : ''}>
+                                            ${hasItems ? '▶' : '　'}
+                                        </span>
+                                        <input type="checkbox" onchange="handleKnowledgeFilter(this, ${subPointsJson})">
+                                        <span>${subCategory}</span>
+                                        <span style="color: var(--primary-color); font-size: 12px; margin-left: auto;">(${subData.count})</span>
+                                    </div>`;
+                        
+                        if (hasItems) {
+                            html += `
+                                    <div class="tree-node-children" style="display: none;">`;
+                            
+                            subData.items.forEach(item => {
+                                const itemPointsJson = JSON.stringify([item.name]).replace(/"/g, '&quot;');
+                                html += `
+                                        <div class="tree-node">
+                                            <div class="tree-node-content">
+                                                <span class="tree-toggle">　</span>
+                                                <input type="checkbox" onchange="handleKnowledgeFilter(this, ${itemPointsJson})">
+                                                <span>${item.name}</span>
+                                                <span style="color: var(--primary-color); font-size: 12px; margin-left: auto;">(${item.count})</span>
+                                            </div>
+                                        </div>`;
+                            });
+                            
+                            html += `
+                                    </div>`;
+                        }
+                        
+                        html += `
+                                </div>`;
+                    }
+                    
+                    html += `
+                            </div>
+                        </div>`;
+                }
+            }
+            
+            if (html === '') {
+                html = '<div style="text-align: center; padding: 20px; color: var(--text-secondary);">暂无知识点数据</div>';
+            }
+            
+            treeContent.innerHTML = html;
+        }
+        
+        // 处理知识点筛选
+        function handleKnowledgeFilter(checkbox, points) {
+            // 获取当前节点的父容器
+            const nodeContent = checkbox.closest('.tree-node-content');
+            const treeNode = nodeContent.closest('.tree-node');
+            const childrenContainer = treeNode.querySelector(':scope > .tree-node-children');
+            
+            // 如果有子节点，同步选中/取消子节点的复选框
+            if (childrenContainer) {
+                const childCheckboxes = childrenContainer.querySelectorAll('input[type="checkbox"]');
+                childCheckboxes.forEach(childCb => {
+                    childCb.checked = checkbox.checked;
+                });
+            }
+            
+            if (checkbox.checked) {
+                // 添加知识点到筛选条件
+                points.forEach(point => {
+                    if (!currentFilters.knowledgePoints.includes(point)) {
+                        currentFilters.knowledgePoints.push(point);
+                    }
+                });
+            } else {
+                // 从筛选条件中移除知识点
+                points.forEach(point => {
+                    const index = currentFilters.knowledgePoints.indexOf(point);
+                    if (index > -1) {
+                        currentFilters.knowledgePoints.splice(index, 1);
+                    }
+                });
+            }
+            
+            // 更新父节点的选中状态
+            updateParentCheckboxState(checkbox);
+            
+            // 更新错题列表（不更新知识点树，避免树被重置）
+            const filteredMistakes = filterMistakes();
+            const stats = calculateStats(filteredMistakes);
+            updateStats(stats);
+            updateMistakeList(filteredMistakes);
+        }
+        
+        // 更新父节点复选框状态
+        function updateParentCheckboxState(checkbox) {
+            const treeNode = checkbox.closest('.tree-node');
+            const parentChildren = treeNode.parentElement;
+            
+            if (parentChildren && parentChildren.classList.contains('tree-node-children')) {
+                const parentNode = parentChildren.closest('.tree-node');
+                if (parentNode) {
+                    const parentCheckbox = parentNode.querySelector(':scope > .tree-node-content > input[type="checkbox"]');
+                    const siblingCheckboxes = parentChildren.querySelectorAll(':scope > .tree-node > .tree-node-content > input[type="checkbox"]');
+                    
+                    if (parentCheckbox && siblingCheckboxes.length > 0) {
+                        const allChecked = Array.from(siblingCheckboxes).every(cb => cb.checked);
+                        const someChecked = Array.from(siblingCheckboxes).some(cb => cb.checked);
+                        
+                        parentCheckbox.checked = allChecked;
+                        parentCheckbox.indeterminate = someChecked && !allChecked;
+                    }
+                }
+            }
+        }
+        
+        // 点击知识点筛选（保留兼容）
+        function filterByKnowledge(knowledgeName) {
+            currentFilters.knowledgePoints = [knowledgeName];
+            const filteredMistakes = filterMistakes();
+            const stats = calculateStats(filteredMistakes);
+            updateStats(stats);
+            updateMistakeList(filteredMistakes);
+        }
+        
+        // 处理知识点复选框（保留兼容）
+        function handleKnowledgeCheck(checkbox, knowledgeName) {
+            handleKnowledgeFilter(checkbox, [knowledgeName]);
         }
         
         // 更新班级选择器选项
@@ -1673,6 +1811,7 @@
             });
             
             currentFilters.searchTerm = '';
+            currentFilters.knowledgePoints = [];
             applyFiltersAndUpdate();
         }
         
@@ -1823,6 +1962,85 @@
             }
             alert(`正在推送 ${checkboxes.length} 道题目给学生...`);
             // 这里可以添加实际的推送逻辑
+        }
+        
+        // Tab切换功能
+        function switchTab(tabType) {
+            // 更新当前Tab模式
+            currentTabMode = tabType;
+            
+            // 获取Tab按钮
+            const classTab = document.getElementById('classTabTop');
+            const personalTab = document.getElementById('personalTabTop');
+            const studentSelector = document.getElementById('studentSelectorTop');
+            const bottomActionBar = document.querySelector('.bottom-action-bar');
+            
+            if (tabType === 'class') {
+                // 班级模式样式
+                classTab.style.background = 'var(--primary-color)';
+                classTab.style.color = 'white';
+                classTab.style.fontWeight = '500';
+                personalTab.style.background = '#f0f0f0';
+                personalTab.style.color = 'var(--text-color)';
+                personalTab.style.fontWeight = 'normal';
+                
+                // 隐藏学生选择器，显示底部操作栏
+                if (studentSelector) {
+                    studentSelector.style.display = 'none';
+                }
+                if (bottomActionBar) {
+                    bottomActionBar.style.display = 'flex';
+                }
+            } else {
+                // 个人模式样式
+                personalTab.style.background = 'var(--primary-color)';
+                personalTab.style.color = 'white';
+                personalTab.style.fontWeight = '500';
+                classTab.style.background = '#f0f0f0';
+                classTab.style.color = 'var(--text-color)';
+                classTab.style.fontWeight = 'normal';
+                
+                // 显示学生选择器，隐藏底部操作栏
+                if (studentSelector) {
+                    studentSelector.style.display = 'flex';
+                }
+                if (bottomActionBar) {
+                    bottomActionBar.style.display = 'none';
+                }
+            }
+            
+            // 切换排序选项：个人模式只保留时间排序
+            const sortSelect = document.getElementById('sortOption');
+            if (sortSelect) {
+                if (tabType === 'personal') {
+                    sortSelect.innerHTML = `
+                        <option value="dateDesc">时间（从新到旧）</option>
+                        <option value="dateAsc">时间（从旧到新）</option>
+                    `;
+                } else {
+                    sortSelect.innerHTML = `
+                        <option value="comprehensiveDesc">综合排序（从高到低）</option>
+                        <option value="comprehensiveAsc">综合排序（从低到高）</option>
+                        <option value="dateDesc">时间（从新到旧）</option>
+                        <option value="dateAsc">时间（从旧到新）</option>
+                    `;
+                }
+            }
+            
+            // 切换统计区域居中：始终居中显示
+            const statsInner = document.getElementById('statsInner');
+            if (statsInner) {
+                statsInner.style.justifyContent = 'center';
+            }
+            
+            // 重新应用筛选和更新显示
+            applyFiltersAndUpdate();
+            
+            // 切换班级专属统计数据的显示/隐藏
+            const classOnlyStats = document.querySelectorAll('.class-only-stat');
+            classOnlyStats.forEach(el => {
+                el.style.display = tabType === 'class' ? '' : 'none';
+            });
         }
     </script>
     
