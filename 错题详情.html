@@ -454,6 +454,65 @@
             border-radius: 8px;
             margin: 20px 0;
         }
+        
+        /* 加载状态样式 */
+        .analysis-loading {
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 60px 20px;
+            text-align: center;
+            background-color: #fafafa;
+            border: 1px dashed #ddd;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .loading-content {
+            max-width: 400px;
+        }
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #e0e0e0;
+            border-top: 4px solid #4285f4;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .loading-text {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+        .loading-progress {
+            width: 200px;
+            height: 6px;
+            background-color: #e0e0e0;
+            border-radius: 3px;
+            margin: 15px auto 0;
+            overflow: hidden;
+        }
+        .loading-progress-bar {
+            height: 100%;
+            background-color: #4285f4;
+            border-radius: 3px;
+            width: 0%;
+            animation: progress 5s ease-out forwards;
+        }
+        @keyframes progress {
+            0% { width: 0%; }
+            20% { width: 15%; }
+            40% { width: 35%; }
+            60% { width: 55%; }
+            80% { width: 75%; }
+            95% { width: 90%; }
+            100% { width: 100%; }
+        }
         .empty-content {
             max-width: 400px;
         }
@@ -750,23 +809,94 @@
             font-size: 14px;
             color: #666;
             position: relative;
-            left: -350px;
+            left: -250px;
         }
         .bottom-actions {
             display: flex;
             gap: 10px;
+            align-items: center;
         }
         #select-top5 {
             position: relative;
-            left: -350px;
+            left: -250px;
         }
         #select-all {
             position: relative;
-            left: -350px;
+            left: -250px;
+        }
+        #cancel-select {
+            position: relative;
+            left: -250px;
         }
         #generate-homework {
             position: relative;
-            left: 350px;
+            left: 265px;
+        }
+        
+        /* 智能分层作业开关样式 */
+        .smart-layer-switch {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            margin-right: 15px;
+            position: relative;
+            left: 270px;
+        }
+        .switch-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .switch-label {
+            font-size: 13px;
+            color: #333;
+            font-weight: 500;
+        }
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 22px;
+        }
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: 0.3s;
+            border-radius: 22px;
+        }
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 2px;
+            bottom: 2px;
+            background-color: white;
+            transition: 0.3s;
+            border-radius: 50%;
+        }
+        .toggle-switch input:checked + .toggle-slider {
+            background-color: #4285f4;
+        }
+        .toggle-switch input:checked + .toggle-slider:before {
+            transform: translateX(22px);
+        }
+        .switch-tip {
+            font-size: 11px;
+            color: #999;
+            margin-top: 4px;
+            text-align: right;
+            white-space: nowrap;
         }
 
         /* 弹窗样式 */
@@ -1194,14 +1324,36 @@
                 <div class="analysis-header">
                     <h3>AI智能错题分析报告</h3>
                     <div class="analysis-controls">
+                        <button class="reanalyze-btn" id="refresh-report-btn" onclick="refreshReport()" style="display: none;">🔄 更新</button>
                         <div class="analysis-date" id="analysis-date" style="display: none;">分析时间：2026-01-23</div>
                     </div>
                 </div>
                 
                 <!-- 空状态提示 -->
-                <div class="analysis-empty" id="analysis-empty">
+                <div class="analysis-empty" id="analysis-empty" style="display: none;">
                     <div class="empty-content">
                         <div class="empty-text">暂无报告内容，请点击【生成】按钮，进行生成。</div>
+                    </div>
+                </div>
+                
+                <!-- 截止时间未到提示 -->
+                <div class="analysis-empty" id="analysis-not-ready" style="display: none;">
+                    <div class="empty-content">
+                        <div style="font-size: 40px; margin-bottom: 15px;">⏳</div>
+                        <div class="empty-text">当前作业截止时间未到，错题分析报告暂未生成。</div>
+                        <div class="empty-text" style="font-size: 12px; color: #999; margin-top: 8px;">截止时间：<span id="deadline-display">2026-01-23 13:30:00</span></div>
+                    </div>
+                </div>
+                
+                <!-- 加载状态 -->
+                <div class="analysis-loading" id="analysis-loading">
+                    <div class="loading-content">
+                        <div class="loading-spinner"></div>
+                        <div class="loading-text">AI正在分析错题数据...</div>
+                        <div class="loading-text" style="font-size: 12px; color: #999;">正在识别知识点薄弱环节，生成个性化学习建议</div>
+                        <div class="loading-progress">
+                            <div class="loading-progress-bar" id="loading-progress-bar"></div>
+                        </div>
                     </div>
                 </div>
                 
@@ -1214,7 +1366,7 @@
                             <span class="collapse-btn collapse-btn--hidden">▼</span>
                         </div>
                         <div class="analysis-body">
-                            <p>本次作业参与作答人数为27人，总题数20道，平均错误率为32%。从整体数据来看，本次作业的难度适中，但仍有较大的提升空间。</p>
+                            <p>本次作业布置人数为50人，参与作答人数为27人，总题数20道，平均错误率为32%。从整体数据来看，本次作业的难度适中，但仍有较大的提升空间。</p>
                         </div>
                     </div>
                     
@@ -1308,16 +1460,54 @@
                 </div>
             </div>
 
-            <!-- 高错率题目TOP N -->
+            <!-- 易错知识点TOP N -->
+            <div class="error-knowledge-section">
+                <div class="section-header">
+                    <div class="section-title">易错知识点TOP5</div>
+                </div>
+                <div class="knowledge-cards" id="knowledge-list">
+                    <!-- 知识点1 -->
+                    <div class="knowledge-card" data-knowledge="两位数进位加法">
+                        <div class="knowledge-name">两位数进位加法</div>
+                        <div class="knowledge-desc">涉及2道题</div>
+                        <div class="knowledge-rate">平均错误率68%</div>
+                        <div class="filter-text">点击筛选</div>
+                    </div>
+                    <!-- 知识点2 -->
+                    <div class="knowledge-card" data-knowledge="合数与偶数概念">
+                        <div class="knowledge-name">合数与偶数概念</div>
+                        <div class="knowledge-desc">涉及1道题</div>
+                        <div class="knowledge-rate">平均错误率58%</div>
+                        <div class="filter-text">点击筛选</div>
+                    </div>
+                    <!-- 知识点3 -->
+                    <div class="knowledge-card" data-knowledge="两位数退位减法">
+                        <div class="knowledge-name">两位数退位减法</div>
+                        <div class="knowledge-desc">涉及1道题</div>
+                        <div class="knowledge-rate">平均错误率45%</div>
+                        <div class="filter-text">点击筛选</div>
+                    </div>
+                    <!-- 知识点4 -->
+                    <div class="knowledge-card" data-knowledge="概率基础">
+                        <div class="knowledge-name">概率基础</div>
+                        <div class="knowledge-desc">涉及1道题</div>
+                        <div class="knowledge-rate">平均错误率40%</div>
+                        <div class="filter-text">点击筛选</div>
+                    </div>
+                    <!-- 知识点5 -->
+                    <div class="knowledge-card" data-knowledge="统计图解读">
+                        <div class="knowledge-name">统计图解读</div>
+                        <div class="knowledge-desc">涉及1道题</div>
+                        <div class="knowledge-rate">平均错误率35%</div>
+                        <div class="filter-text">点击筛选</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 错误题目 -->
             <div class="high-error-section">
                 <div class="section-header">
-                    <div class="section-title">高错率题目TOP5</div>
-                    <select class="num-select" id="question-num-select">
-                        <option value="3">显示3题</option>
-                        <option value="5" selected>显示5题</option>
-                        <option value="10">显示10题</option>
-                        <option value="all">显示全部</option>
-                    </select>
+                    <div class="section-title">错误题目</div>
                 </div>
                 <!-- 题目卡片列表 -->
                 <div id="question-list">
@@ -1534,57 +1724,19 @@
                 </div>
             </div>
 
-            <!-- 易错知识点TOP N -->
-            <div class="error-knowledge-section">
-                <div class="section-header">
-                    <div class="section-title">易错知识点TOP5</div>
-                </div>
-                <div class="knowledge-cards" id="knowledge-list">
-                    <!-- 知识点1 -->
-                    <div class="knowledge-card" data-knowledge="两位数进位加法">
-                        <div class="knowledge-name">两位数进位加法</div>
-                        <div class="knowledge-desc">涉及2道题</div>
-                        <div class="knowledge-rate">平均错误率68%</div>
-                        <div class="filter-text">点击筛选</div>
-                    </div>
-                    <!-- 知识点2 -->
-                    <div class="knowledge-card" data-knowledge="合数与偶数概念">
-                        <div class="knowledge-name">合数与偶数概念</div>
-                        <div class="knowledge-desc">涉及1道题</div>
-                        <div class="knowledge-rate">平均错误率58%</div>
-                        <div class="filter-text">点击筛选</div>
-                    </div>
-                    <!-- 知识点3 -->
-                    <div class="knowledge-card" data-knowledge="两位数退位减法">
-                        <div class="knowledge-name">两位数退位减法</div>
-                        <div class="knowledge-desc">涉及1道题</div>
-                        <div class="knowledge-rate">平均错误率45%</div>
-                        <div class="filter-text">点击筛选</div>
-                    </div>
-                    <!-- 知识点4 -->
-                    <div class="knowledge-card" data-knowledge="概率基础">
-                        <div class="knowledge-name">概率基础</div>
-                        <div class="knowledge-desc">涉及1道题</div>
-                        <div class="knowledge-rate">平均错误率40%</div>
-                        <div class="filter-text">点击筛选</div>
-                    </div>
-                    <!-- 知识点5 -->
-                    <div class="knowledge-card" data-knowledge="统计图解读">
-                        <div class="knowledge-name">统计图解读</div>
-                        <div class="knowledge-desc">涉及1道题</div>
-                        <div class="knowledge-rate">平均错误率35%</div>
-                        <div class="filter-text">点击筛选</div>
-                    </div>
-                </div>
-            </div>
         </div>
 
         <!-- 底部固定操作栏 -->
         <div class="bottom-bar">
             <div class="bottom-count" id="bottom-selected-count">已勾选：0题</div>
             <div class="bottom-actions">
-                <button class="btn btn-blue" id="select-top5">勾选高错TOP5题</button>
+                <button class="btn btn-blue" id="select-top5">勾选高错TOP10题</button>
+                <span style="font-size: 13px; color: #666; position: relative; left: -250px;">快速选中前</span>
+                <input type="number" id="select-custom-input" value="5" min="1" style="width: 50px; padding: 4px 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px; text-align: center; position: relative; left: -250px;">
+                <span style="font-size: 13px; color: #666; position: relative; left: -250px;">题</span>
+                <button class="btn btn-blue" id="select-custom-btn" style="position: relative; left: -250px;">确定</button>
                 <button class="btn btn-blue" id="select-all">全选错题</button>
+                <button class="btn btn-red" id="cancel-select" style="display: none;">取消选中</button>
                 <button class="btn btn-blue" id="generate-homework">布置错题巩固作业</button>
             </div>
         </div>
@@ -1705,6 +1857,20 @@
         </div>
     </div>
 
+    <!-- AI变题生成loading弹窗 -->
+    <div class="modal" id="ai-loading-modal">
+        <div class="modal-content" style="width: 450px; text-align: center; padding: 40px 30px;">
+            <div style="font-size: 40px; margin-bottom: 15px;">🤖</div>
+            <h3 style="font-size: 18px; color: #333; margin-bottom: 10px;">AI正在生成变题</h3>
+            <p id="ai-loading-desc" style="font-size: 13px; color: #999; margin-bottom: 20px;">正在根据选中的错题智能生成变式题目...</p>
+            <div style="width: 100%; height: 8px; background: #e0e0e0; border-radius: 4px; overflow: hidden; margin-bottom: 10px;">
+                <div id="ai-progress-bar" style="height: 100%; width: 0%; background: linear-gradient(90deg, #4285f4, #34a853); border-radius: 4px; transition: width 0.5s ease;"></div>
+            </div>
+            <div id="ai-progress-text" style="font-size: 13px; color: #666;">进度：0%</div>
+            <div id="ai-progress-step" style="font-size: 12px; color: #999; margin-top: 8px;">正在分析原题知识点...</div>
+        </div>
+    </div>
+
     <script>
         // 1. Tab切换功能
         const tabItems = document.querySelectorAll('.tab-item');
@@ -1739,18 +1905,21 @@
         
         // 初始化题目数量显示
         function initQuestionDisplay() {
-            const questionNumSelect = document.getElementById('question-num-select');
-            const defaultShowNum = parseInt(questionNumSelect.value);
-            const allQuestionCards = document.querySelectorAll('.question-card');
+            const questionList = document.getElementById('question-list');
+            const allQuestionCards = Array.from(questionList.querySelectorAll('.question-card'));
             
-            // 只显示默认数量的题目
-            for (let i = 0; i < allQuestionCards.length; i++) {
-                if (i < defaultShowNum) {
-                    allQuestionCards[i].style.display = 'flex';
-                } else {
-                    allQuestionCards[i].style.display = 'none';
-                }
-            }
+            // 按错误率从高到低排序
+            allQuestionCards.sort((a, b) => {
+                const rateA = parseFloat(a.querySelector('.error-rate-text').textContent) || 0;
+                const rateB = parseFloat(b.querySelector('.error-rate-text').textContent) || 0;
+                return rateB - rateA;
+            });
+            
+            // 重新插入排序后的卡片并全部显示
+            allQuestionCards.forEach(card => {
+                card.style.display = 'flex';
+                questionList.appendChild(card);
+            });
         }
         
         // 调用初始化函数
@@ -1764,6 +1933,13 @@
         // 更新勾选数量
         function updateSelectedCount() {
             bottomSelectedCountEl.textContent = `已勾选：${selectedCount}题`;
+            // 控制取消选中按钮的显示
+            const cancelSelectBtn = document.getElementById('cancel-select');
+            if (selectedCount > 0) {
+                cancelSelectBtn.style.display = 'inline-block';
+            } else {
+                cancelSelectBtn.style.display = 'none';
+            }
         }
 
         // 单个勾选事件
@@ -1781,23 +1957,45 @@
             });
         });
 
-        // 勾选高错TOP5题
+        // 取消选中按钮点击事件
+        document.getElementById('cancel-select').addEventListener('click', () => {
+            questionCheckboxes.forEach(checkbox => {
+                checkbox.checked = false;
+                const questionCard = document.querySelector(`.question-card[data-id="${checkbox.getAttribute('data-id')}"]`);
+                questionCard.classList.remove('highlight');
+            });
+            selectedCount = 0;
+            updateSelectedCount();
+            updateSelectAllBtn();
+        });
+
+        // 勾选高错TOP10题
         document.getElementById('select-top5').addEventListener('click', () => {
-            // 清空现有勾选
+            selectTopN(10);
+        });
+
+        // 快速选中前N题（自定义输入）
+        document.getElementById('select-custom-btn').addEventListener('click', () => {
+            const n = parseInt(document.getElementById('select-custom-input').value) || 5;
+            selectTopN(n);
+        });
+
+        // 通用：选中前N题
+        function selectTopN(n) {
             questionCheckboxes.forEach(checkbox => {
                 checkbox.checked = false;
                 document.querySelector(`.question-card[data-id="${checkbox.getAttribute('data-id')}"]`).classList.remove('highlight');
             });
             selectedCount = 0;
-            // 勾选前5题
-            const top5Checkboxes = Array.from(questionCheckboxes).slice(0, 5);
-            top5Checkboxes.forEach(checkbox => {
+            const topCheckboxes = Array.from(questionCheckboxes).slice(0, n);
+            topCheckboxes.forEach(checkbox => {
                 checkbox.checked = true;
                 document.querySelector(`.question-card[data-id="${checkbox.getAttribute('data-id')}"]`).classList.add('highlight');
                 selectedCount++;
             });
             updateSelectedCount();
-        });
+            updateSelectAllBtn();
+        }
 
         // 全选/取消全选功能
         const selectAllBtn = document.getElementById('select-all');
@@ -1896,7 +2094,8 @@
         // 分层分析报告数据（模拟）
         const layerAnalysisData = {
             'all': {
-                overall: '本次作业参与作答人数为27人，总题数20道，平均错误率为32%。从整体数据来看，本次作业的难度适中，但仍有较大的提升空间。',
+                overall: '本次作业布置人数为50人，参与作答人数为27人，总题数20道，平均错误率为32%。从整体数据来看，本次作业的难度适中，但仍有较大的提升空间。',
+                students: ['巢雅婧', '唐锦雯', '潘奕琳', '余诗雨', '蔡依依', '杨诗涵', '黄雨萱', '朱珈琳', '石峻熙', '张明辉', '李思思', '王浩然', '陈雨欣', '刘子涵', '赵子轩', '孙伟杰', '周雅琪'],
                 knowledge: [
                     { name: '两位数进位加法', rate: '72%' },
                     { name: '合数与偶数概念', rate: '58%' },
@@ -1931,7 +2130,8 @@
                 }
             },
             'challenge': {
-                overall: '挑战层学生参与作答人数为3人，总题数20道，平均错误率为8%。从整体数据来看，这部分学生基础知识扎实，解题能力强。',
+                overall: '本次作业布置人数为50人，挑战层学生参与作答人数为3人，总题数20道，平均错误率为8%。从整体数据来看，这部分学生基础知识扎实，解题能力强。',
+                students: ['蔡依依', '张明辉', '李思思'],
                 knowledge: [
                     { name: '数学逻辑推理', rate: '15%' },
                     { name: '统计与概率基础', rate: '10%' },
@@ -1966,7 +2166,8 @@
                 }
             },
             'advanced': {
-                overall: '拔高层学生参与作答人数为3人，总题数20道，平均错误率为18%。从整体数据来看，这部分学生基础知识较好，但在一些复杂问题上仍有提升空间。',
+                overall: '本次作业布置人数为50人，拔高层学生参与作答人数为3人，总题数20道，平均错误率为18%。从整体数据来看，这部分学生基础知识较好，但在一些复杂问题上仍有提升空间。',
+                students: ['余诗雨', '王浩然', '陈雨欣'],
                 knowledge: [
                     { name: '数学逻辑推理', rate: '25%' },
                     { name: '统计与概率基础', rate: '20%' },
@@ -2001,7 +2202,8 @@
                 }
             },
             'good': {
-                overall: '良好层学生参与作答人数为3人，总题数20道，平均错误率为30%。从整体数据来看，这部分学生基础知识一般，需要加强练习和巩固。',
+                overall: '本次作业布置人数为50人，良好层学生参与作答人数为3人，总题数20道，平均错误率为30%。从整体数据来看，这部分学生基础知识一般，需要加强练习和巩固。',
+                students: ['杨诗涵', '刘子涵', '赵子轩'],
                 knowledge: [
                     { name: '合数与偶数概念', rate: '40%' },
                     { name: '统计与概率基础', rate: '35%' },
@@ -2036,7 +2238,8 @@
                 }
             },
             'improve': {
-                overall: '提升层学生参与作答人数为3人，总题数20道，平均错误率为45%。从整体数据来看，这部分学生基础知识薄弱，需要加强基础训练。',
+                overall: '本次作业布置人数为50人，提升层学生参与作答人数为3人，总题数20道，平均错误率为45%。从整体数据来看，这部分学生基础知识薄弱，需要加强基础训练。',
+                students: ['石峻熙', '孙伟杰', '周雅琪'],
                 knowledge: [
                     { name: '两位数进位加法', rate: '60%' },
                     { name: '合数与偶数概念', rate: '55%' },
@@ -2071,7 +2274,8 @@
                 }
             },
             'basic': {
-                overall: '基础层学生参与作答人数为5人，总题数20道，平均错误率为65%。从整体数据来看，这部分学生基础知识非常薄弱，需要从最基本的概念开始学习。',
+                overall: '本次作业布置人数为50人，基础层学生参与作答人数为5人，总题数20道，平均错误率为65%。从整体数据来看，这部分学生基础知识非常薄弱，需要从最基本的概念开始学习。',
+                students: ['巢雅婧', '唐锦雯', '潘奕琳', '黄雨萱', '朱珈琳'],
                 knowledge: [
                     { name: '两位数进位加法', rate: '85%' },
                     { name: '合数与偶数概念', rate: '75%' },
@@ -2160,6 +2364,15 @@
                     studentSuggestionsHtml += `<li>${item}</li>`;
                 });
                 
+                // 构建学生名单HTML
+                let studentsHtml = '';
+                if (analysisData.students && analysisData.students.length > 0) {
+                    studentsHtml = `<div style="margin-top: 12px; padding: 10px 15px; background-color: #f0f8ff; border-radius: 6px; border-left: 4px solid #4285f4;">
+                        <strong style="color: #333;">包含学生（${analysisData.students.length}人）：</strong>
+                        <span style="color: #666;">${analysisData.students.join('、')}</span>
+                    </div>`;
+                }
+                
                 // 更新报告内容
                 analysisContentEl.innerHTML = `
                     <!-- 整体错误率分析 - 默认展开 -->
@@ -2170,6 +2383,7 @@
                         </div>
                         <div class="analysis-body">
                             <p>${analysisData.overall}</p>
+                            ${studentsHtml}
                         </div>
                     </div>
                     
@@ -2235,8 +2449,12 @@
                     </div>
                 `;
                 
-                // 显示报告内容，隐藏空状态
+                // 显示报告内容，隐藏空状态和加载状态
                 analysisEmptyEl.style.display = 'none';
+                const analysisLoadingEl = document.getElementById('analysis-loading');
+                if (analysisLoadingEl) {
+                    analysisLoadingEl.style.display = 'none';
+                }
                 analysisContentEl.style.display = 'block';
                 
                 // 重新绑定折叠功能
@@ -2284,12 +2502,80 @@
             });
         }
         
-        // 进入页面后自动生成报告
-        window.addEventListener('load', () => {
-            // 延迟一点时间，模拟生成过程
+        // 标记报告是否已生成（首次加载需要5秒，后续切换层次不需要）
+        let reportGenerated = false;
+        
+        // 显示加载状态
+        function showLoadingState() {
+            const analysisEmptyEl = document.getElementById('analysis-empty');
+            const analysisLoadingEl = document.getElementById('analysis-loading');
+            const analysisContentEl = document.getElementById('analysis-content');
+            const progressBar = document.getElementById('loading-progress-bar');
+            
+            if (analysisEmptyEl) analysisEmptyEl.style.display = 'none';
+            if (analysisContentEl) analysisContentEl.style.display = 'none';
+            if (analysisLoadingEl) {
+                analysisLoadingEl.style.display = 'flex';
+                // 重置进度条动画
+                if (progressBar) {
+                    progressBar.style.animation = 'none';
+                    progressBar.offsetHeight; // 触发重绘
+                    progressBar.style.animation = 'progress 5s ease-out forwards';
+                }
+            }
+        }
+        
+        // 更新报告：重新加载并生成当前层次的分析报告
+        function refreshReport() {
+            const btn = document.getElementById('refresh-report-btn');
+            btn.disabled = true;
+            btn.textContent = '更新中...';
+            
+            showLoadingState();
+            
             setTimeout(() => {
-                generateAnalysisReport();
-            }, 500);
+                const currentLayer = document.querySelector('#layer-buttons button[style*="background: #4285f4"], #layer-buttons button[style*="background: rgb(66, 133, 244)"]');
+                const layer = currentLayer ? currentLayer.getAttribute('data-layer') : 'all';
+                generateAnalysisReport(layer);
+                btn.disabled = false;
+                btn.textContent = '🔄 更新';
+            }, 5000);
+        }
+        
+        // 作业截止时间
+        const homeworkDeadline = new Date('2026-01-23T13:30:00');
+        
+        // 进入页面后检查截止时间，决定是否生成报告
+        window.addEventListener('load', () => {
+            const now = new Date();
+            const analysisNotReady = document.getElementById('analysis-not-ready');
+            const analysisLoadingEl = document.getElementById('analysis-loading');
+            
+            if (now < homeworkDeadline) {
+                // 截止时间未到，显示提示
+                if (analysisLoadingEl) analysisLoadingEl.style.display = 'none';
+                if (analysisNotReady) analysisNotReady.style.display = 'flex';
+                
+                // 到达截止时间后自动生成报告
+                const delay = homeworkDeadline.getTime() - now.getTime();
+                setTimeout(() => {
+                    if (analysisNotReady) analysisNotReady.style.display = 'none';
+                    showLoadingState();
+                    setTimeout(() => {
+                        generateAnalysisReport();
+                        reportGenerated = true;
+                        document.getElementById('refresh-report-btn').style.display = 'inline-block';
+                    }, 5000);
+                }, delay);
+            } else {
+                // 已过截止时间，直接显示加载动画并生成报告
+                showLoadingState();
+                setTimeout(() => {
+                    generateAnalysisReport();
+                    reportGenerated = true;
+                    document.getElementById('refresh-report-btn').style.display = 'inline-block';
+                }, 5000);
+            }
         });
         
         // AI变题类型选择功能
@@ -2575,7 +2861,7 @@
             });
         });
 
-        // 5. 布置错题巩固作业弹窗
+        // 5. 布置错题巩固作业
         const generateBtn = document.getElementById('generate-homework');
         const generateModal = document.getElementById('generate-modal');
         const closeGenerateModal = document.getElementById('close-generate-modal');
@@ -2588,21 +2874,8 @@
                 return;
             }
             
-            // 更新已选择题目信息
-            const selectedQuestionCount = document.getElementById('selectedQuestionCount');
-            const selectedQuestionTypes = document.getElementById('selectedQuestionTypes');
-            
-            if (selectedQuestionCount) {
-                selectedQuestionCount.textContent = selectedCount;
-            }
-            
-            if (selectedQuestionTypes) {
-                // 这里可以根据实际选中的题目类型进行统计
-                // 由于我们没有实际的题目类型数据，这里使用模拟数据
-                selectedQuestionTypes.textContent = '单项选择题 3 题，判断题 2 题';
-            }
-            
-            generateModal.style.display = 'flex';
+            // 直接跳转到分层作业页面
+            window.location.href = 'fenceng-homework.html';
         });
         
         // 关闭生成弹窗
@@ -2614,102 +2887,119 @@
         
         // 确认布置
         confirmGenerate.addEventListener('click', () => {
-            closeGenerate();
-            window.location.href = 'preview.html';
+            // 检查是否选择了AI变题
+            const aiRadio = document.getElementById('type3');
+            if (aiRadio && aiRadio.checked) {
+                closeGenerate();
+                startAiGeneration();
+            } else {
+                closeGenerate();
+                window.location.href = 'preview.html';
+            }
         });
+        
+        // AI变题生成流程
+        function startAiGeneration() {
+            const modal = document.getElementById('ai-loading-modal');
+            const progressBar = document.getElementById('ai-progress-bar');
+            const progressText = document.getElementById('ai-progress-text');
+            const progressStep = document.getElementById('ai-progress-step');
+            
+            modal.style.display = 'flex';
+            progressBar.style.width = '0%';
+            
+            const steps = [
+                { pct: 15, text: '正在分析原题知识点...', time: 1000 },
+                { pct: 35, text: '正在匹配变题策略...', time: 2000 },
+                { pct: 55, text: '正在生成变式题目...', time: 3500 },
+                { pct: 75, text: '正在校验题目质量...', time: 5000 },
+                { pct: 90, text: '正在生成参考答案与解析...', time: 6500 },
+                { pct: 100, text: '生成完成！', time: 7500 }
+            ];
+            
+            steps.forEach(step => {
+                setTimeout(() => {
+                    progressBar.style.width = step.pct + '%';
+                    progressText.textContent = '进度：' + step.pct + '%';
+                    progressStep.textContent = step.text;
+                }, step.time);
+            });
+            
+            // 完成后跳转
+            setTimeout(() => {
+                modal.style.display = 'none';
+                window.location.href = 'preview.html';
+            }, 8500);
+        }
         
         // 6. 自定义多选下拉框功能
         const multiselect = document.getElementById('custom-multiselect');
         const multiselectHeader = document.getElementById('multiselect-header');
         const multiselectOptions = document.getElementById('multiselect-options');
         const selectedTags = document.getElementById('selected-tags');
-        const options = multiselect.querySelectorAll('.option');
         
-        // 切换下拉框显示/隐藏
-        multiselectHeader.addEventListener('click', () => {
-            multiselectOptions.style.display = multiselectOptions.style.display === 'none' ? 'block' : 'none';
-        });
-        
-        // 处理选项点击
-        options.forEach(option => {
-            option.addEventListener('click', () => {
-                const value = option.getAttribute('data-value');
-                const label = option.getAttribute('data-label');
-                const isSelected = option.getAttribute('data-selected') === 'true';
-                
-                if (isSelected) {
-                    // 取消选中
-                    option.setAttribute('data-selected', 'false');
-                    const tag = selectedTags.querySelector(`[data-value="${value}"]`);
-                    if (tag) {
-                        tag.remove();
-                    }
-                } else {
-                    // 选中
-                    option.setAttribute('data-selected', 'true');
-                    const tag = document.createElement('span');
-                    tag.className = 'tag';
-                    tag.setAttribute('data-value', value);
-                    tag.innerHTML = `${label}<span class="tag-remove">×</span>`;
-                    selectedTags.appendChild(tag);
-                    
-                    // 添加标签移除事件
-                    tag.querySelector('.tag-remove').addEventListener('click', () => {
-                        tag.remove();
-                        option.setAttribute('data-selected', 'false');
-                    });
-                }
-            });
-        });
-        
-        // 点击外部关闭下拉框
-        document.addEventListener('click', (e) => {
-            if (!multiselect.contains(e.target)) {
-                multiselectOptions.style.display = 'none';
-            }
-        });
-        
-        // 初始化标签移除事件
-        selectedTags.querySelectorAll('.tag-remove').forEach(removeBtn => {
-            removeBtn.addEventListener('click', () => {
-                const tag = removeBtn.closest('.tag');
-                const value = tag.getAttribute('data-value');
-                tag.remove();
-                const option = multiselect.querySelector(`[data-value="${value}"]`);
-                if (option) {
-                    option.setAttribute('data-selected', 'false');
-                }
-            });
-        });
-
-        // 7. 切换显示题目数量
-        const questionNumSelect = document.getElementById('question-num-select');
-        
-        questionNumSelect.addEventListener('change', () => {
-            const value = questionNumSelect.value;
-            const allQuestionCards = document.querySelectorAll('.question-card');
+        // 只有当multiselect元素存在时才执行相关代码
+        if (multiselect && multiselectHeader && multiselectOptions && selectedTags) {
+            const options = multiselect.querySelectorAll('.option');
             
-            if (value === 'all') {
-                // 显示全部题目
-                for (let i = 0; i < allQuestionCards.length; i++) {
-                    allQuestionCards[i].style.display = 'flex';
-                }
-                // 更新标题
-                document.querySelector('.high-error-section .section-title').textContent = '高错率题目';
-            } else {
-                // 显示指定数量题目
-                const showNum = parseInt(value);
-                for (let i = 0; i < allQuestionCards.length; i++) {
-                    if (i < showNum) {
-                        allQuestionCards[i].style.display = 'flex';
+            // 切换下拉框显示/隐藏
+            multiselectHeader.addEventListener('click', () => {
+                multiselectOptions.style.display = multiselectOptions.style.display === 'none' ? 'block' : 'none';
+            });
+            
+            // 处理选项点击
+            options.forEach(option => {
+                option.addEventListener('click', () => {
+                    const value = option.getAttribute('data-value');
+                    const label = option.getAttribute('data-label');
+                    const isSelected = option.getAttribute('data-selected') === 'true';
+                    
+                    if (isSelected) {
+                        // 取消选中
+                        option.setAttribute('data-selected', 'false');
+                        const tag = selectedTags.querySelector(`[data-value="${value}"]`);
+                        if (tag) {
+                            tag.remove();
+                        }
                     } else {
-                        allQuestionCards[i].style.display = 'none';
+                        // 选中
+                        option.setAttribute('data-selected', 'true');
+                        const tag = document.createElement('span');
+                        tag.className = 'tag';
+                        tag.setAttribute('data-value', value);
+                        tag.innerHTML = `${label}<span class="tag-remove">×</span>`;
+                        selectedTags.appendChild(tag);
+                        
+                        // 添加标签移除事件
+                        tag.querySelector('.tag-remove').addEventListener('click', () => {
+                            tag.remove();
+                            option.setAttribute('data-selected', 'false');
+                        });
                     }
+                });
+            });
+            
+            // 点击外部关闭下拉框
+            document.addEventListener('click', (e) => {
+                if (!multiselect.contains(e.target)) {
+                    multiselectOptions.style.display = 'none';
                 }
-                // 更新标题
-                document.querySelector('.high-error-section .section-title').textContent = `高错率题目TOP${showNum}`;
-            }
-        });
+            });
+            
+            // 初始化标签移除事件
+            selectedTags.querySelectorAll('.tag-remove').forEach(removeBtn => {
+                removeBtn.addEventListener('click', () => {
+                    const tag = removeBtn.closest('.tag');
+                    const value = tag.getAttribute('data-value');
+                    tag.remove();
+                    const option = multiselect.querySelector(`[data-value="${value}"]`);
+                    if (option) {
+                        option.setAttribute('data-selected', 'false');
+                    }
+                });
+            });
+        }
+
         // 8. 学生分层按钮交互功能
         const layerButtons = document.querySelectorAll('#layer-buttons button');
         let currentLayer = 'all';
@@ -2808,7 +3098,7 @@
             // 更新标题
             const sectionTitle = document.querySelector('.high-error-section .section-title');
             if (layer === 'all') {
-                sectionTitle.textContent = '高错率题目TOP5';
+                sectionTitle.textContent = '错误题目';
             } else {
                 const layerNames = {
                     'challenge': '挑战层',
@@ -2817,7 +3107,7 @@
                     'improve': '提升层',
                     'basic': '基础层'
                 };
-                sectionTitle.textContent = `高错率题目TOP5（${layerNames[layer]}）`;
+                sectionTitle.textContent = `错误题目（${layerNames[layer]}）`;
             }
         }
         
@@ -2887,8 +3177,23 @@
                 // 更新题目列表
                 updateQuestionList(layer);
                 
-                // 生成对应层次的分析报告
-                generateAnalysisReport(layer);
+                // 生成对应层次的分析报告（如果报告已生成则直接切换，否则等待首次加载完成）
+                if (reportGenerated) {
+                    generateAnalysisReport(layer);
+                }
+                
+                // 自动切换到"错题分析"Tab
+                const errorAnalysisTab = document.querySelector('.tab-item[data-tab="error-analysis"]');
+                if (errorAnalysisTab) {
+                    // 移除所有active
+                    tabItems.forEach(tab => tab.classList.remove('active'));
+                    tabContents.forEach(content => content.classList.remove('active'));
+                    // 添加当前active
+                    errorAnalysisTab.classList.add('active');
+                    document.getElementById('error-analysis').classList.add('active');
+                    // 显示底部固定栏
+                    toggleBottomBar('error-analysis');
+                }
                 
                 console.log('已选择分层:', layer);
             });
