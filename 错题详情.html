@@ -1279,8 +1279,7 @@
         <!-- 学生知识点掌握程度分层区域 -->
         <div style="background: #fff; border-radius: 8px; padding: 15px 20px; margin-bottom: 20px;">
             <div style="display: flex; gap: 10px; flex-wrap: wrap;" id="layer-buttons">
-                <button style="padding: 8px 20px; border: 2px solid #4285f4; border-radius: 4px; background: #4285f4; color: #fff; font-size: 14px; cursor: pointer; font-weight: bold;" data-layer="all">全部学生</button>
-                <button style="padding: 8px 20px; border: 2px solid #1890ff; border-radius: 4px; background: #fff; color: #1890ff; font-size: 14px; cursor: pointer; font-weight: bold;" data-layer="challenge">90%-100%(挑战层)</button>
+                <button style="padding: 8px 20px; border: 2px solid #1890ff; border-radius: 4px; background: #1890ff; color: #fff; font-size: 14px; cursor: pointer; font-weight: bold;" data-layer="challenge">90%-100%(挑战层)</button>
                 <button style="padding: 8px 20px; border: 2px solid #52c41a; border-radius: 4px; background: #fff; color: #52c41a; font-size: 14px; cursor: pointer; font-weight: bold;" data-layer="advanced">75%-89%(拔高层)</button>
                 <button style="padding: 8px 20px; border: 2px solid #faad14; border-radius: 4px; background: #fff; color: #faad14; font-size: 14px; cursor: pointer; font-weight: bold;" data-layer="good">60%-74%(良好层)</button>
                 <button style="padding: 8px 20px; border: 2px solid #ff6b9d; border-radius: 4px; background: #fff; color: #ff6b9d; font-size: 14px; cursor: pointer; font-weight: bold;" data-layer="improve">40%-59%(提升层)</button>
@@ -2003,6 +2002,7 @@
                 <button class="btn btn-blue" id="select-custom-btn" style="position: relative; left: -250px;">确定</button>
                 <button class="btn btn-blue" id="select-all">全选错题</button>
                 <button class="btn btn-red" id="cancel-select" style="display: none;">取消选中</button>
+                <button class="btn btn-blue" id="view-selected" style="display: none;">查看已选错题（<span id="view-selected-count">0</span>题）</button>
                 <button class="btn btn-blue" id="generate-homework">布置错题巩固作业</button>
             </div>
         </div>
@@ -2139,6 +2139,22 @@
         </div>
     </div>
 
+    <!-- 查看已选错题弹窗 -->
+    <div class="modal" id="view-selected-modal">
+        <div class="modal-content" style="width: 800px; max-width: 95%; max-height: 85vh; display: flex; flex-direction: column;">
+            <div class="modal-header">
+                <div class="modal-title">已选错题（<span id="view-selected-modal-count">0</span>题）</div>
+                <button class="close-btn" id="close-view-selected-modal">×</button>
+            </div>
+            <div class="modal-body" id="view-selected-modal-body" style="overflow-y: auto; flex: 1; padding: 0;">
+                <!-- 动态填充 -->
+            </div>
+            <div class="modal-footer" style="display: flex; justify-content: flex-start; align-items: center;">
+                <button class="btn btn-red" id="clear-all-selected">清空全部选中</button>
+            </div>
+        </div>
+    </div>
+
     <!-- AI变题生成loading弹窗 -->
     <div class="modal" id="ai-loading-modal">
         <div class="modal-content" style="width: 450px; text-align: center; padding: 40px 30px;">
@@ -2207,46 +2223,72 @@
         // 调用初始化函数
         initQuestionDisplay();
 
-        // 2. 错题勾选功能
+        // 2. 错题勾选功能 - 全局选中集合（跨层保持）
         const questionCheckboxes = document.querySelectorAll('.question-checkbox');
         const bottomSelectedCountEl = document.getElementById('bottom-selected-count');
-        let selectedCount = 0;
+        // 全局选中题目集合：key=questionId, value=题目卡片的快照信息
+        const globalSelectedQuestions = new Map();
 
-        // 更新勾选数量
+        // 更新勾选数量及相关按钮
         function updateSelectedCount() {
-            bottomSelectedCountEl.textContent = `已勾选：${selectedCount}题`;
-            // 控制取消选中按钮的显示
+            const count = globalSelectedQuestions.size;
+            bottomSelectedCountEl.textContent = `已勾选：${count}题`;
             const cancelSelectBtn = document.getElementById('cancel-select');
-            if (selectedCount > 0) {
-                cancelSelectBtn.style.display = 'inline-block';
-            } else {
-                cancelSelectBtn.style.display = 'none';
-            }
+            const viewSelectedBtn = document.getElementById('view-selected');
+            const viewSelectedCount = document.getElementById('view-selected-count');
+            cancelSelectBtn.style.display = count > 0 ? 'inline-block' : 'none';
+            viewSelectedBtn.style.display = count > 0 ? 'inline-block' : 'none';
+            if (viewSelectedCount) viewSelectedCount.textContent = count;
+        }
+
+        // 同步当前可见题目的checkbox状态到全局选中集合
+        function syncCheckboxesToGlobal() {
+            questionCheckboxes.forEach(checkbox => {
+                const qid = checkbox.getAttribute('data-id');
+                checkbox.checked = globalSelectedQuestions.has(qid);
+                const card = document.querySelector(`.question-card[data-id="${qid}"]`);
+                if (card) {
+                    card.classList.toggle('highlight', checkbox.checked);
+                }
+            });
         }
 
         // 单个勾选事件
         questionCheckboxes.forEach(checkbox => {
             checkbox.addEventListener('change', () => {
-                const questionCard = document.querySelector(`.question-card[data-id="${checkbox.getAttribute('data-id')}"]`);
+                const qid = checkbox.getAttribute('data-id');
+                const card = document.querySelector(`.question-card[data-id="${qid}"]`);
                 if (checkbox.checked) {
-                    selectedCount++;
-                    questionCard.classList.add('highlight');
+                    // 保存题目信息快照
+                    globalSelectedQuestions.set(qid, {
+                        id: qid,
+                        type: card ? card.querySelector('.tag-type')?.textContent : '',
+                        difficulty: card ? card.querySelector('.tag-difficulty')?.textContent : '',
+                        knowledge: card ? card.querySelector('.tag-knowledge')?.textContent : '',
+                        question: card ? card.querySelector('.question-text')?.textContent : '',
+                        options: card ? card.querySelector('.question-options-inline')?.textContent : '',
+                        answer: card ? card.querySelector('.question-answer-inline')?.textContent : '',
+                        errorRate: card ? card.querySelector('.stat-rate-value')?.textContent : '',
+                        countText: card ? card.querySelector('.stat-count-value')?.textContent : ''
+                    });
+                    if (card) card.classList.add('highlight');
                 } else {
-                    selectedCount--;
-                    questionCard.classList.remove('highlight');
+                    globalSelectedQuestions.delete(qid);
+                    if (card) card.classList.remove('highlight');
                 }
                 updateSelectedCount();
+                updateSelectAllBtn();
             });
         });
 
         // 取消选中按钮点击事件
         document.getElementById('cancel-select').addEventListener('click', () => {
+            globalSelectedQuestions.clear();
             questionCheckboxes.forEach(checkbox => {
                 checkbox.checked = false;
-                const questionCard = document.querySelector(`.question-card[data-id="${checkbox.getAttribute('data-id')}"]`);
-                questionCard.classList.remove('highlight');
+                const card = document.querySelector(`.question-card[data-id="${checkbox.getAttribute('data-id')}"]`);
+                if (card) card.classList.remove('highlight');
             });
-            selectedCount = 0;
             updateSelectedCount();
             updateSelectAllBtn();
         });
@@ -2262,18 +2304,39 @@
             selectTopN(n);
         });
 
-        // 通用：选中前N题
+        // 通用：选中前N题（仅当前可见题目）
         function selectTopN(n) {
+            // 先清除当前层可见题目的选中
             questionCheckboxes.forEach(checkbox => {
-                checkbox.checked = false;
-                document.querySelector(`.question-card[data-id="${checkbox.getAttribute('data-id')}"]`).classList.remove('highlight');
+                const qid = checkbox.getAttribute('data-id');
+                const card = document.querySelector(`.question-card[data-id="${qid}"]`);
+                if (card && card.style.display !== 'none') {
+                    checkbox.checked = false;
+                    globalSelectedQuestions.delete(qid);
+                    card.classList.remove('highlight');
+                }
             });
-            selectedCount = 0;
-            const topCheckboxes = Array.from(questionCheckboxes).slice(0, n);
-            topCheckboxes.forEach(checkbox => {
+            // 选中前N个可见题目
+            const visibleCheckboxes = Array.from(questionCheckboxes).filter(cb => {
+                const card = document.querySelector(`.question-card[data-id="${cb.getAttribute('data-id')}"]`);
+                return card && card.style.display !== 'none';
+            });
+            visibleCheckboxes.slice(0, n).forEach(checkbox => {
+                const qid = checkbox.getAttribute('data-id');
+                const card = document.querySelector(`.question-card[data-id="${qid}"]`);
                 checkbox.checked = true;
-                document.querySelector(`.question-card[data-id="${checkbox.getAttribute('data-id')}"]`).classList.add('highlight');
-                selectedCount++;
+                globalSelectedQuestions.set(qid, {
+                    id: qid,
+                    type: card ? card.querySelector('.tag-type')?.textContent : '',
+                    difficulty: card ? card.querySelector('.tag-difficulty')?.textContent : '',
+                    knowledge: card ? card.querySelector('.tag-knowledge')?.textContent : '',
+                    question: card ? card.querySelector('.question-text')?.textContent : '',
+                    options: card ? card.querySelector('.question-options-inline')?.textContent : '',
+                    answer: card ? card.querySelector('.question-answer-inline')?.textContent : '',
+                    errorRate: card ? card.querySelector('.stat-rate-value')?.textContent : '',
+                    countText: card ? card.querySelector('.stat-count-value')?.textContent : ''
+                });
+                if (card) card.classList.add('highlight');
             });
             updateSelectedCount();
             updateSelectAllBtn();
@@ -2282,9 +2345,13 @@
         // 全选/取消全选功能
         const selectAllBtn = document.getElementById('select-all');
         
-        // 更新全选按钮状态
+        // 更新全选按钮状态（基于当前可见题目）
         function updateSelectAllBtn() {
-            const isAllChecked = Array.from(questionCheckboxes).every(checkbox => checkbox.checked);
+            const visibleCheckboxes = Array.from(questionCheckboxes).filter(cb => {
+                const card = document.querySelector(`.question-card[data-id="${cb.getAttribute('data-id')}"]`);
+                return card && card.style.display !== 'none';
+            });
+            const isAllChecked = visibleCheckboxes.length > 0 && visibleCheckboxes.every(cb => cb.checked);
             if (isAllChecked) {
                 selectAllBtn.textContent = '取消全选';
                 selectAllBtn.classList.remove('btn-blue');
@@ -2296,18 +2363,33 @@
             }
         }
         
-        // 全选/取消全选点击事件
+        // 全选/取消全选点击事件（仅操作当前可见题目）
         selectAllBtn.addEventListener('click', () => {
-            const isAllChecked = Array.from(questionCheckboxes).every(checkbox => checkbox.checked);
-            selectedCount = 0;
-            questionCheckboxes.forEach(checkbox => {
+            const visibleCheckboxes = Array.from(questionCheckboxes).filter(cb => {
+                const card = document.querySelector(`.question-card[data-id="${cb.getAttribute('data-id')}"]`);
+                return card && card.style.display !== 'none';
+            });
+            const isAllChecked = visibleCheckboxes.every(cb => cb.checked);
+            visibleCheckboxes.forEach(checkbox => {
+                const qid = checkbox.getAttribute('data-id');
+                const card = document.querySelector(`.question-card[data-id="${qid}"]`);
                 checkbox.checked = !isAllChecked;
-                const questionCard = document.querySelector(`.question-card[data-id="${checkbox.getAttribute('data-id')}"]`);
                 if (!isAllChecked) {
-                    questionCard.classList.add('highlight');
-                    selectedCount++;
+                    globalSelectedQuestions.set(qid, {
+                        id: qid,
+                        type: card ? card.querySelector('.tag-type')?.textContent : '',
+                        difficulty: card ? card.querySelector('.tag-difficulty')?.textContent : '',
+                        knowledge: card ? card.querySelector('.tag-knowledge')?.textContent : '',
+                        question: card ? card.querySelector('.question-text')?.textContent : '',
+                        options: card ? card.querySelector('.question-options-inline')?.textContent : '',
+                        answer: card ? card.querySelector('.question-answer-inline')?.textContent : '',
+                        errorRate: card ? card.querySelector('.stat-rate-value')?.textContent : '',
+                        countText: card ? card.querySelector('.stat-count-value')?.textContent : ''
+                    });
+                    if (card) card.classList.add('highlight');
                 } else {
-                    questionCard.classList.remove('highlight');
+                    globalSelectedQuestions.delete(qid);
+                    if (card) card.classList.remove('highlight');
                 }
             });
             updateSelectedCount();
@@ -2376,7 +2458,7 @@
         // 分层分析报告数据（模拟）
         const layerAnalysisData = {
             'all': {
-                overall: '本次作业布置人数为50人，参与作答人数为27人，总题数20道，平均错误率为32%。从整体数据来看，本次作业的难度适中，但仍有较大的提升空间。',
+                overall: '本次作业布置人数为50人，参与作答人数为27人，总题数20道，平均错误率为32%。',
                 students: ['巢雅婧', '唐锦雯', '潘奕琳', '余诗雨', '蔡依依', '杨诗涵', '黄雨萱', '朱珈琳', '石峻熙', '张明辉', '李思思', '王浩然', '陈雨欣', '刘子涵', '赵子轩', '孙伟杰', '周雅琪'],
                 knowledge: [
                     { name: '两位数进位加法', rate: '72%' },
@@ -2412,7 +2494,7 @@
                 }
             },
             'challenge': {
-                overall: '本次作业布置人数为50人，挑战层学生参与作答人数为3人，总题数20道，平均错误率为8%。从整体数据来看，这部分学生基础知识扎实，解题能力强。',
+                overall: '本次作业布置人数为50人，挑战层学生参与作答人数为3人，总题数20道，平均错误率为8%。',
                 students: ['蔡依依', '张明辉', '李思思'],
                 knowledge: [
                     { name: '数学逻辑推理', rate: '15%' },
@@ -2448,7 +2530,7 @@
                 }
             },
             'advanced': {
-                overall: '本次作业布置人数为50人，拔高层学生参与作答人数为3人，总题数20道，平均错误率为18%。从整体数据来看，这部分学生基础知识较好，但在一些复杂问题上仍有提升空间。',
+                overall: '本次作业布置人数为50人，拔高层学生参与作答人数为3人，总题数20道，平均错误率为18%。',
                 students: ['余诗雨', '王浩然', '陈雨欣'],
                 knowledge: [
                     { name: '数学逻辑推理', rate: '25%' },
@@ -2484,7 +2566,7 @@
                 }
             },
             'good': {
-                overall: '本次作业布置人数为50人，良好层学生参与作答人数为3人，总题数20道，平均错误率为30%。从整体数据来看，这部分学生基础知识一般，需要加强练习和巩固。',
+                overall: '本次作业布置人数为50人，良好层学生参与作答人数为3人，总题数20道，平均错误率为30%。',
                 students: ['杨诗涵', '刘子涵', '赵子轩'],
                 knowledge: [
                     { name: '合数与偶数概念', rate: '40%' },
@@ -2520,7 +2602,7 @@
                 }
             },
             'improve': {
-                overall: '本次作业布置人数为50人，提升层学生参与作答人数为3人，总题数20道，平均错误率为45%。从整体数据来看，这部分学生基础知识薄弱，需要加强基础训练。',
+                overall: '本次作业布置人数为50人，提升层学生参与作答人数为3人，总题数20道，平均错误率为45%。',
                 students: ['石峻熙', '孙伟杰', '周雅琪'],
                 knowledge: [
                     { name: '两位数进位加法', rate: '60%' },
@@ -2556,7 +2638,7 @@
                 }
             },
             'basic': {
-                overall: '本次作业布置人数为50人，基础层学生参与作答人数为5人，总题数20道，平均错误率为65%。从整体数据来看，这部分学生基础知识非常薄弱，需要从最基本的概念开始学习。',
+                overall: '本次作业布置人数为50人，基础层学生参与作答人数为5人，总题数20道，平均错误率为65%。',
                 students: ['巢雅婧', '唐锦雯', '潘奕琳', '黄雨萱', '朱珈琳'],
                 knowledge: [
                     { name: '两位数进位加法', rate: '85%' },
@@ -3350,6 +3432,73 @@
             });
         }
 
+        // 查看已选错题弹窗
+        const viewSelectedModal = document.getElementById('view-selected-modal');
+        document.getElementById('view-selected').addEventListener('click', () => {
+            renderViewSelectedModal();
+            viewSelectedModal.style.display = 'flex';
+        });
+        document.getElementById('close-view-selected-modal').addEventListener('click', () => {
+            viewSelectedModal.style.display = 'none';
+        });
+        document.getElementById('clear-all-selected').addEventListener('click', () => {
+            globalSelectedQuestions.clear();
+            questionCheckboxes.forEach(cb => {
+                cb.checked = false;
+                const card = document.querySelector(`.question-card[data-id="${cb.getAttribute('data-id')}"]`);
+                if (card) card.classList.remove('highlight');
+            });
+            updateSelectedCount();
+            updateSelectAllBtn();
+            viewSelectedModal.style.display = 'none';
+        });
+
+        function renderViewSelectedModal() {
+            const body = document.getElementById('view-selected-modal-body');
+            const countEl = document.getElementById('view-selected-modal-count');
+            const questions = Array.from(globalSelectedQuestions.values());
+            countEl.textContent = questions.length;
+
+            if (questions.length === 0) {
+                body.innerHTML = '<div style="text-align:center;padding:40px;color:#999;">暂无已选错题</div>';
+                return;
+            }
+
+            body.innerHTML = questions.map((q) => `
+                <div data-modal-qid="${q.id}" style="padding:15px 20px;border-bottom:1px solid #f0f0f0;">
+                    <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:8px;">
+                        <div style="flex:1;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                            <span style="padding:2px 8px;background:#fff7e6;color:#fa8c16;border-radius:4px;font-size:12px;">${q.type}</span>
+                            <span style="padding:2px 8px;background:#e6f7ff;color:#1890ff;border-radius:4px;font-size:12px;">${q.difficulty}</span>
+                            <span style="font-size:12px;color:#666;">${q.knowledge}</span>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:12px;flex-shrink:0;">
+                            <span style="font-size:12px;color:#ff4d4f;background:#fff1f0;padding:2px 8px;border-radius:4px;white-space:nowrap;">错误率：${q.errorRate}</span>
+                            <span style="font-size:12px;color:#999;white-space:nowrap;">错题人数/答题人数</span>
+                            <span style="font-size:20px;font-weight:bold;color:#ff4d4f;white-space:nowrap;">${q.countText}</span>
+                            <input type="checkbox" checked onchange="removeFromSelected('${q.id}')" style="width:18px;height:18px;cursor:pointer;accent-color:#4285f4;">
+                        </div>
+                    </div>
+                    <div style="font-size:14px;color:#333;margin-bottom:6px;line-height:1.5;">${q.question}</div>
+                    <div style="font-size:13px;color:#555;margin-bottom:4px;">${q.options}</div>
+                    <div style="font-size:13px;color:#52c41a;font-weight:500;">${q.answer}</div>
+                </div>
+            `).join('');
+        }
+
+        function removeFromSelected(qid) {
+            globalSelectedQuestions.delete(qid);
+            // 同步checkbox
+            const cb = document.querySelector(`.question-checkbox[data-id="${qid}"]`);
+            if (cb) cb.checked = false;
+            const card = document.querySelector(`.question-card[data-id="${qid}"]`);
+            if (card) card.classList.remove('highlight');
+            updateSelectedCount();
+            updateSelectAllBtn();
+            // 刷新弹窗
+            renderViewSelectedModal();
+        }
+
         // 8. 学生分层按钮交互功能
         const layerButtons = document.querySelectorAll('#layer-buttons button');
         let currentLayer = 'all';
@@ -3459,7 +3608,14 @@
                 };
                 sectionTitle.textContent = `错误题目（${layerNames[layer]}）`;
             }
+            // 同步全局选中状态到当前可见题目的checkbox
+            syncCheckboxesToGlobal();
         }
+        
+        // 初始化默认选中挑战层
+        currentLayer = 'challenge';
+        updateStudentTable('challenge');
+        updateQuestionList('challenge');
         
         // 按钮点击事件
         layerButtons.forEach(btn => {
