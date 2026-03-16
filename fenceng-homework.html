@@ -1047,54 +1047,101 @@
                         <div class="select-box" style="padding: 5px 10px; width: 80px;">18:00</div>
                     </div>
                 </div>
-                <div style="padding: 30px 20px; background: #fafafa; border-radius: 8px; border: 1px solid #f0f0f0;">
-                    <div style="font-size: 14px; font-weight: 500; color: #333; margin-bottom: 20px;">请选择题目类型：</div>
-                    <div style="display: flex; flex-direction: column; gap: 16px;">
-                        <label style="display: flex; align-items: center; gap: 10px; padding: 12px 15px; background: #fff; border: 1px solid #e8e8e8; border-radius: 6px; cursor: pointer; transition: all 0.3s;" onmouseover="this.style.borderColor='#1890ff'" onmouseout="if(!this.querySelector('input').checked) this.style.borderColor='#e8e8e8'" onclick="setTimeout(()=>toggleSimpleAiTypes(),0)">
-                            <input type="radio" name="simpleQuestionType" value="original" checked style="accent-color: #1890ff; width: 16px; height: 16px;">
-                            <div>
-                                <div style="font-size: 14px; color: #333; font-weight: 500;">原题重做</div>
-                                <div style="font-size: 12px; color: #999; margin-top: 3px;">使用原始错题，让学生重新作答巩固</div>
+                <div style="display: flex; gap: 20px;">
+                    <!-- 左侧：题目类型选择 -->
+                    <div style="flex: 0 0 45%; padding: 30px 20px; background: #fafafa; border-radius: 8px; border: 1px solid #f0f0f0;">
+                        <div style="font-size: 14px; font-weight: 500; color: #333; margin-bottom: 20px;">请选择题目类型：</div>
+                        <div style="display: flex; flex-direction: column; gap: 16px;">
+                            <label style="display: flex; align-items: center; gap: 10px; padding: 12px 15px; background: #fff; border: 1px solid #e8e8e8; border-radius: 6px; cursor: pointer; transition: all 0.3s;" onmouseover="this.style.borderColor='#1890ff'" onmouseout="if(!this.querySelector('input').checked) this.style.borderColor='#e8e8e8'" onclick="setTimeout(()=>handleSimpleQuestionTypeChange(),0)">
+                                <input type="radio" name="simpleQuestionType" value="original" checked style="accent-color: #1890ff; width: 16px; height: 16px;">
+                                <div>
+                                    <div style="font-size: 14px; color: #333; font-weight: 500;">原题重做</div>
+                                    <div style="font-size: 12px; color: #999; margin-top: 3px;">使用原始错题，让学生重新作答巩固</div>
+                                </div>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 10px; padding: 12px 15px; background: #fff; border: 1px solid #e8e8e8; border-radius: 6px; cursor: pointer; transition: all 0.3s;" onmouseover="this.style.borderColor='#1890ff'" onmouseout="if(!this.querySelector('input').checked) this.style.borderColor='#e8e8e8'" onclick="setTimeout(()=>handleSimpleQuestionTypeChange(),0)">
+                                <input type="radio" name="simpleQuestionType" value="similar" style="accent-color: #1890ff; width: 16px; height: 16px;">
+                                <div>
+                                    <div style="font-size: 14px; color: #333; font-weight: 500;">举一反三</div>
+                                    <div style="font-size: 12px; color: #999; margin-top: 3px;">基于原题知识点，生成相似题目进行练习</div>
+                                </div>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 10px; padding: 12px 15px; background: #fff; border: 1px solid #e8e8e8; border-radius: 6px; cursor: pointer; transition: all 0.3s;" onmouseover="this.style.borderColor='#1890ff'" onmouseout="if(!this.querySelector('input').checked) this.style.borderColor='#e8e8e8'" onclick="setTimeout(()=>handleSimpleQuestionTypeChange(),0)">
+                                <input type="radio" name="simpleQuestionType" value="aiVariation" style="accent-color: #1890ff; width: 16px; height: 16px;">
+                                <div>
+                                    <div style="font-size: 14px; color: #333; font-weight: 500;">🤖 AI变题</div>
+                                    <div style="font-size: 12px; color: #999; margin-top: 3px;">AI智能生成变式题目，请选择变题类型</div>
+                                </div>
+                            </label>
+                            <!-- AI变题子选项 -->
+                            <div id="simpleAiTypeOptions" class="hidden" style="margin-left: 26px; display: none;">
+                                <div style="display: flex; flex-direction: column; gap: 10px; padding: 15px; background: #e6f7ff; border: 1px solid #91d5ff; border-radius: 6px;">
+                                    <div style="font-size: 13px; color: #1890ff; font-weight: 500; margin-bottom: 2px;">选择AI变题类型：</div>
+                                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 14px; color: #333;">
+                                        <input type="radio" name="simpleAiType" value="questionType" checked style="accent-color: #1890ff; width: 15px; height: 15px;">
+                                        题型转换
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 14px; color: #333;">
+                                        <input type="radio" name="simpleAiType" value="context" style="accent-color: #1890ff; width: 15px; height: 15px;">
+                                        情境重构
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 14px; color: #333;">
+                                        <input type="radio" name="simpleAiType" value="data" style="accent-color: #1890ff; width: 15px; height: 15px;">
+                                        数值/素材替换
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 14px; color: #333;">
+                                        <input type="radio" name="simpleAiType" value="knowledge" style="accent-color: #1890ff; width: 15px; height: 15px;">
+                                        知识点融合
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 14px; color: #333;">
+                                        <input type="radio" name="simpleAiType" value="condition" style="accent-color: #1890ff; width: 15px; height: 15px;">
+                                        条件变式
+                                    </label>
+                                </div>
                             </div>
-                        </label>
-                        <label style="display: flex; align-items: center; gap: 10px; padding: 12px 15px; background: #fff; border: 1px solid #e8e8e8; border-radius: 6px; cursor: pointer; transition: all 0.3s;" onmouseover="this.style.borderColor='#1890ff'" onmouseout="if(!this.querySelector('input').checked) this.style.borderColor='#e8e8e8'" onclick="setTimeout(()=>toggleSimpleAiTypes(),0)">
-                            <input type="radio" name="simpleQuestionType" value="similar" style="accent-color: #1890ff; width: 16px; height: 16px;">
-                            <div>
-                                <div style="font-size: 14px; color: #333; font-weight: 500;">举一反三</div>
-                                <div style="font-size: 12px; color: #999; margin-top: 3px;">基于原题知识点，生成相似题目进行练习</div>
+                        </div>
+                    </div>
+                    
+                    <!-- 右侧：题目难度配置 -->
+                    <div style="flex: 1; padding: 30px 20px; background: #fafafa; border-radius: 8px; border: 1px solid #f0f0f0;">
+                        <div style="font-size: 14px; font-weight: 500; color: #333; margin-bottom: 20px;">题目难度配置：</div>
+                        <div id="simpleDifficultyConfig" style="opacity: 0.6;">
+                            <div style="margin-bottom: 15px;">
+                                <label style="font-size: 13px; color: #666; display: block; margin-bottom: 8px;">难度预设：</label>
+                                <select id="simpleDifficultyPreset" onchange="changeSimpleDifficultyPreset()" disabled style="width: 100%; padding: 8px; border: 1px solid #d9d9d9; border-radius: 4px; font-size: 13px; background-color: #f5f5f5; color: #999; cursor: not-allowed;">
+                                    <option value="relax">轻松应对</option>
+                                    <option value="easy">专注一下</option>
+                                    <option value="medium" selected>小有难度</option>
+                                    <option value="hard">颇有难度</option>
+                                    <option value="challenge">挑战自我</option>
+                                </select>
                             </div>
-                        </label>
-                        <label style="display: flex; align-items: center; gap: 10px; padding: 12px 15px; background: #fff; border: 1px solid #e8e8e8; border-radius: 6px; cursor: pointer; transition: all 0.3s;" onmouseover="this.style.borderColor='#1890ff'" onmouseout="if(!this.querySelector('input').checked) this.style.borderColor='#e8e8e8'" onclick="setTimeout(()=>toggleSimpleAiTypes(),0)">
-                            <input type="radio" name="simpleQuestionType" value="aiVariation" style="accent-color: #1890ff; width: 16px; height: 16px;">
-                            <div>
-                                <div style="font-size: 14px; color: #333; font-weight: 500;">🤖 AI变题</div>
-                                <div style="font-size: 12px; color: #999; margin-top: 3px;">AI智能生成变式题目，请选择变题类型</div>
-                            </div>
-                        </label>
-                        <!-- AI变题子选项 -->
-                        <div id="simpleAiTypeOptions" class="hidden" style="margin-left: 26px; display: none;">
-                            <div style="display: flex; flex-direction: column; gap: 10px; padding: 15px; background: #e6f7ff; border: 1px solid #91d5ff; border-radius: 6px;">
-                                <div style="font-size: 13px; color: #1890ff; font-weight: 500; margin-bottom: 2px;">选择AI变题类型：</div>
-                                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 14px; color: #333;">
-                                    <input type="radio" name="simpleAiType" value="questionType" checked style="accent-color: #1890ff; width: 15px; height: 15px;">
-                                    题型转换
-                                </label>
-                                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 14px; color: #333;">
-                                    <input type="radio" name="simpleAiType" value="context" style="accent-color: #1890ff; width: 15px; height: 15px;">
-                                    情境重构
-                                </label>
-                                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 14px; color: #333;">
-                                    <input type="radio" name="simpleAiType" value="data" style="accent-color: #1890ff; width: 15px; height: 15px;">
-                                    数值/素材替换
-                                </label>
-                                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 14px; color: #333;">
-                                    <input type="radio" name="simpleAiType" value="knowledge" style="accent-color: #1890ff; width: 15px; height: 15px;">
-                                    知识点融合
-                                </label>
-                                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 14px; color: #333;">
-                                    <input type="radio" name="simpleAiType" value="condition" style="accent-color: #1890ff; width: 15px; height: 15px;">
-                                    条件变式
-                                </label>
+                            <div style="display: flex; flex-direction: column; gap: 12px;">
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <label style="font-size: 13px; color: #999; width: 60px;">基础：</label>
+                                    <input type="number" id="simpleBasic" value="20" min="0" max="100" disabled style="flex: 1; padding: 6px; border: 1px solid #d9d9d9; border-radius: 4px; text-align: center; background-color: #f5f5f5; color: #999; cursor: not-allowed;">
+                                    <span style="font-size: 13px; color: #999;">%</span>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <label style="font-size: 13px; color: #999; width: 60px;">容易：</label>
+                                    <input type="number" id="simpleEasy" value="30" min="0" max="100" disabled style="flex: 1; padding: 6px; border: 1px solid #d9d9d9; border-radius: 4px; text-align: center; background-color: #f5f5f5; color: #999; cursor: not-allowed;">
+                                    <span style="font-size: 13px; color: #999;">%</span>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <label style="font-size: 13px; color: #999; width: 60px;">中等：</label>
+                                    <input type="number" id="simpleMedium" value="30" min="0" max="100" disabled style="flex: 1; padding: 6px; border: 1px solid #d9d9d9; border-radius: 4px; text-align: center; background-color: #f5f5f5; color: #999; cursor: not-allowed;">
+                                    <span style="font-size: 13px; color: #999;">%</span>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <label style="font-size: 13px; color: #999; width: 60px;">困难：</label>
+                                    <input type="number" id="simpleHard" value="15" min="0" max="100" disabled style="flex: 1; padding: 6px; border: 1px solid #d9d9d9; border-radius: 4px; text-align: center; background-color: #f5f5f5; color: #999; cursor: not-allowed;">
+                                    <span style="font-size: 13px; color: #999;">%</span>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <label style="font-size: 13px; color: #999; width: 60px;">挑战：</label>
+                                    <input type="number" id="simpleChallenge" value="5" min="0" max="100" disabled style="flex: 1; padding: 6px; border: 1px solid #d9d9d9; border-radius: 4px; text-align: center; background-color: #f5f5f5; color: #999; cursor: not-allowed;">
+                                    <span style="font-size: 13px; color: #999;">%</span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1971,6 +2018,67 @@
                 aiOptions.classList.add('hidden');
                 aiOptions.style.display = 'none';
             }
+        }
+
+        function handleSimpleQuestionTypeChange() {
+            const selected = document.querySelector('input[name="simpleQuestionType"]:checked');
+            if (!selected) return;
+            const value = selected.value;
+
+            // Show/hide AI variation type options
+            const aiOptions = document.getElementById('simpleAiTypeOptions');
+            if (value === 'aiVariation') {
+                aiOptions.classList.remove('hidden');
+                aiOptions.style.display = 'block';
+            } else {
+                aiOptions.classList.add('hidden');
+                aiOptions.style.display = 'none';
+            }
+
+            // Enable/disable difficulty config
+            const diffConfig = document.getElementById('simpleDifficultyConfig');
+            const presetSelect = document.getElementById('simpleDifficultyPreset');
+            const inputs = diffConfig.querySelectorAll('input[type="number"]');
+            const labels = diffConfig.querySelectorAll('label');
+
+            if (value === 'original') {
+                diffConfig.style.opacity = '0.6';
+                presetSelect.disabled = true;
+                presetSelect.style.backgroundColor = '#f5f5f5';
+                presetSelect.style.color = '#999';
+                presetSelect.style.cursor = 'not-allowed';
+                inputs.forEach(inp => {
+                    inp.disabled = true;
+                    inp.style.backgroundColor = '#f5f5f5';
+                    inp.style.color = '#999';
+                    inp.style.cursor = 'not-allowed';
+                });
+                labels.forEach(lbl => { lbl.style.color = '#999'; });
+            } else {
+                diffConfig.style.opacity = '1';
+                presetSelect.disabled = false;
+                presetSelect.style.backgroundColor = '';
+                presetSelect.style.color = '';
+                presetSelect.style.cursor = '';
+                inputs.forEach(inp => {
+                    inp.disabled = false;
+                    inp.style.backgroundColor = '';
+                    inp.style.color = '';
+                    inp.style.cursor = '';
+                });
+                labels.forEach(lbl => { lbl.style.color = ''; });
+            }
+        }
+
+        function changeSimpleDifficultyPreset() {
+            const preset = document.getElementById('simpleDifficultyPreset').value;
+            const config = difficultyPresets[preset];
+            if (!config) return;
+            document.getElementById('simpleBasic').value = config.basic;
+            document.getElementById('simpleEasy').value = config.easy;
+            document.getElementById('simpleMedium').value = config.medium;
+            document.getElementById('simpleHard').value = config.hard;
+            document.getElementById('simpleChallenge').value = config.challenge;
         }
 
         function startAiGeneration() {
