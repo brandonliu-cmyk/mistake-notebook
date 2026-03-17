@@ -2342,55 +2342,38 @@
             updateSelectAllBtn();
         }
 
-        // 全选/取消全选功能
+        // 全选错题功能
         const selectAllBtn = document.getElementById('select-all');
         
-        // 更新全选按钮状态（基于当前可见题目）
+        // 更新全选按钮状态（不再切换文本）
         function updateSelectAllBtn() {
-            const visibleCheckboxes = Array.from(questionCheckboxes).filter(cb => {
-                const card = document.querySelector(`.question-card[data-id="${cb.getAttribute('data-id')}"]`);
-                return card && card.style.display !== 'none';
-            });
-            const isAllChecked = visibleCheckboxes.length > 0 && visibleCheckboxes.every(cb => cb.checked);
-            if (isAllChecked) {
-                selectAllBtn.textContent = '取消全选';
-                selectAllBtn.classList.remove('btn-blue');
-                selectAllBtn.classList.add('btn-red');
-            } else {
-                selectAllBtn.textContent = '全选错题';
-                selectAllBtn.classList.remove('btn-red');
-                selectAllBtn.classList.add('btn-blue');
-            }
+            // 保持按钮文本始终为"全选错题"
+            // 不再根据选中状态切换按钮文本和样式
         }
         
-        // 全选/取消全选点击事件（仅操作当前可见题目）
+        // 全选错题点击事件（仅全选操作，不切换）
         selectAllBtn.addEventListener('click', () => {
             const visibleCheckboxes = Array.from(questionCheckboxes).filter(cb => {
                 const card = document.querySelector(`.question-card[data-id="${cb.getAttribute('data-id')}"]`);
                 return card && card.style.display !== 'none';
             });
-            const isAllChecked = visibleCheckboxes.every(cb => cb.checked);
+            // 只执行全选操作
             visibleCheckboxes.forEach(checkbox => {
                 const qid = checkbox.getAttribute('data-id');
                 const card = document.querySelector(`.question-card[data-id="${qid}"]`);
-                checkbox.checked = !isAllChecked;
-                if (!isAllChecked) {
-                    globalSelectedQuestions.set(qid, {
-                        id: qid,
-                        type: card ? card.querySelector('.tag-type')?.textContent : '',
-                        difficulty: card ? card.querySelector('.tag-difficulty')?.textContent : '',
-                        knowledge: card ? card.querySelector('.tag-knowledge')?.textContent : '',
-                        question: card ? card.querySelector('.question-text')?.textContent : '',
-                        options: card ? card.querySelector('.question-options-inline')?.textContent : '',
-                        answer: card ? card.querySelector('.question-answer-inline')?.textContent : '',
-                        errorRate: card ? card.querySelector('.stat-rate-value')?.textContent : '',
-                        countText: card ? card.querySelector('.stat-count-value')?.textContent : ''
-                    });
-                    if (card) card.classList.add('highlight');
-                } else {
-                    globalSelectedQuestions.delete(qid);
-                    if (card) card.classList.remove('highlight');
-                }
+                checkbox.checked = true;
+                globalSelectedQuestions.set(qid, {
+                    id: qid,
+                    type: card ? card.querySelector('.tag-type')?.textContent : '',
+                    difficulty: card ? card.querySelector('.tag-difficulty')?.textContent : '',
+                    knowledge: card ? card.querySelector('.tag-knowledge')?.textContent : '',
+                    question: card ? card.querySelector('.question-text')?.textContent : '',
+                    options: card ? card.querySelector('.question-options-inline')?.textContent : '',
+                    answer: card ? card.querySelector('.question-answer-inline')?.textContent : '',
+                    errorRate: card ? card.querySelector('.stat-rate-value')?.textContent : '',
+                    countText: card ? card.querySelector('.stat-count-value')?.textContent : ''
+                });
+                if (card) card.classList.add('highlight');
             });
             updateSelectedCount();
             updateSelectAllBtn();
@@ -3301,7 +3284,7 @@
         const confirmGenerate = document.getElementById('confirm-generate');
         
         generateBtn.addEventListener('click', () => {
-            if (selectedCount === 0) {
+            if (globalSelectedQuestions.size === 0) {
                 alert('请先勾选需要布置的错题！');
                 return;
             }

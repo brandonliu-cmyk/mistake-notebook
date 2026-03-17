@@ -906,10 +906,12 @@
                     <span style="font-size: 12px; color: var(--text-secondary);">题</span>
                     <button onclick="selectTopQuestionsByInput()" style="padding: 4px 12px; background: #1890ff; border: 1px solid #1890ff; color: white; border-radius: 4px; font-size: 12px; cursor: pointer;">确定</button>
                 </div>
+                <button id="selectAllBtn" onclick="selectAllMistakes()" style="padding: 4px 12px; background: #1890ff; border: 1px solid #1890ff; color: white; border-radius: 4px; font-size: 12px; cursor: pointer;">全选错题</button>
                 <button id="cancelSelectionBtn" onclick="cancelSelection()" style="padding: 4px 12px; background: #ff4d4f; border: 1px solid #ff4d4f; color: white; border-radius: 4px; font-size: 12px; cursor: pointer; display: none;">取消选中</button>
             </div>
         </div>
         <div class="action-buttons" style="display: flex; align-items: center; gap: 20px;">
+            <button class="btn-action" id="view-selected-mistakes" style="background: #52c41a; color: white; display: none;" onclick="showViewSelectedModal()">查看已选错题（<span id="view-selected-count-mistakes">0</span>题）</button>
             <button class="btn-action btn-assign-homework" onclick="assignHomework()">布置错题巩固作业</button>
         </div>
     </div>
@@ -1402,7 +1404,7 @@
                 const style = subjectColors[m.subject];
                 const diffStyle = difficultyColors[m.difficulty];
                 return `
-                    <div class="mistake-item" style="position: relative; padding: 15px;">
+                    <div class="mistake-item" style="position: relative; padding: 15px;" data-subject="${m.subject}" data-date="${m.date}" data-error-count="${m.errorCount}">
                         <!-- 右上角区域：统计信息 + 选择框 -->
                         <div style="position: absolute; top: 15px; right: 15px; display: flex; align-items: center; gap: 12px;">
                                 <div class="class-only-stat" style="font-size: 12px; color: var(--text-secondary); padding: 3px 8px; background: #fff1f0; border-radius: 4px;">
@@ -1410,7 +1412,7 @@
                                 </div>
                                 <span class="class-only-stat" style="font-size: 12px; color: var(--text-secondary);">错题人数/答题人数</span>
                                 <span class="class-only-stat" onclick="showStudentList('${m.question}', ${m.errorCount})" style="font-size: 20px; font-weight: bold; color: #ff4d4f; text-decoration: underline; cursor: pointer;">${m.errorCount}/${m.totalCount || 40}</span>
-                                <input type="checkbox" class="question-checkbox class-only-stat" onchange="updateSelectionCount()" style="width: 18px; height: 18px; cursor: pointer; margin-left: 8px;">
+                                <input type="checkbox" class="question-checkbox class-only-stat" style="width: 18px; height: 18px; cursor: pointer; margin-left: 8px;">
                             </div>
                         
                         <div style="padding-right: 280px;">
@@ -1439,6 +1441,10 @@
                     </div>
                 `;
             }).join('');
+            
+            // 重新设置checkbox事件和同步状态
+            setupCheckboxEvents();
+            syncCheckboxesToGlobalMistakes();
         }
         
         function applyFiltersAndUpdate() {
@@ -1750,6 +1756,10 @@
             // 初始化班级选项
             updateClassOptions();
             applyFiltersAndUpdate();
+            
+            // 初始化checkbox事件
+            setupCheckboxEvents();
+            syncCheckboxesToGlobalMistakes();
         });
         
         function toggleTreeNode(toggleElement) {
@@ -1861,25 +1871,132 @@
             });
         }
         
+        // 全局选中题目集合（跨Tab保持）
+        const globalSelectedMistakes = new Map();
+
         // 更新选择计数
         function updateSelectionCount() {
-            const checkboxes = document.querySelectorAll('.question-checkbox');
-            const checkedCount = Array.from(checkboxes).filter(cb => cb.checked).length;
+            const count = globalSelectedMistakes.size;
             const countElement = document.getElementById('selectionCount');
             const cancelBtn = document.getElementById('cancelSelectionBtn');
+            const viewSelectedBtn = document.getElementById('view-selected-mistakes');
+            const viewSelectedCount = document.getElementById('view-selected-count-mistakes');
+            
             if (countElement) {
-                countElement.textContent = checkedCount;
+                countElement.textContent = count;
             }
             if (cancelBtn) {
-                cancelBtn.style.display = checkedCount > 0 ? 'inline-block' : 'none';
+                cancelBtn.style.display = count > 0 ? 'inline-block' : 'none';
             }
+            if (viewSelectedBtn) {
+                viewSelectedBtn.style.display = count > 0 ? 'inline-block' : 'none';
+            }
+            if (viewSelectedCount) {
+                viewSelectedCount.textContent = count;
+            }
+        }
+
+        // 同步checkbox状态到全局选中集合
+        function syncCheckboxesToGlobalMistakes() {
+            const checkboxes = document.querySelectorAll('.question-checkbox');
+            checkboxes.forEach(checkbox => {
+                const mistakeItem = checkbox.closest('.mistake-item');
+                if (mistakeItem) {
+                    const mistakeId = mistakeItem.getAttribute('data-subject') + '-' + mistakeItem.getAttribute('data-date') + '-' + mistakeItem.getAttribute('data-error-count');
+                    checkbox.checked = globalSelectedMistakes.has(mistakeId);
+                }
+            });
+        }
+
+        // 更新checkbox事件处理
+        function setupCheckboxEvents() {
+            const checkboxes = document.querySelectorAll('.question-checkbox');
+            checkboxes.forEach(checkbox => {
+                checkbox.onchange = function() {
+                    const mistakeItem = this.closest('.mistake-item');
+                    if (mistakeItem) {
+                        const mistakeId = mistakeItem.getAttribute('data-subject') + '-' + mistakeItem.getAttribute('data-date') + '-' + mistakeItem.getAttribute('data-error-count');
+                        if (this.checked) {
+                            // 保存题目信息
+                            const questionDiv = mistakeItem.querySelector('div[style*="font-size: 15px"][style*="font-weight: 500"]');
+                            const questionText = questionDiv ? questionDiv.textContent.trim() : '';
+                            
+                            const subjectSpan = mistakeItem.querySelector('span[style*="font-weight: 500"]');
+                            const subjectText = subjectSpan ? subjectSpan.textContent.trim() : '';
+                            
+                            const knowledgeSpan = mistakeItem.querySelector('span[style*="知识点"]');
+                            const knowledgeText = knowledgeSpan ? knowledgeSpan.textContent.trim() : '';
+                            
+                            const errorInfoSpan = mistakeItem.querySelector('span[onclick*="showStudentList"]');
+                            const errorInfo = errorInfoSpan ? errorInfoSpan.textContent.trim() : '';
+                            
+                            const errorRateDiv = mistakeItem.querySelector('div[style*="错误率"]');
+                            const errorRate = errorRateDiv ? errorRateDiv.textContent.trim() : '';
+                            
+                            globalSelectedMistakes.set(mistakeId, {
+                                id: mistakeId,
+                                question: questionText,
+                                subject: subjectText,
+                                knowledge: knowledgeText,
+                                errorInfo: errorInfo,
+                                errorRate: errorRate
+                            });
+                        } else {
+                            globalSelectedMistakes.delete(mistakeId);
+                        }
+                        updateSelectionCount();
+                    }
+                };
+            });
         }
         
         // 快速选中前N题
         function selectTopQuestions(count) {
             const checkboxes = document.querySelectorAll('.question-checkbox');
+            // 先清除所有选中
+            globalSelectedMistakes.clear();
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = false;
+                const mistakeItem = checkbox.closest('.mistake-item');
+                if (mistakeItem) {
+                    const mistakeId = mistakeItem.getAttribute('data-subject') + '-' + mistakeItem.getAttribute('data-date') + '-' + mistakeItem.getAttribute('data-error-count');
+                    globalSelectedMistakes.delete(mistakeId);
+                }
+            });
+            
+            // 选中前N题
             checkboxes.forEach((checkbox, index) => {
-                checkbox.checked = index < count;
+                if (index < count) {
+                    checkbox.checked = true;
+                    const mistakeItem = checkbox.closest('.mistake-item');
+                    if (mistakeItem) {
+                        const mistakeId = mistakeItem.getAttribute('data-subject') + '-' + mistakeItem.getAttribute('data-date') + '-' + mistakeItem.getAttribute('data-error-count');
+                        
+                        const questionDiv = mistakeItem.querySelector('div[style*="font-size: 15px"][style*="font-weight: 500"]');
+                        const questionText = questionDiv ? questionDiv.textContent.trim() : '';
+                        
+                        const subjectSpan = mistakeItem.querySelector('span[style*="font-weight: 500"]');
+                        const subjectText = subjectSpan ? subjectSpan.textContent.trim() : '';
+                        
+                        const knowledgeSpan = mistakeItem.querySelector('span[style*="知识点"]');
+                        const knowledgeText = knowledgeSpan ? knowledgeSpan.textContent.trim() : '';
+                        
+                        const errorInfoSpan = mistakeItem.querySelector('span[onclick*="showStudentList"]');
+                        const errorInfo = errorInfoSpan ? errorInfoSpan.textContent.trim() : '';
+                        
+                        const errorRateDiv = mistakeItem.querySelector('div[style*="错误率"]');
+                        const errorRate = errorRateDiv ? errorRateDiv.textContent.trim() : '';
+                        
+                        globalSelectedMistakes.set(mistakeId, {
+                            id: mistakeId,
+                            question: questionText,
+                            subject: subjectText,
+                            knowledge: knowledgeText,
+                            errorInfo: errorInfo,
+                            errorRate: errorRate
+                        });
+                    }
+                }
             });
             updateSelectionCount();
         }
@@ -1891,8 +2008,54 @@
             selectTopQuestions(count);
         }
         
+        // 全选错题
+        function selectAllMistakes() {
+            const checkboxes = document.querySelectorAll('.question-checkbox');
+            const visibleCheckboxes = Array.from(checkboxes).filter(cb => {
+                const mistakeItem = cb.closest('.mistake-item');
+                return mistakeItem && mistakeItem.style.display !== 'none';
+            });
+            
+            // 全选所有可见题目
+            visibleCheckboxes.forEach(checkbox => {
+                const mistakeItem = checkbox.closest('.mistake-item');
+                if (mistakeItem && !checkbox.checked) {
+                    const mistakeId = mistakeItem.getAttribute('data-subject') + '-' + mistakeItem.getAttribute('data-date') + '-' + mistakeItem.getAttribute('data-error-count');
+                    
+                    // 选中题目
+                    checkbox.checked = true;
+                    
+                    const questionDiv = mistakeItem.querySelector('div[style*="font-size: 15px"][style*="font-weight: 500"]');
+                    const questionText = questionDiv ? questionDiv.textContent.trim() : '';
+                    
+                    const subjectSpan = mistakeItem.querySelector('span[style*="font-weight: 500"]');
+                    const subjectText = subjectSpan ? subjectSpan.textContent.trim() : '';
+                    
+                    const knowledgeSpan = mistakeItem.querySelector('span[style*="知识点"]');
+                    const knowledgeText = knowledgeSpan ? knowledgeSpan.textContent.trim() : '';
+                    
+                    const errorInfoSpan = mistakeItem.querySelector('span[onclick*="showStudentList"]');
+                    const errorInfo = errorInfoSpan ? errorInfoSpan.textContent.trim() : '';
+                    
+                    const errorRateDiv = mistakeItem.querySelector('div[style*="错误率"]');
+                    const errorRate = errorRateDiv ? errorRateDiv.textContent.trim() : '';
+                    
+                    globalSelectedMistakes.set(mistakeId, {
+                        id: mistakeId,
+                        question: questionText,
+                        subject: subjectText,
+                        knowledge: knowledgeText,
+                        errorInfo: errorInfo,
+                        errorRate: errorRate
+                    });
+                }
+            });
+            updateSelectionCount();
+        }
+        
         // 取消全部选中
         function cancelSelection() {
+            globalSelectedMistakes.clear();
             const checkboxes = document.querySelectorAll('.question-checkbox');
             checkboxes.forEach(checkbox => {
                 checkbox.checked = false;
@@ -1902,19 +2065,17 @@
         
         // 加入错题组
         function addToGroup() {
-            const checkboxes = document.querySelectorAll('.question-checkbox:checked');
-            if (checkboxes.length === 0) {
+            if (globalSelectedMistakes.size === 0) {
                 alert('请先选择要加入错题组的题目');
                 return;
             }
-            alert(`已将 ${checkboxes.length} 道题目加入错题组`);
+            alert(`已将 ${globalSelectedMistakes.size} 道题目加入错题组`);
             // 这里可以添加实际的加入错题组逻辑
         }
         
         // 布置作业
         function assignHomework() {
-            const checkboxes = document.querySelectorAll('.question-checkbox:checked');
-            if (checkboxes.length === 0) {
+            if (globalSelectedMistakes.size === 0) {
                 alert('请先勾选需要布置的错题！');
                 return;
             }
@@ -1925,23 +2086,21 @@
         
         // 生成试卷
         function generatePaper() {
-            const checkboxes = document.querySelectorAll('.question-checkbox:checked');
-            if (checkboxes.length === 0) {
+            if (globalSelectedMistakes.size === 0) {
                 alert('请先选择要生成试卷的题目');
                 return;
             }
-            alert(`正在生成包含 ${checkboxes.length} 道题目的试卷...`);
+            alert(`正在生成包含 ${globalSelectedMistakes.size} 道题目的试卷...`);
             // 这里可以添加实际的生成试卷逻辑
         }
         
         // 一键推送试题
         function pushQuestions() {
-            const checkboxes = document.querySelectorAll('.question-checkbox:checked');
-            if (checkboxes.length === 0) {
+            if (globalSelectedMistakes.size === 0) {
                 alert('请先选择要推送的题目');
                 return;
             }
-            alert(`正在推送 ${checkboxes.length} 道题目给学生...`);
+            alert(`正在推送 ${globalSelectedMistakes.size} 道题目给学生...`);
             // 这里可以添加实际的推送逻辑
         }
         
@@ -1990,20 +2149,13 @@
                 }
             }
             
-            // 切换排序选项：个人模式只保留时间排序
+            // 排序选项：两个tab都使用综合排序
             const sortSelect = document.getElementById('sortOption');
             if (sortSelect) {
-                if (tabType === 'personal') {
-                    sortSelect.innerHTML = `
-                        <option value="dateDesc">时间（从新到旧）</option>
-                        <option value="dateAsc">时间（从旧到新）</option>
-                    `;
-                } else {
-                    sortSelect.innerHTML = `
-                        <option value="comprehensiveDesc">综合排序（从高到低）</option>
-                        <option value="comprehensiveAsc">综合排序（从低到高）</option>
-                    `;
-                }
+                sortSelect.innerHTML = `
+                    <option value="comprehensiveDesc">综合排序（从高到低）</option>
+                    <option value="comprehensiveAsc">综合排序（从低到高）</option>
+                `;
             }
             
             // 切换统计区域居中：始终居中显示
@@ -2020,6 +2172,76 @@
             classOnlyStats.forEach(el => {
                 el.style.display = tabType === 'class' ? '' : 'none';
             });
+        }
+
+        // 显示查看已选错题弹窗
+        function showViewSelectedModal() {
+            const modal = document.getElementById('viewSelectedModal');
+            const countEl = document.getElementById('view-selected-modal-count-mistakes');
+            const bodyEl = document.getElementById('view-selected-modal-body-mistakes');
+            
+            const mistakes = Array.from(globalSelectedMistakes.values());
+            countEl.textContent = mistakes.length;
+            
+            if (mistakes.length === 0) {
+                bodyEl.innerHTML = '<div style="text-align:center;padding:40px;color:#999;">暂无已选错题</div>';
+            } else {
+                bodyEl.innerHTML = mistakes.map((mistake) => `
+                    <div data-modal-mistake-id="${mistake.id}" style="padding:15px 20px;border-bottom:1px solid #f0f0f0;">
+                        <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:8px;">
+                            <div style="flex:1;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                                <span style="padding:2px 8px;background:#e6f7ff;color:#1890ff;border-radius:4px;font-size:12px;">${mistake.subject}</span>
+                                <span style="font-size:12px;color:#666;">${mistake.knowledge}</span>
+                            </div>
+                            <div style="display:flex;align-items:center;gap:12px;flex-shrink:0;">
+                                <span style="font-size:12px;color:#ff4d4f;background:#fff1f0;padding:2px 8px;border-radius:4px;white-space:nowrap;">${mistake.errorRate}</span>
+                                <span style="font-size:12px;color:#999;white-space:nowrap;">错题人数/答题人数</span>
+                                <span style="font-size:20px;font-weight:bold;color:#ff4d4f;white-space:nowrap;">${mistake.errorInfo}</span>
+                                <input type="checkbox" checked onchange="removeFromSelectedMistakes('${mistake.id}')" style="width:18px;height:18px;cursor:pointer;accent-color:#1890ff;">
+                            </div>
+                        </div>
+                        <div style="font-size:14px;color:#333;margin-bottom:6px;line-height:1.5;">${mistake.question}</div>
+                    </div>
+                `).join('');
+            }
+            
+            modal.style.display = 'flex';
+        }
+
+        // 关闭查看已选错题弹窗
+        function closeViewSelectedModal() {
+            const modal = document.getElementById('viewSelectedModal');
+            modal.style.display = 'none';
+        }
+
+        // 清空全部选中错题
+        function clearAllSelectedMistakes() {
+            globalSelectedMistakes.clear();
+            const checkboxes = document.querySelectorAll('.question-checkbox');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = false;
+            });
+            updateSelectionCount();
+            closeViewSelectedModal();
+        }
+
+        // 从已选错题中移除单个错题
+        function removeFromSelectedMistakes(mistakeId) {
+            globalSelectedMistakes.delete(mistakeId);
+            // 同步页面中的checkbox
+            const checkboxes = document.querySelectorAll('.question-checkbox');
+            checkboxes.forEach(checkbox => {
+                const mistakeItem = checkbox.closest('.mistake-item');
+                if (mistakeItem) {
+                    const itemId = mistakeItem.getAttribute('data-subject') + '-' + mistakeItem.getAttribute('data-date') + '-' + mistakeItem.getAttribute('data-error-count');
+                    if (itemId === mistakeId) {
+                        checkbox.checked = false;
+                    }
+                }
+            });
+            updateSelectionCount();
+            // 刷新弹窗内容
+            showViewSelectedModal();
         }
     </script>
     
@@ -2176,6 +2398,22 @@
         </div>
     </div>
     
+    <!-- 查看已选错题弹窗 -->
+    <div id="viewSelectedModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+        <div style="background: white; border-radius: 8px; width: 800px; max-width: 95%; max-height: 85vh; display: flex; flex-direction: column; box-shadow: 0 4px 20px rgba(0,0,0,0.15);">
+            <div style="padding: 20px 25px; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="margin: 0; font-size: 18px; color: var(--text-color);">已选错题（<span id="view-selected-modal-count-mistakes">0</span>题）</h3>
+                <button onclick="closeViewSelectedModal()" style="background: none; border: none; font-size: 24px; color: #999; cursor: pointer; line-height: 1;">&times;</button>
+            </div>
+            <div id="view-selected-modal-body-mistakes" style="overflow-y: auto; flex: 1; padding: 0;">
+                <!-- 动态填充 -->
+            </div>
+            <div style="padding: 15px 25px; border-top: 1px solid #f0f0f0; display: flex; justify-content: flex-start; align-items: center;">
+                <button onclick="clearAllSelectedMistakes()" style="padding: 8px 20px; background: #ff4d4f; color: white; border: none; border-radius: 4px; font-size: 14px; cursor: pointer;">清空全部选中</button>
+            </div>
+        </div>
+    </div>
+    
     <script>
         // 显示学生名单弹窗
         function showStudentList(question, errorCount) {
@@ -2322,6 +2560,11 @@
             const assignModal = document.getElementById('assignHomeworkModal');
             if (e.target === assignModal) {
                 closeAssignHomeworkModal();
+            }
+            
+            const viewSelectedModal = document.getElementById('viewSelectedModal');
+            if (e.target === viewSelectedModal) {
+                closeViewSelectedModal();
             }
         });
         
