@@ -466,6 +466,47 @@
             display: flex;
         }
 
+        /* Loading Overlay */
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8); /* Semi-transparent white background */
+            z-index: 1001; /* Higher than other modals */
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .loading-overlay.show {
+            display: flex;
+        }
+
+        .loading-spinner {
+            border: 5px solid #f3f3f3; /* Light grey */
+            border-top: 5px solid var(--primary-color); /* Blue */
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            font-size: 16px;
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+
         .modal-content {
             background: white;
             border-radius: 8px;
@@ -1427,6 +1468,12 @@
         </div>
     </div>
 
+    <!-- 全局加载动画 -->
+    <div class="loading-overlay" id="globalLoadingOverlay">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">正在生成作业，请稍候...</div>
+    </div>
+
     <script>
         // 难度预设配置
         const difficultyPresets = {
@@ -1466,6 +1513,14 @@
                 challenge: 30
             }
         };
+
+        function showLoadingAnimation() {
+            document.getElementById('globalLoadingOverlay').classList.add('show');
+        }
+
+        function hideLoadingAnimation() {
+            document.getElementById('globalLoadingOverlay').classList.remove('show');
+        }
 
         // 切换难度预设
         function changeDifficultyPreset(selectElement, layerId) {
@@ -1965,28 +2020,28 @@
             });
         }
 
-        // 生成作业：检查是否有层使用了AI变题
+        // 生成作业：直接跳转到预览页面
         function handleGenerateHomework() {
-            const layerToggle = document.getElementById('layerModeToggle');
-            let hasAiVariation = false;
+            // Collect homework details (simplified for now, ideally this would be dynamic from form inputs)
+            const newHomework = {
+                id: 'homework_' + Date.now(),
+                subject: '语文', // Placeholder for subject
+                title: 'AI智能分层作业', // Placeholder for title
+                chapter: '统编版 10. 守株待兔', // Placeholder for chapter
+                type: '智能分层作业', // Placeholder for type
+                class: '初一2班 等', // Placeholder for class
+                deadline: '2026年1月7日 19:00', // Placeholder for deadline
+                status: 'generating',
+                autoPublish: false, // Default to false
+                createdAt: new Date().toISOString()
+            };
 
-            if (layerToggle && layerToggle.checked) {
-                // 分层模式：检查各层的题目类型
-                const selects = document.querySelectorAll('.question-type-select');
-                selects.forEach(sel => {
-                    if (sel.value === 'aiVariation') hasAiVariation = true;
-                });
-            } else {
-                // 简单模式：检查单选的题目类型
-                const simpleRadio = document.querySelector('input[name="simpleQuestionType"]:checked');
-                if (simpleRadio && simpleRadio.value === 'aiVariation') hasAiVariation = true;
-            }
-
-            if (hasAiVariation) {
-                startAiGeneration();
-            } else {
+            sessionStorage.setItem('newlyGeneratingHomework', JSON.stringify(newHomework));
+            sessionStorage.setItem('source', 'fenceng-homework');
+            showLoadingAnimation();
+            setTimeout(() => {
                 window.location.href = 'preview2.html';
-            }
+            }, 500); // Small delay to ensure the loading animation is visible
         }
 
         function toggleLayerMode() {
