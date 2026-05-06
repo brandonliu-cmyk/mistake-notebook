@@ -266,6 +266,17 @@
             color: #ff4d4f;
         }
 
+        .badge-generating {
+            background: #e6f7ff;
+            color: #1890ff;
+            animation: pulse-badge 1.5s infinite;
+        }
+
+        @keyframes pulse-badge {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
         .card-info {
             font-size: 13px;
             color: #666;
@@ -532,45 +543,8 @@
             </div>
 
             <!-- 作业卡片网格 -->
-            <div class="homework-grid">
-                <!-- 作业卡片1 -->
-                <div class="homework-card">
-                    <div class="card-header card-bg-pink">
-                        <div class="card-title">
-                            <span style="display: inline-block; background: #ff7a45; color: white; padding: 2px 8px; border-radius: 4px; font-size: 12px; margin-right: 8px;">语文</span>
-                            12月29日分层作业
-                        </div>
-                        <button class="btn-more" style="position: absolute; top: 20px; right: 20px;">⋮</button>
-                    </div>
-                    <div class="card-info">
-                        <div class="card-info-item">
-                            <span style="color: #999;">章节：</span>
-                            <span>统编版</span>
-                        </div>
-                        <div class="card-info-item">
-                            <span style="color: #999;">详情：</span>
-                            <span>智能分层作业，判断题4道 连线题4道</span>
-                        </div>
-                        <div class="card-info-item">
-                            <span style="color: #999;">提交人数：</span>
-                            <span>1/2人</span>
-                            <a href="#" style="color: var(--primary-color); text-decoration: none; margin-left: 10px;" onclick="event.preventDefault(); alert('未提交学生名单');">未提交名单</a>
-                        </div>
-                        <div class="card-info-item">
-                            <span style="color: #999;">截止时间：</span>
-                            <span>2025年12月31日 18:30</span>
-                        </div>
-                        <div class="card-info-item" style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center;">
-                            <span style="color: #999;">三年级3班</span>
-                            <button class="btn-view" style="width: 90px; height: 30px; padding: 0; font-size: 13px; flex: none;" onclick="window.location.href='错题详情.html'">检查作业</button>
-                        </div>
-                    </div>
-                    <div style="position: absolute; top: 80px; right: 20px;">
-                        <div style="width: 45px; height: 45px; border-radius: 50%; border: 2px solid #52c41a; display: flex; align-items: center; justify-content: center; color: #52c41a; font-weight: bold; font-size: 11px; background: white;">
-                            已检查
-                        </div>
-                    </div>
-                </div>
+            <div class="homework-grid" id="homeworkGrid">
+                <!-- 作业卡片将通过JS动态渲染 -->
             </div>
 
             <!-- 分页 -->
@@ -628,6 +602,196 @@
     </div>
 
     <script>
+        // 静态作业数据（原有作业）
+        const staticHomeworkData = [
+            {
+                id: 'static_1',
+                subject: '语文',
+                title: '12月29日分层作业',
+                chapter: '统编版',
+                detail: '智能分层作业，判断题4道 连线题4道',
+                submitted: '1/2人',
+                class: '三年级3班',
+                deadline: '2025年12月31日 18:30',
+                status: 'checked',
+                bgColor: 'card-bg-pink'
+            }
+        ];
+
+        // 渲染作业卡片
+        function renderHomeworkCards() {
+            const grid = document.getElementById('homeworkGrid');
+            let html = '';
+
+            // 从 localStorage 获取动态作业数据
+            const dynamicHomeworkList = JSON.parse(localStorage.getItem('homeworkList') || '[]');
+
+            // 合并数据（动态数据在前）
+            const allHomework = [...dynamicHomeworkList, ...staticHomeworkData];
+
+            allHomework.forEach((homework, index) => {
+                if (homework.status === 'generating') {
+                    // 正在生成中的作业卡片
+                    html += `
+                        <div class="homework-card" data-id="${homework.id}">
+                            <div class="card-header ${index % 2 === 0 ? 'card-bg-blue' : 'card-bg-green'}">
+                                <div class="card-title">
+                                    <span style="display: inline-block; background: #1890ff; color: white; padding: 2px 8px; border-radius: 4px; font-size: 12px; margin-right: 8px;">${homework.subject || '语文'}</span>
+                                    ${homework.title || '新作业'}
+                                </div>
+                                <span class="card-badge badge-generating" style="position: absolute; top: 15px; right: 15px;">正在生成中</span>
+                            </div>
+                            <div class="card-info">
+                                <div class="card-info-item">
+                                    <span style="color: #999;">章节：</span>
+                                    <span>${homework.chapter || '统编版'}</span>
+                                </div>
+                                <div class="card-info-item">
+                                    <span style="color: #999;">详情：</span>
+                                    <span>${homework.type || '智能作业'}</span>
+                                </div>
+                                <div class="card-info-item">
+                                    <span style="color: #999;">班级：</span>
+                                    <span>${homework.class || '初一2班 等'}</span>
+                                </div>
+                                <div class="card-info-item">
+                                    <span style="color: #999;">截止时间：</span>
+                                    <span>${homework.deadline || '待定'}</span>
+                                </div>
+                                <div class="card-info-item" style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center;">
+                                    <span style="color: #999;">${homework.class || '初一2班 等'}</span>
+                                    <button class="btn-view" style="width: 90px; height: 30px; padding: 0; font-size: 13px; flex: none;" onclick="goToPreview('${homework.id}')">查看进度</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                } else if (homework.status === 'completed') {
+                    // 已完成生成但未发布的作业卡片
+                    html += `
+                        <div class="homework-card" data-id="${homework.id}">
+                            <div class="card-header ${homework.bgColor || (index % 2 === 0 ? 'card-bg-blue' : 'card-bg-orange')}">
+                                <div class="card-title">
+                                    <span style="display: inline-block; background: #1890ff; color: white; padding: 2px 8px; border-radius: 4px; font-size: 12px; margin-right: 8px;">${homework.subject || '语文'}</span>
+                                    ${homework.title || '新作业'}
+                                </div>
+                                <button class="btn-more" style="position: absolute; top: 15px; right: 15px;">⋮</button>
+                            </div>
+                            <div class="card-info">
+                                <div class="card-info-item">
+                                    <span style="color: #999;">章节：</span>
+                                    <span>${homework.chapter || '统编版'}</span>
+                                </div>
+                                <div class="card-info-item">
+                                    <span style="color: #999;">详情：</span>
+                                    <span>${homework.detail || homework.type || '智能作业'}</span>
+                                </div>
+                                <div class="card-info-item">
+                                    <span style="color: #999;">题目数量：</span>
+                                    <span>${homework.questionCount || '未生成'}</span>
+                                </div>
+                                <div class="card-info-item">
+                                    <span style="color: #999;">截止时间：</span>
+                                    <span>${homework.deadline || '待定'}</span>
+                                </div>
+                                <div class="card-info-item" style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center;">
+                                    <span style="color: #999;">${homework.class || '初一2班 等'}</span>
+                                    <button class="btn-view" style="width: 90px; height: 30px; padding: 0; font-size: 13px; flex: none;" onclick="goToPreview('${homework.id}')">发布</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                } else if (homework.status === 'published' || homework.status === 'checked') {
+                    // 已发布或已检查的作业卡片
+                    html += `
+                        <div class="homework-card" data-id="${homework.id}">
+                            <div class="card-header ${homework.bgColor || (index % 2 === 0 ? 'card-bg-pink' : 'card-bg-orange')}">
+                                <div class="card-title">
+                                    <span style="display: inline-block; background: #ff7a45; color: white; padding: 2px 8px; border-radius: 4px; font-size: 12px; margin-right: 8px;">${homework.subject || '语文'}</span>
+                                    ${homework.title || '新作业'}
+                                </div>
+                                <button class="btn-more" style="position: absolute; top: 20px; right: 20px;">⋮</button>
+                            </div>
+                            <div class="card-info">
+                                <div class="card-info-item">
+                                    <span style="color: #999;">章节：</span>
+                                    <span>${homework.chapter || '统编版'}</span>
+                                </div>
+                                <div class="card-info-item">
+                                    <span style="color: #999;">详情：</span>
+                                    <span>${homework.detail || homework.type || '智能作业'}</span>
+                                </div>
+                                <div class="card-info-item">
+                                    <span style="color: #999;">提交人数：</span>
+                                    <span>${homework.submitted || '0/0人'}</span>
+                                    ${homework.submitted ? '<a href="#" style="color: var(--primary-color); text-decoration: none; margin-left: 10px;" onclick="event.preventDefault(); alert(\'未提交学生名单\');">未提交名单</a>' : ''}
+                                </div>
+                                <div class="card-info-item">
+                                    <span style="color: #999;">截止时间：</span>
+                                    <span>${homework.deadline || '待定'}</span>
+                                </div>
+                                <div class="card-info-item" style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center;">
+                                    <span style="color: #999;">${homework.class || '初一2班 等'}</span>
+                                    <button class="btn-view" style="width: 90px; height: 30px; padding: 0; font-size: 13px; flex: none;" onclick="goToDetail('${homework.id}')">检查作业</button>
+                                </div>
+                            </div>
+                            ${homework.status === 'checked' ? `
+                            <div style="position: absolute; top: 80px; right: 20px;">
+                                <div style="width: 45px; height: 45px; border-radius: 50%; border: 2px solid #52c41a; display: flex; align-items: center; justify-content: center; color: #52c41a; font-weight: bold; font-size: 11px; background: white;">
+                                    已检查
+                                </div>
+                            </div>` : ''}
+                        </div>
+                    `;
+                }
+            });
+
+            grid.innerHTML = html;
+        }
+
+        // 跳转到预览页面
+        function goToPreview(homeworkId) {
+            sessionStorage.setItem('source', 'index');
+            sessionStorage.setItem('viewingHomeworkId', homeworkId);
+            window.location.href = 'preview2.html';
+        }
+
+        // 跳转到详情页面
+        function goToDetail(homeworkId) {
+            sessionStorage.setItem('source', 'index');
+            sessionStorage.setItem('viewingHomeworkId', homeworkId);
+            window.location.href = '错题详情.html';
+        }
+
+        // 定期检查作业状态更新
+        function checkHomeworkStatus() {
+            let homeworkList = JSON.parse(localStorage.getItem('homeworkList') || '[]');
+            let needsUpdate = false;
+            
+            homeworkList.forEach((homework, index) => {
+                if (homework.status === 'generating') {
+                    const createdAt = new Date(homework.createdAt);
+                    const now = new Date();
+                    const elapsedSeconds = (now - createdAt) / 1000;
+                    
+                    // 如果已经过了2分钟，自动标记为完成或发布
+                    if (elapsedSeconds >= 120) {
+                        if (homework.autoPublish) {
+                            homeworkList[index].status = 'published';
+                        } else {
+                            homeworkList[index].status = 'completed';
+                        }
+                        needsUpdate = true;
+                    }
+                }
+            });
+            
+            if (needsUpdate) {
+                localStorage.setItem('homeworkList', JSON.stringify(homeworkList));
+            }
+            
+            renderHomeworkCards();
+        }
+
         // 显示弹窗
         function showHomeworkModal() {
             const modal = document.getElementById('homeworkModal');
@@ -672,6 +836,13 @@
                     this.classList.add('active');
                 }
             });
+        });
+
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            renderHomeworkCards();
+            // 每2秒检查一次状态更新
+            setInterval(checkHomeworkStatus, 2000);
         });
     </script>
 </body>

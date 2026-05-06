@@ -264,6 +264,167 @@
             border-radius: 4px;
             cursor: pointer;
         }
+
+        /* Toggle Switch Styles (from fenceng-homework.html) */
+        .switch-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 22px;
+        }
+
+        .switch input { opacity: 0; width: 0; height: 0; }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 2px;
+            bottom: 2px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--primary-color);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(22px);
+        }
+
+
+        /* Question Area Loading */
+        .question-loading-area {
+            background: #fff;
+            border-radius: 0 0 8px 8px;
+            padding: 60px 40px;
+            text-align: center;
+            min-height: 400px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .question-loading-area.hidden {
+            display: none;
+        }
+
+        .question-area-content {
+            display: none;
+        }
+
+        .question-area-content.visible {
+            display: block;
+        }
+
+        .loading-icon {
+            width: 60px;
+            height: 60px;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .loading-circle {
+            width: 100%;
+            height: 100%;
+            border: 3px solid #e8e8e8;
+            border-top-color: var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .loading-subtitle {
+            font-size: 13px;
+            color: #999;
+            margin-bottom: 30px;
+        }
+
+        .loading-progress-container {
+            width: 400px;
+            max-width: 100%;
+            margin-bottom: 15px;
+        }
+
+        .loading-progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #e8e8e8;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 8px;
+        }
+
+        .loading-progress-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #1890ff, #40a9ff);
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+
+        .loading-progress-text {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .loading-step {
+            font-size: 12px;
+            color: #1890ff;
+            margin-top: 10px;
+        }
+
+        .pulse-dot {
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            background: #1890ff;
+            border-radius: 50%;
+            margin: 0 2px;
+            animation: pulse 1.4s infinite ease-in-out both;
+        }
+
+        .pulse-dot:nth-child(1) { animation-delay: -0.32s; }
+        .pulse-dot:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes pulse {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
+        }
     </style>
 </head>
 
@@ -284,7 +445,7 @@
     </div>
 
     <div class="container">
-        <div class="back-link" onclick="history.back()">← 返回 布置作业 / 预览</div>
+        <div class="back-link" onclick="window.location.href='index.html'">← 返回 布置作业 / 预览</div>
 
         <div class="preview-banner">
             <h1 style="color: #fff; opacity: 0.3; font-size: 60px; position: absolute; top: -10px; left: 20px;">语文</h1>
@@ -300,38 +461,194 @@
             <div class="info-item"><span class="info-label">总分:</span> 100</div>
         </div>
 
-        <div class="layer-filter-bar">
-            <span class="filter-label">知识点掌握程度：</span>
-            <div class="layer-tabs">
-                <div class="layer-tab active" onclick="switchLayer(this, 5)">90%-100%</div>
-                <div class="layer-tab" onclick="switchLayer(this, 4)">75%-89%</div>
-                <div class="layer-tab" onclick="switchLayer(this, 3)">60%-74%</div>
-                <div class="layer-tab" onclick="switchLayer(this, 2)">40%-59%</div>
-                <div class="layer-tab" onclick="switchLayer(this, 1)">0%-39%</div>
+        <!-- Question Loading Area -->
+        <div class="question-loading-area" id="questionLoadingArea">
+            <div class="loading-icon">
+                <div class="loading-circle"></div>
             </div>
+            <div class="loading-title">正在生成题目</div>
+            <div class="loading-subtitle">预计需要 <span id="estimatedTime">2</span> 分钟，请耐心等待</div>
+            <div class="loading-progress-container">
+                <div class="loading-progress-bar">
+                    <div class="loading-progress-fill" id="progressFill"></div>
+                </div>
+                <div class="loading-progress-text">
+                    <span id="progressPercent">0%</span>
+                    <span>剩余时间: <span id="remainingTime">2:00</span></span>
+                </div>
+            </div>
+            <div class="loading-step" id="loadingStep">正在分析学生数据<span class="pulse-dot"></span><span class="pulse-dot"></span></div>
         </div>
 
-        <div class="action-bar">
-            <div class="bar-title" id="barTitle">课后巩固 (20题) 100分</div>
-        </div>
+        <!-- Question Area Content (Visible after loading) -->
+        <div class="question-area-content" id="questionAreaContent">
+            <div class="layer-filter-bar">
+                <span class="filter-label">知识点掌握程度：</span>
+                <div class="layer-tabs">
+                    <div class="layer-tab active" onclick="switchLayer(this, 5)">90%-100%</div>
+                    <div class="layer-tab" onclick="switchLayer(this, 4)">75%-89%</div>
+                    <div class="layer-tab" onclick="switchLayer(this, 3)">60%-74%</div>
+                    <div class="layer-tab" onclick="switchLayer(this, 2)">40%-59%</div>
+                    <div class="layer-tab" onclick="switchLayer(this, 1)">0%-39%</div>
+                </div>
+            </div>
 
-        <div class="question-list" id="questionContainer">
-            <!-- Content will be injected by JS -->
+            <div class="action-bar">
+                <div class="bar-title" id="barTitle">课后巩固 (20题) 100分</div>
+            </div>
+
+            <div class="question-list" id="questionContainer">
+                <!-- Content will be injected by JS -->
+            </div>
         </div>
     </div>
 
     <div class="footer-action">
-        <button class="btn-outline">调整</button>
-        <button class="btn-primary" onclick="window.location.href='index.html'">发布</button>
+        <div id="generatingFooter" style="display: none; align-items: center; gap: 20px;">
+            <div class="switch-container">
+                <label class="switch">
+                    <input type="checkbox" id="autoPublishToggle">
+                    <span class="slider"></span>
+                </label>
+                <span style="font-size: 14px; color: #333;">生成后直接发布</span>
+            </div>
+        </div>
+        <div id="completedFooter" style="display: none; align-items: center; gap: 20px;">
+            <button class="btn-primary" onclick="publishHomework()">发布</button>
+        </div>
     </div>
 
     <script>
+        // 作业信息 (将在这里被覆盖或初始化)
+        let currentHomework = {}; 
+
+        // Function to handle publishing homework
+        function publishHomework() {
+            currentHomework.status = 'published';
+            saveHomeworkStatus(currentHomework);
+            sessionStorage.setItem('source', 'preview2'); // Indicate source of redirect
+            sessionStorage.setItem('publishedHomeworkId', currentHomework.id);
+            window.location.href = 'index.html';
+        }
+
+        // 页面加载时判断状态
+        window.addEventListener('load', function() {
+            const source = sessionStorage.getItem('source');
+            const homeworkList = JSON.parse(localStorage.getItem('homeworkList') || '[]');
+            const viewingHomeworkId = sessionStorage.getItem('viewingHomeworkId');
+            const autoPublishToggle = document.getElementById('autoPublishToggle');
+            
+            // Attempt to load newly generating homework from sessionStorage
+            const newlyGeneratingHomeworkJSON = sessionStorage.getItem('newlyGeneratingHomework');
+
+            if (newlyGeneratingHomeworkJSON) {
+                // If coming from fenceng-homework and it's a new generation
+                currentHomework = JSON.parse(newlyGeneratingHomeworkJSON);
+                sessionStorage.removeItem('newlyGeneratingHomework'); // Clear it after use
+                
+                // Check for autoPublish preference from previous page if any
+                const autoPublishPreference = sessionStorage.getItem('autoPublishPreference');
+                if (autoPublishPreference === 'true') {
+                    currentHomework.autoPublish = true;
+                    autoPublishToggle.checked = true;
+                    sessionStorage.removeItem('autoPublishPreference'); // Clear preference after applying
+                }
+
+                saveHomeworkStatus(currentHomework); // Save this new homework to localStorage
+                setupGeneratingView();
+                startGeneration(totalTime); // Always start fresh for new generation
+            } else {
+                // Not a new generation from fenceng-homework, check for existing homework
+                let homework = homeworkList.find(h => h.id === viewingHomeworkId);
+
+                if (homework) {
+                    currentHomework = homework; // Use the existing homework
+                    if (currentHomework.autoPublish) {
+                        autoPublishToggle.checked = true;
+                    }
+                    
+                    if (currentHomework.status === 'generating') {
+                        setupGeneratingView();
+                        const elapsedSeconds = (new Date().getTime() - new Date(currentHomework.createdAt).getTime()) / 1000;
+                        startGeneration(totalTime - elapsedSeconds); // Resume from where it left off
+                    } else if (currentHomework.status === 'completed' || currentHomework.status === 'published') {
+                        setupCompletedView();
+                    }
+                } else {
+                    // Fallback: If no homework found (e.g., direct access, or error)
+                    console.warn("No homework found to display in preview2.html. Creating a generic completed one.");
+                    currentHomework = {
+                        id: 'homework_' + Date.now(),
+                        subject: '语文',
+                        title: '未知作业',
+                        chapter: '未知章节',
+                        type: '未知类型',
+                        class: '未知班级',
+                        deadline: '未知时间',
+                        status: 'completed',
+                        autoPublish: false,
+                        createdAt: new Date().toISOString()
+                    };
+                    setupCompletedView();
+                }
+            }
+            
+            // Update displayed homework info based on currentHomework
+            document.querySelector('.preview-banner h1:nth-of-type(2)').textContent = currentHomework.title;
+            document.querySelector('.info-card div:nth-of-type(1) span:nth-of-type(2)').textContent = currentHomework.type;
+            document.querySelector('.info-card div:nth-of-type(3) span:nth-of-type(2)').textContent = currentHomework.class;
+            document.querySelector('.info-card div:nth-of-type(4) span:nth-of-type(2)').textContent = currentHomework.chapter;
+            document.querySelector('.info-card div:nth-of-type(5) span:nth-of-type(2)').textContent = currentHomework.deadline;
+            
+            // Add event listener for the autoPublishToggle
+            autoPublishToggle.addEventListener('change', function() {
+                currentHomework.autoPublish = this.checked;
+                saveHomeworkStatus(currentHomework); // Persist autoPublish state for this homework
+            });
+        });
+
+        function setupGeneratingView() {
+            document.getElementById('generatingFooter').style.display = 'flex';
+            document.getElementById('completedFooter').style.display = 'none';
+            document.getElementById('questionLoadingArea').classList.remove('hidden');
+            document.getElementById('questionAreaContent').classList.remove('visible'); // Ensure content is hidden
+            document.getElementById('questionAreaContent').classList.add('hidden');
+        }
+
+        function setupCompletedView() {
+            document.getElementById('generatingFooter').style.display = 'none';
+            document.getElementById('completedFooter').style.display = 'flex';
+            document.getElementById('questionLoadingArea').classList.add('hidden');
+            document.getElementById('questionAreaContent').classList.remove('hidden'); // Ensure content is visible
+            document.getElementById('questionAreaContent').classList.add('visible');
+            renderQuestions(5); // Render default layer questions
+        }
+
+        // 直接显示题目内容 (now handled by setupCompletedView for existing items)
+        function showContentDirectly() {
+            setupCompletedView();
+        }
+
+        // 保存作业状态到 localStorage
+        function saveHomeworkStatus(homework) {
+            let homeworkList = JSON.parse(localStorage.getItem('homeworkList') || '[]');
+            const existingIndex = homeworkList.findIndex(h => h.id === homework.id);
+
+            if (existingIndex >= 0) {
+                // Update existing homework, preserving original properties if not explicitly updated
+                homeworkList[existingIndex] = { ...homeworkList[existingIndex], ...homework };
+            } else {
+                homeworkList.unshift(homework); // Add new homework to the beginning
+            }
+            localStorage.setItem('homeworkList', JSON.stringify(homeworkList));
+        }
+
         // Mock Data for each layer
         const questionsDB = {
             5: [ // 90-100% (Challenge)
                 { type: '填空题', diff: '挑战', content: '升国旗时，我们要注意 ______，双眼注视国旗。', answer: '立正' },
                 { type: '填空题', diff: '困难', content: '《守株待兔》这则寓言告诉我们的道理是 ______。', answer: '不应不劳而获' },
-                { type: '阅读理解', diff: '挑战', content: '请分析文中“兔走触株”中“走”字的含义及古今异义。', answer: '...' }
+                { type: '阅读理解', diff: '挑战', content: '请分析文中"兔走触株"中"走"字的含义及古今异义。', answer: '...' }
             ],
             4: [
                 { type: '填空题', diff: '困难', content: '五星红旗是我们的 ______。', answer: '国旗' },
@@ -339,7 +656,7 @@
                 { type: '填空题', diff: '中等', content: '宋人有耕者，田中有 ______。', answer: '株' }
             ],
             3: [
-                { type: '填空题', diff: '中等', content: '守株待兔的“株”意思是 ______。', answer: '树桩' },
+                { type: '填空题', diff: '中等', content: '守株待兔的"株"意思是 ______。', answer: '树桩' },
                 { type: '选择题', diff: '容易', content: '农夫最后的结局是？', answer: '被嘲笑' }
             ],
             2: [
@@ -351,6 +668,96 @@
                 { type: '选择题', diff: '基础', content: '兔子撞到了什么？', answer: '树桩' }
             ]
         };
+
+        // 生成步骤配置
+        const generationSteps = [
+            { pct: 10, text: '正在分析学生数据', time: 800 },
+            { pct: 25, text: '正在匹配知识点', time: 1800 },
+            { pct: 40, text: '正在为挑战层生成题目', time: 2800 },
+            { pct: 55, text: '正在为拔高层生成题目', time: 3800 },
+            { pct: 70, text: '正在为其他层次生成题目', time: 4800 },
+            { pct: 85, text: '正在校验题目质量', time: 5800 },
+            { pct: 95, text: '正在生成参考答案与解析', time: 6800 },
+            { pct: 100, text: '生成完成', time: 7800 }
+        ];
+
+        const totalTime = 120; // 2分钟 = 120秒
+
+        function startGeneration(remainingSeconds = totalTime) {
+            const progressFill = document.getElementById('progressFill');
+            const progressPercent = document.getElementById('progressPercent');
+            const remainingTime = document.getElementById('remainingTime');
+            const loadingStep = document.getElementById('loadingStep');
+            const questionLoadingArea = document.getElementById('questionLoadingArea');
+            const questionAreaContent = document.getElementById('questionAreaContent');
+
+            // 计算当前进度
+            const elapsedSeconds = totalTime - remainingSeconds;
+            const initialProgress = (elapsedSeconds / totalTime) * 100;
+            progressFill.style.width = initialProgress + '%';
+            progressPercent.textContent = Math.round(initialProgress) + '%';
+            
+            let initialMinutes = Math.floor(remainingSeconds / 60);
+            let initialSeconds = Math.floor(remainingSeconds % 60);
+            remainingTime.textContent = `${initialMinutes}:${initialSeconds.toString().padStart(2, '0')}`;
+
+            // 更新步骤文本 - 根据已过时间调整步骤显示
+            generationSteps.forEach((step, index) => {
+                // 只显示还未执行或正在执行的步骤
+                if (elapsedSeconds * 1000 < step.time + 1000) {
+                    const delay = Math.max(0, step.time - elapsedSeconds * 1000);
+                    setTimeout(() => {
+                        if (step.pct < 100) {
+                            loadingStep.innerHTML = step.text + '<span class="pulse-dot"></span><span class="pulse-dot"></span>';
+                        } else {
+                            loadingStep.textContent = '生成完成！';
+                        }
+                    }, delay);
+                }
+            });
+
+            // 更新进度条和剩余时间
+            let startTime = Date.now() - elapsedSeconds * 1000;
+            const progressInterval = setInterval(() => {
+                let elapsed = (Date.now() - startTime) / 1000;
+                let progress = Math.min((elapsed / totalTime) * 100, 100);
+                let remaining = Math.max(totalTime - elapsed, 0);
+
+                progressFill.style.width = progress + '%';
+                progressPercent.textContent = Math.round(progress) + '%';
+                
+                let minutes = Math.floor(remaining / 60);
+                let seconds = Math.floor(remaining % 60);
+                remainingTime.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+
+                if (progress >= 100) {
+                    clearInterval(progressInterval);
+                    
+                    // 显示完成
+                    loadingStep.textContent = '生成完成！';
+                    
+                    // 更新作业状态为已完成
+                    currentHomework.status = 'completed';
+                    saveHomeworkStatus(currentHomework);
+                    
+                    // 延迟隐藏loading，显示题目内容
+                    setTimeout(() => {
+                        const navSource = sessionStorage.getItem('source');
+                        if (navSource === 'fenceng-homework') {
+                            // 如果是从 fenceng-homework.html 跳转过来的，则生成完成后停留在 preview2.html
+                            // 让用户选择是否发布，并查看自动发布开关状态
+                            setupCompletedView();
+                        } else if (currentHomework.autoPublish) {
+                            // 如果是从 index.html 跳转过来，且开启了自动发布，则自动发布并跳转
+                            publishHomework();
+                        } else {
+                            // 如果是从 index.html 跳转过来，且未开启自动发布，则显示完成视图
+                            setupCompletedView();
+                        }
+                    }, 500);
+                }
+            }, 100);
+        }
 
         function switchLayer(tabElement, layerIdx) {
             // Update Tabs
@@ -397,8 +804,7 @@
             container.innerHTML = html;
         }
 
-        // Init
-        renderQuestions(5);
+
     </script>
 </body>
 
